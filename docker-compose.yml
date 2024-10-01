@@ -17,7 +17,7 @@ services:
     build: ./backend
     container_name: flask_app
     ports:
-      - "5001:5001"
+      - "5000:5000"
     depends_on:
       - db
 
@@ -26,8 +26,3 @@ services:
     container_name: next_frontend
     ports:
       - "3000:3000"
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-
