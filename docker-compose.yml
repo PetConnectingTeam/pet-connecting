@@ -19,6 +19,7 @@ services:
     build: ./api
     container_name: flask_api
     environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:user_password@mysql_db/mydb
       - FLASK_ENV=development
       - FLASK_DEBUG=1

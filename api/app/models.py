@@ -21,7 +21,8 @@ class User(db.Model):
     Surname = db.Column(db.String(100))
     RoleID = db.Column(db.BigInteger, db.ForeignKey('Roles.ID'))  # Relación con la tabla Roles
     Points = db.Column(db.Float)
-    ProfilePhoto = db.Column(db.BigInteger)  # Cambiar el tipo según lo que necesites
+    ProfilePhoto = db.Column(db.LargeBinary, nullable=True)  # Cambiar el tipo según lo que necesites
+    MimeType = db.Column(db.String(50), nullable=True)
     Rating = db.Column(db.Numeric(5, 2))
 
     def __repr__(self):
@@ -46,12 +47,13 @@ class Pet(db.Model):
         return f'<Pet {self.Name}, Type: {self.AnimalType}>'
 
 
-class Photos(db.Model):
-    __tablename__ = 'Photos'  # Nombre de la tabla en la base de datos
+class PetPhotos(db.Model):
+    __tablename__ = 'PetPhotos'  # Nombre de la tabla en la base de datos
 
     ID = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     PetID = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'))  # Relación con la tabla Pet
-    Photos = db.Column(db.LargeBinary)  # Asumiendo que deseas almacenar la imagen como un binario
+    Photo = db.Column(db.LargeBinary)  # Asumiendo que deseas almacenar la imagen como un binario
+    MimeType = db.Column(db.String(50), nullable=True)
 
     def __repr__(self):
         return f'<Photo for Pet ID: {self.PetID}>'

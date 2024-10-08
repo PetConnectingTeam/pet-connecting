@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS User (
     Surname VARCHAR(100),
     RoleID BIGINT,
     Points FLOAT,
-    ProfilePhoto BIGINT, 
+    ProfilePhoto BLOB, 
+    MimeType VARCHAR(50),
     Rating DECIMAL(5, 2),
     FOREIGN KEY (RoleID) REFERENCES Roles(ID)
 );
@@ -36,10 +37,11 @@ CREATE TABLE IF NOT EXISTS Pet (
 );
 
 
-CREATE TABLE IF NOT EXISTS Photos (
+CREATE TABLE IF NOT EXISTS PetPhotos (
     ID BIGINT AUTO_INCREMENT PRIMARY KEY,
     PetID BIGINT,
-    Photos BIGINT, -- Asumiendo que Photos se almacena como un binario
+    Photo BLOB,
+    MimeType VARCHAR(50),
     FOREIGN KEY (PetID) REFERENCES Pet(ID)
 );
 
