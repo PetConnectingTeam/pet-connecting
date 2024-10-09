@@ -1,9 +1,0 @@
-CREATE DATABASE IF NOT EXISTS mydb;
-USE mydb;
-
-CREATE TABLE mytable (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL
-);
-
-INSERT INTO mytable (name) VALUES ('dato1'), ('dato2');
