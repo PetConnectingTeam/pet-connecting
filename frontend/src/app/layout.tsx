@@ -61,7 +61,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <BarSidebar /> {/* Bar-sidebar will load first */}
+        {/* <BarSidebar /> */}
+        {/* Bar-sidebar will load first */}
         {children} {/* Render other page content */}
       </body>
     </html>
