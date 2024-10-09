@@ -1,71 +1,71 @@
 import React from "react";
 import {
-  Avatar,
   Button,
-  CssBaseline,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link,
-  Paper,
   Box,
-  Grid,
+  Card,
   Typography,
+  CardContent,
 } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+
+// const Logo = (props) => (
+//   <SvgIcon {...props} viewBox="0 0 24 24">
+//     <path d="M12,2C6.47,2,2,6.47,2,12s4.47,10,10,10s10-4.47,10-10S17.53,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8 S16.41,20,12,20z" />
+//     <path d="M15.5,11c0.83,0,1.5-0.67,1.5-1.5S16.33,8,15.5,8S14,8.67,14,9.5S14.67,11,15.5,11z" />
+//     <path d="M8.5,11c0.83,0,1.5-0.67,1.5-1.5S9.33,8,8.5,8S7,8.67,7,9.5S7.67,11,8.5,11z" />
+//     <path d="M12,14c-2.33,0-4.31,1.46-5.11,3.5h10.22C16.31,15.46,14.33,14,12,14z" />
+//   </SvgIcon>
+// );
 
 const SignInSide: React.FC = () => {
   return (
-    <Grid
-      container
-      component="main"
-      sx={{ height: "100vh", backgroundColor: "white" }}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        bgcolor: "#f5f5f5",
+      }}
     >
-      <CssBaseline />
-      <Grid
-        item
-        xs={12}
-        sm={8}
-        md={5}
-        component={Paper}
-        elevation={6}
-        square
+      <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
+        {/* <Logo sx={{ fontSize: 40, color: "#ff3b30", mr: 1 }} /> */}
+        <Typography variant="h4" component="h1" sx={{ fontWeight: "bold" }}>
+          PetCareConnect
+        </Typography>
+      </Box>
+      <Card
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 4,
+          maxWidth: 400,
+          width: "100%",
+          padding: "24px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.05)",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
+        <CardContent>
+          <Typography
+            variant="h5"
+            component="h2"
+            align="center"
+            sx={{ mb: 3, fontWeight: "bold" }}
+          >
+            Welcome Back
           </Typography>
-          <Box component="form" noValidate sx={{ mt: 1, width: "100%" }}>
+          <Box component="form" noValidate sx={{ mt: 1 }}>
             <TextField
-              variant="outlined"
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="Username"
+              name="username"
+              autoComplete="username"
               autoFocus
+              placeholder="Enter your username"
             />
             <TextField
-              variant="outlined"
               margin="normal"
               required
               fullWidth
@@ -74,36 +74,130 @@ const SignInSide: React.FC = () => {
               type="password"
               id="password"
               autoComplete="current-password"
+              placeholder="Enter your password"
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3, mb: 2 }}
+            <Box
+              sx={{
+                mt: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
+              <Link href="#" variant="body2" sx={{ color: "#ff3b30" }}>
+                Forgot password?
+              </Link>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  bgcolor: "#ff3b30",
+                  "&:hover": {
+                    bgcolor: "#ff3b30",
+                  },
+                }}
+              >
+                Login
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </Grid>
-    </Grid>
+        </CardContent>
+      </Card>
+      <Typography variant="body2" sx={{ mt: 2 }}>
+        Don&apos;t have an account?{" "}
+        <Link href="#" sx={{ color: "#ff3b30" }}>
+          Create account
+        </Link>
+      </Typography>
+    </Box>
+    // <Grid
+    //   container
+    //   component="main"
+    //   sx={{ height: "100vh", backgroundColor: "white" }}
+    // >
+    //   <CssBaseline />
+    //   <Grid
+    //     item
+    //     xs={12}
+    //     sm={8}
+    //     md={5}
+    //     component={Paper}
+    //     elevation={6}
+    //     square
+    //     sx={{
+    //       display: "flex",
+    //       flexDirection: "column",
+    //       alignItems: "center",
+    //       justifyContent: "center",
+    //       padding: 4,
+    //     }}
+    //   >
+    //     <Box
+    //       sx={{
+    //         display: "flex",
+    //         flexDirection: "column",
+    //         alignItems: "center",
+    //         width: "100%",
+    //       }}
+    //     >
+    //       <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+    //         <LockOutlinedIcon />
+    //       </Avatar>
+    //       <Typography component="h1" variant="h5">
+    //         Sign in
+    //       </Typography>
+    //       <Box component="form" noValidate sx={{ mt: 1, width: "100%" }}>
+    //         <TextField
+    //           variant="outlined"
+    //           margin="normal"
+    //           required
+    //           fullWidth
+    //           id="email"
+    //           label="Email Address"
+    //           name="email"
+    //           autoComplete="email"
+    //           autoFocus
+    //         />
+    //         <TextField
+    //           variant="outlined"
+    //           margin="normal"
+    //           required
+    //           fullWidth
+    //           name="password"
+    //           label="Password"
+    //           type="password"
+    //           id="password"
+    //           autoComplete="current-password"
+    //         />
+    //         <FormControlLabel
+    //           control={<Checkbox value="remember" color="primary" />}
+    //           label="Remember me"
+    //         />
+    //         <Button
+    //           type="submit"
+    //           fullWidth
+    //           variant="contained"
+    //           color="primary"
+    //           sx={{ mt: 3, mb: 2 }}
+    //         >
+    //           Sign In
+    //         </Button>
+    //         <Grid container>
+    //           <Grid item xs>
+    //             <Link href="#" variant="body2">
+    //               Forgot password?
+    //             </Link>
+    //           </Grid>
+    //           <Grid item>
+    //             <Link href="/signup" variant="body2">
+    //               {"Don't have an account? Sign Up"}
+    //             </Link>
+    //           </Grid>
+    //         </Grid>
+    //       </Box>
+    //     </Box>
+    //   </Grid>
+    // </Grid>
   );
 };
 
