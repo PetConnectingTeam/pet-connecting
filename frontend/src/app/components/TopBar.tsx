@@ -64,6 +64,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     borderRadius: "20px",
     padding: "10px 10px",
     color:'red', //font color
+
     
   },
 }));

@@ -1,9 +1,9 @@
 import React from "react";
 import UserProfile from "./components/UserProfile";
 import PetProfile from "./components/PetProfile";
-import Menu from "./components/MenuBar"; // Importing the Menu component
-import TopBar from "./components/TopBar"; // Importing the TopBar component correctly
-import { Margin } from "@mui/icons-material";
+import Menu from "./components/MenuBar"; 
+import TopBar from "./components/TopBar"; 
+
 
 function App() {
   const userData = {
