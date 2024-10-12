@@ -44,6 +44,23 @@ CREATE TABLE IF NOT EXISTS PetPhotos (
     MimeType VARCHAR(50),
     FOREIGN KEY (PetID) REFERENCES Pet(ID)
 );
+CREATE TABLE IF NOT EXISTS RequestService (
+    ServiceId BIGINT AUTO_INCREMENT PRIMARY KEY,
+    PublisherId BIGINT NOT NULL,
+    publishDate DATETIME NOT NULL,
+    description TEXT NOT NULL,
+    takerId BIGINT, -- Puede ser NULL hasta que alguien acepte el servicio
+    serviceDateIni DATETIME NOT NULL,
+    serviceDateEnd DATETIME NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    cost DECIMAL(10, 2) NOT NULL,
+    completed BOOLEAN NOT NULL DEFAULT FALSE,
+    petId BIGINT NOT NULL,
+    FOREIGN KEY (PublisherId) REFERENCES User(ID),
+    FOREIGN KEY (takerId) REFERENCES User(ID),
+    FOREIGN KEY (petId) REFERENCES Pet(ID)
+);
+
 
 -- Populate
 
@@ -64,3 +81,6 @@ INSERT INTO Pet (UserID, Name, AnimalType, Breed, Description, Allergies, Weight
 (1, 'Mittens', 'Cat', 'Siames', 'Un gato juguetón', 'Polvo', 10.0, 'Small', 3),
 (2, 'Paddy', 'Dog', '', 'Perro rebelde', '', 10.0, 'Medium', 4);
 
+-- Request Service
+INSERT INTO RequestService (PublisherId, publishDate, description, serviceDateIni, serviceDateEnd, location, cost, completed, petId)
+VALUES (1, NOW(), 'Cuidar perro durante el fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE, 1);
