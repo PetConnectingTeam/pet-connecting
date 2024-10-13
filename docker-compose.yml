@@ -1,36 +1,27 @@
+version: '3.8'
+
 services:
-  mysql_db:
-    image: mysql:latest
+  db:
+    image: mysql:5.7
     container_name: mysql_db
+    platform: linux/amd64
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: mydb
-      MYSQL_USER: user
-      MYSQL_PASSWORD: user_password
     ports:
       - "3306:3306"
     volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      #- ./db/mysql_data:/var/lib/mysql    descometar quan estigui creada a DDBB
-    networks:
-      - webnet
+      - ./mysql:/docker-entrypoint-initdb.d
 
-  flask_api:
-    build: ./api
-    container_name: flask_api
-    environment:
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:user_password@mysql_db/mydb
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
+  backend:
+    build: ./backend
+    container_name: flask_app
     ports:
       - "5001:5000"
-    volumes:
-      - ./api:/app
     depends_on:
-      - mysql_db
-    networks:
-      - webnet
+      - db
+    volumes:
+      - ./backend:/app
 
   frontend:
     build: ./frontend
@@ -39,6 +30,3 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend/src:/app/src
-
-networks:
-  webnet:
