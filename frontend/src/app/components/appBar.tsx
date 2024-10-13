@@ -8,10 +8,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import { useRouter } from "next/navigation";
 
 export default function MenuAppBar() {
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const router = useRouter();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAuth(event.target.checked);
@@ -25,10 +27,54 @@ export default function MenuAppBar() {
     setAnchorEl(null);
   };
 
+  const handleProfileClick = () => {
+    handleClose();
+    router.push("/userProfile");
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: "white",
+          boxShadow: "none",
+          borderBottom: "1px solid #e0e0e0",
+          // width: `calc(100% - 240px)`,
+          // marginLeft: "auto",
+          // marginRight: 0,
+        }}
+      >
         <Toolbar>
+          <Typography
+            variant="h6"
+            sx={{
+              flexGrow: 1,
+              color: "black",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              "& svg": {
+                marginRight: "8px",
+                color: "#ff4d4f",
+              },
+            }}
+            onClick={() => router.push("/home")}
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                fill="currentColor"
+              />
+            </svg>
+            PetCareConnect
+          </Typography>
           <IconButton
             size="large"
             edge="start"
@@ -38,9 +84,6 @@ export default function MenuAppBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Photos
-          </Typography>
           {auth && (
             <div>
               <IconButton
@@ -49,7 +92,7 @@ export default function MenuAppBar() {
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
                 onClick={handleMenu}
-                color="inherit"
+                color="info"
               >
                 <AccountCircle />
               </IconButton>
@@ -68,8 +111,9 @@ export default function MenuAppBar() {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
                 <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem>Logout</MenuItem>
               </Menu>
             </div>
           )}
