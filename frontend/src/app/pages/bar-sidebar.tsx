@@ -42,7 +42,6 @@ export default function Component() {
           width: drawerWidth,
           boxSizing: 'border-box',
           backgroundColor: '#f0f0f0',
-          paddingTop:10
         },
       }}
       variant="permanent"

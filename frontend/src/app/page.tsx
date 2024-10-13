@@ -1,9 +1,6 @@
 import React from "react";
 import UserProfile from "./components/UserProfile";
 import PetProfile from "./components/PetProfile";
-import Menu from "./components/MenuBar"; 
-import TopBar from "./components/TopBar"; 
-
 
 function App() {
   const userData = {
@@ -30,22 +27,9 @@ function App() {
   };
 
   return (
-   
-    <div className="App" style={{ display: "flex" }}>
-      
-      <div style={{ flexGrow: 8 }}>
-        <TopBar /> {/* TopBar added here */}
-        <div style={{ padding: "20px" }}>
-          {/* Render UserProfile */}
-          <UserProfile {...userData} />
-
-          {/* Render PetProfile */}
-          <PetProfile {...petData} />
-          {/* Adding the MenuBar component */}
-          <Menu />
-          
-        </div>
-      </div>
+    <div className="App">
+      <UserProfile {...userData} />
+      <PetProfile {...petData} />
     </div>
   );
 }
