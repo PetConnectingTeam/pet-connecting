@@ -43,7 +43,6 @@ const SignInSide: React.FC = () => {
       password: password,
     });
 
-    console.log(response);
     const expirationTime = new Date(
       new Date().getTime() + 24 * 60 * 60 * 1000 // 24 hours
     );
