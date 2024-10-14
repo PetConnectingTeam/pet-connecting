@@ -5,7 +5,10 @@ import {
   Button,
   Container,
   TextField,
+  Typography,
   Box,
+  AppBar,
+  Toolbar,
   FormControl,
   FormLabel,
   RadioGroup,
@@ -13,7 +16,6 @@ import {
   Radio,
   CssBaseline,
 } from "@mui/material";
-import MenuAppBar from "../components/appBar";
 
 interface UserProfileProps {
   username: string;
@@ -46,8 +48,75 @@ const UserProfile: React.FC<UserProfileProps> = (
   return (
     <>
       <CssBaseline />
-      <MenuAppBar></MenuAppBar>
       <Box sx={{ flexGrow: 1 }}>
+        <AppBar
+          position="static"
+          sx={{
+            backgroundColor: "white",
+            boxShadow: "none",
+            borderBottom: "1px solid #e0e0e0",
+          }}
+        >
+          <Toolbar>
+            <Typography
+              variant="h6"
+              sx={{
+                flexGrow: 1,
+                color: "black",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                "& svg": {
+                  marginRight: "8px",
+                  color: "#ff4d4f",
+                },
+              }}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  fill="currentColor"
+                />
+              </svg>
+              PetCareConnect
+            </Typography>
+            <Button
+              sx={{
+                // color: "black",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+              }}
+            >
+              Home
+            </Button>
+            <Button
+              sx={{
+                // color: "black",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+              }}
+              className="active"
+            >
+              Profile
+            </Button>
+            <Button
+              sx={{
+                // color: "black",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+              }}
+              className="active"
+            >
+              Logout
+            </Button>
+          </Toolbar>
+        </AppBar>
         <Container
           maxWidth={false}
           sx={{ backgroundColor: "white", height: "100vh" }}

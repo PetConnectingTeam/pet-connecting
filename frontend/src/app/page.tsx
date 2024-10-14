@@ -3,8 +3,9 @@ import PetProfile from "./components/PetProfile";
 
 function App() {
   const userData = {
+    userId: 123,
     username: "John Doe",
-    bio: "Pet lover and experienced dog sitter.",
+    bio: "Amante de las mascotas y cuidador de perros experimentado.",
     email: "john.doe@example.com",
     profilePhoto: "https://via.placeholder.com/150",
     petPhotos: [
@@ -12,10 +13,11 @@ function App() {
       "https://via.placeholder.com/150",
     ],
     reviews: [
-      { rating: 5, comment: "Great service, very reliable!" },
-      { rating: 4, comment: "My dog loved the sitter!" },
+      { rating: 5, comment: "¡Excelente servicio, muy confiable!" },
+      { rating: 4, comment: "¡Mi perro adoró al cuidador!" },
     ],
   };
+  
 
   const petData = {
     petName: "Buddy",
@@ -27,7 +29,6 @@ function App() {
 
   return (
     <div className="App">
-      <UserProfile {...userData} />
       <PetProfile {...petData} />
     </div>
   );
