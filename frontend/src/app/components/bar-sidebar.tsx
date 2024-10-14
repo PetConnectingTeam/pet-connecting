@@ -43,9 +43,10 @@ export default function Sidebar() {
           marginTop: 0,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            marginTop: 10,
             boxSizing: "border-box",
             backgroundColor: "#f0f0f0",
+            height: `calc(100% - 60px)`,
+            marginTop: 8,
           },
         }}
         variant="permanent"

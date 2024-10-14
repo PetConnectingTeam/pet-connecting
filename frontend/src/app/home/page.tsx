@@ -6,11 +6,11 @@ const HomePage: React.FC = () => {
     <Box
       component="main"
       sx={{
-        flexGrow: 1, // Se expande para ocupar todo el espacio restante
-        bgcolor: "white", // Fondo blanco
-        padding: 3, // Padding para dar espacio interno
-        marginLeft: "240px", // Ajusta el espacio a la izquierda para el Sidebar
-        height: "calc(100vh - 64px)", // Ajusta la altura para que respete el espacio ocupado por el AppBar
+        flexGrow: 1,
+        bgcolor: "white",
+        padding: 3,
+        marginLeft: "240px",
+        height: "calc(100vh - 64px)",
       }}
     >
       <Container
