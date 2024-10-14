@@ -57,3 +57,22 @@ class PetPhotos(db.Model):
 
     def __repr__(self):
         return f'<Photo for Pet ID: {self.PetID}>'
+    
+
+class RequestService(db.Model):
+    __tablename__ = 'RequestService'  # Nombre de la tabla en la base de datos
+
+    ServiceId = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    PublisherId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False)  # Relación con la tabla User
+    publishDate = db.Column(db.DateTime, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    takerId = db.Column(db.BigInteger, db.ForeignKey('User.ID'))  # Relación opcional con la tabla User
+    serviceDateIni = db.Column(db.DateTime, nullable=False)
+    serviceDateEnd = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(255), nullable=False)
+    cost = db.Column(db.Numeric(10, 2), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)
+    petId = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'), nullable=False)  #
+
+    def __repr__(self):
+        return f'<RequestService {self.description[:20]}... (ServiceId: {self.ServiceId})>'

@@ -3,6 +3,9 @@ from app import app, db, bcrypt
 from app.models import User, Role, Pet, PetPhotos
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import base64
+from flask_cors import CORS
+
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/')
 def index():
