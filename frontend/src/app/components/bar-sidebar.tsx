@@ -22,6 +22,8 @@ import {
   ExitToApp,
 } from "@mui/icons-material";
 
+import { useRouter } from "next/navigation";
+
 const drawerWidth = 240;
 
 const groups = [
@@ -32,6 +34,7 @@ const groups = [
 ];
 
 export default function SideBar() {
+  const router = useRouter();
   return (
     <Drawer
       sx={{
@@ -50,7 +53,11 @@ export default function SideBar() {
     >
       <List>
         <ListItem disablePadding>
-          <ListItemButton>
+          <ListItemButton
+            onClick={() => {
+              router.push("/home");
+            }}
+          >
             <ListItemIcon>
               <Home />
             </ListItemIcon>
@@ -58,7 +65,11 @@ export default function SideBar() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton>
+          <ListItemButton
+            onClick={() => {
+              router.push("/userProfile");
+            }}
+          >
             <ListItemIcon>
               <Avatar
                 src="/placeholder.svg?height=40&width=40"
@@ -78,6 +89,7 @@ export default function SideBar() {
           (text, index) => (
             <ListItem key={text} disablePadding>
               <ListItemButton>
+                o
                 <ListItemIcon>
                   {index === 0 ? (
                     <Message />
