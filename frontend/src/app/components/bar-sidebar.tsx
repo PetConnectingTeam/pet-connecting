@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Drawer,
   List,
@@ -9,10 +9,9 @@ import {
   Typography,
   Avatar,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Home,
-  Person,
   Message,
   People,
   RssFeed,
@@ -21,28 +20,29 @@ import {
   PhotoLibrary,
   HelpOutline,
   ExitToApp,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 const drawerWidth = 240;
 
 const groups = [
-  { name: 'Pet Lovers', avatar: '/placeholder.svg?height=40&width=40' },
-  { name: 'PetCareConnect', avatar: '/placeholder.svg?height=40&width=40' },
-  { name: 'Travel with Pets', avatar: '/placeholder.svg?height=40&width=40' },
-  { name: 'Pet Memes', avatar: '/placeholder.svg?height=40&width=40' },
+  { name: "Pet Lovers", avatar: "/placeholder.svg?height=40&width=40" },
+  { name: "PetCareConnect", avatar: "/placeholder.svg?height=40&width=40" },
+  { name: "Travel with Pets", avatar: "/placeholder.svg?height=40&width=40" },
+  { name: "Pet Memes", avatar: "/placeholder.svg?height=40&width=40" },
 ];
 
-export default function Component() {
+export default function SideBar() {
   return (
     <Drawer
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#f0f0f0',
-          paddingTop:10
+          boxSizing: "border-box",
+          backgroundColor: "#f0f0f0",
+          height: `calc(100% - 60px)`,
+          marginTop: 8,
         },
       }}
       variant="permanent"
@@ -60,35 +60,47 @@ export default function Component() {
         <ListItem disablePadding>
           <ListItemButton>
             <ListItemIcon>
-              <Avatar src="/placeholder.svg?height=40&width=40" sx={{ width: 24, height: 24 }} />
+              <Avatar
+                src="/placeholder.svg?height=40&width=40"
+                sx={{ width: 24, height: 24 }}
+              />
             </ListItemIcon>
             <ListItemText primary="Profile" />
           </ListItemButton>
         </ListItem>
       </List>
       <Divider />
-      <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: 'bold' }}>
+      <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: "bold" }}>
         Favorites
       </Typography>
       <List>
-        {['Messages', 'Friends', 'Feed', 'Stories', 'Events', 'Memories'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index === 0 ? <Message /> :
-                 index === 1 ? <People /> :
-                 index === 2 ? <RssFeed /> :
-                 index === 3 ? <Collections /> :
-                 index === 4 ? <Event /> :
-                 <PhotoLibrary />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {["Messages", "Friends", "Feed", "Stories", "Events", "Memories"].map(
+          (text, index) => (
+            <ListItem key={text} disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  {index === 0 ? (
+                    <Message />
+                  ) : index === 1 ? (
+                    <People />
+                  ) : index === 2 ? (
+                    <RssFeed />
+                  ) : index === 3 ? (
+                    <Collections />
+                  ) : index === 4 ? (
+                    <Event />
+                  ) : (
+                    <PhotoLibrary />
+                  )}
+                </ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItemButton>
+            </ListItem>
+          )
+        )}
       </List>
       <Divider />
-      <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: 'bold' }}>
+      <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: "bold" }}>
         Groups
       </Typography>
       <List>

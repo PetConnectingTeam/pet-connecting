@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Button,
@@ -9,6 +11,10 @@ import {
   CardContent,
 } from "@mui/material";
 
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import Cookies from "js-cookie";
+
 // const Logo = (props) => (
 //   <SvgIcon {...props} viewBox="0 0 24 24">
 //     <path d="M12,2C6.47,2,2,6.47,2,12s4.47,10,10,10s10-4.47,10-10S17.53,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8 S16.41,20,12,20z" />
@@ -19,6 +25,43 @@ import {
 // );
 
 const SignInSide: React.FC = () => {
+  const [email, setEmail] = React.useState<string>("");
+  const [password, setPassword] = React.useState<string>("");
+  const router = useRouter();
+
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  };
+
+  const handleSignInButton = async () => {
+    const response = await axios.post("http://127.0.0.1:5001/login", {
+      email: email,
+      password: password,
+    });
+
+    const expirationTime = new Date(
+      new Date().getTime() + 24 * 60 * 60 * 1000 // 24 hours
+    );
+
+    Cookies.set("accessToken", response.data.access_token, {
+      expires: expirationTime,
+      path: "/",
+    });
+
+    Cookies.set("email", email, {
+      expires: expirationTime,
+      path: "/",
+    });
+
+    if (response) {
+      router.push("/home");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -58,12 +101,13 @@ const SignInSide: React.FC = () => {
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
               autoFocus
-              placeholder="Enter your username"
+              placeholder="Enter your email"
+              onChange={handleEmailChange}
             />
             <TextField
               margin="normal"
@@ -75,6 +119,7 @@ const SignInSide: React.FC = () => {
               id="password"
               autoComplete="current-password"
               placeholder="Enter your password"
+              onChange={handlePasswordChange}
             />
             <Box
               sx={{
@@ -88,7 +133,7 @@ const SignInSide: React.FC = () => {
                 Forgot password?
               </Link>
               <Button
-                type="submit"
+                type="button"
                 variant="contained"
                 sx={{
                   bgcolor: "#ff3b30",
@@ -96,6 +141,7 @@ const SignInSide: React.FC = () => {
                     bgcolor: "#ff3b30",
                   },
                 }}
+                onClick={handleSignInButton}
               >
                 Login
               </Button>
@@ -105,7 +151,7 @@ const SignInSide: React.FC = () => {
       </Card>
       <Typography variant="body2" sx={{ mt: 2 }}>
         Don&apos;t have an account?{" "}
-        <Link href="#" sx={{ color: "#ff3b30" }}>
+        <Link href="/signup" sx={{ color: "#ff3b30" }}>
           Create account
         </Link>
       </Typography>

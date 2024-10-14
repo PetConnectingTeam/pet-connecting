@@ -1,18 +1,54 @@
+"use client";
+
 import React from "react";
 import {
   Button,
   TextField,
-  FormControlLabel,
   Box,
   Typography,
-  FormControl,
   Card,
   CardContent,
-  RadioGroup,
-  Radio,
 } from "@mui/material";
+import axios from "axios";
+
+import { useRouter } from "next/navigation";
 
 const SignUp: React.FC = () => {
+  const [name, setName] = React.useState<string>("");
+  const [surname, setSurname] = React.useState<string>("");
+  const [email, setEmail] = React.useState<string>("");
+  const [password, setPassword] = React.useState<string>("");
+  const router = useRouter();
+
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value);
+  };
+
+  const handleSurnameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSurname(event.target.value);
+  };
+
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  };
+
+  const handleSignUpButton = async () => {
+    const response = axios.post("http://127.0.0.1:5001/register", {
+      name: name,
+      surname: surname,
+      email: email,
+      password: password,
+    });
+
+    if (await response) {
+      router.push("/signin");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -37,10 +73,19 @@ const SignUp: React.FC = () => {
           <Box component="form" noValidate autoComplete="off">
             <TextField
               fullWidth
-              label="Full Name"
+              label="Name"
               variant="outlined"
               margin="normal"
               placeholder="Enter your name"
+              onChange={handleNameChange}
+            />
+            <TextField
+              fullWidth
+              label="Surname"
+              variant="outlined"
+              margin="normal"
+              placeholder="Enter your surname"
+              onChange={handleSurnameChange}
             />
             <TextField
               fullWidth
@@ -49,6 +94,7 @@ const SignUp: React.FC = () => {
               margin="normal"
               type="email"
               placeholder="Enter your email"
+              onChange={handleEmailChange}
             />
             <TextField
               fullWidth
@@ -57,24 +103,8 @@ const SignUp: React.FC = () => {
               margin="normal"
               type="password"
               placeholder="Create a password"
+              onChange={handlePasswordChange}
             />
-            <FormControl component="fieldset" sx={{ mt: 2, mb: 2 }}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                I am a:
-              </Typography>
-              <RadioGroup row>
-                <FormControlLabel
-                  value="petOwner"
-                  control={<Radio />}
-                  label="Pet Owner"
-                />
-                <FormControlLabel
-                  value="serviceProvider"
-                  control={<Radio />}
-                  label="Service Provider"
-                />
-              </RadioGroup>
-            </FormControl>
             <Button
               fullWidth
               variant="contained"
@@ -85,6 +115,7 @@ const SignUp: React.FC = () => {
                   bgcolor: "#ff3b30",
                 },
               }}
+              onClick={handleSignUpButton}
             >
               Sign Up
             </Button>
