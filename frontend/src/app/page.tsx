@@ -1,5 +1,4 @@
 import React from "react";
-import UserProfile from "./components/UserProfile";
 import PetProfile from "./components/PetProfile";
 
 function App() {
