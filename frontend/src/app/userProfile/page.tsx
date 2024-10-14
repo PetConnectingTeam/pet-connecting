@@ -1,15 +1,14 @@
 "use client";
 import React from "react";
 import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
   Avatar,
   Button,
   Container,
   TextField,
+  Typography,
   Box,
+  AppBar,
+  Toolbar,
   FormControl,
   FormLabel,
   RadioGroup,
@@ -17,115 +16,107 @@ import {
   Radio,
   CssBaseline,
 } from "@mui/material";
-import MenuAppBar from "../components/appBar";
 
 interface UserProfileProps {
-  userId: number;
+  username: string;
+  bio: string;
+  email: string;
+  profilePhoto: string;
+  petPhotos: string[];
+  reviews: { rating: number; comment: string }[];
 }
 
-export default function UserProfile({ userId }: UserProfileProps) {
-  const [editMode, setEditMode] = useState(false);
-  const [username, setUsername] = useState("");
-  const [bio, setBio] = useState("");
-  const [email, setEmail] = useState("");
-  const [profilePhoto, setProfilePhoto] = useState("");
-  const [petPhotos, setPetPhotos] = useState<string[]>([]);
-  const [newBio, setNewBio] = useState("");
-  const [newPetPhotos, setNewPetPhotos] = useState<string[]>([]);
+const UserProfile: React.FC<UserProfileProps> = (
+  {
+    // username,
+    // bio,
+    // email,
+    // profilePhoto,
+    // petPhotos,
+    // reviews,
+  }
+) => {
+  // const [newPetPhotos, setNewPetPhotos] = useState<string[]>(petPhotos);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch(`/api/user/${userId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setUsername(data.username);
-          setBio(data.bio);
-          setEmail(data.email);
-          setProfilePhoto(data.profilePhoto);
-          setPetPhotos(data.petPhotos);
-          setNewBio(data.bio);
-        } else {
-          console.error("Failed to fetch user profile data");
-        }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, [userId]);
-
-  const handleAddPetPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const formData = new FormData();
-      formData.append('petPhoto', file);
-
-      try {
-        const response = await fetch(`/api/user/${userId}/add-pet-photo`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          const newPhotoUrl = URL.createObjectURL(file);
-          setNewPetPhotos([...newPetPhotos, newPhotoUrl]);
-        } else {
-          console.error("Failed to upload new pet photo");
-        }
-      } catch (error) {
-        console.error("Error uploading pet photo:", error);
-      }
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    const updatedProfile = {
-      bio: newBio,
-    };
-
-    try {
-      const response = await fetch(`/api/user/${userId}/update-profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProfile),
-      });
-
-      if (response.ok) {
-        setBio(newBio);
-        setEditMode(false);
-      } else {
-        console.error("Failed to update profile");
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
-
-  const handleDeletePetPhoto = async (photo: string) => {
-    try {
-      const response = await fetch(`/api/user/${userId}/delete-pet-photo`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photoUrl: photo }),
-      });
-
-      if (response.ok) {
-        setNewPetPhotos(newPetPhotos.filter(p => p !== photo));
-      } else {
-        console.error("Failed to delete pet photo");
-      }
-    } catch (error) {
-      console.error("Error deleting pet photo:", error);
-    }
-  };
+  // const handleAddPetPhoto = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (event.target.files) {
+  //     const file = URL.createObjectURL(event.target.files[0]);
+  //     setNewPetPhotos([...newPetPhotos, file]);
+  //   }
+  // };
 
   return (
     <>
       <CssBaseline />
-      <MenuAppBar></MenuAppBar>
       <Box sx={{ flexGrow: 1 }}>
+        <AppBar
+          position="static"
+          sx={{
+            backgroundColor: "white",
+            boxShadow: "none",
+            borderBottom: "1px solid #e0e0e0",
+          }}
+        >
+          <Toolbar>
+            <Typography
+              variant="h6"
+              sx={{
+                flexGrow: 1,
+                color: "black",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                "& svg": {
+                  marginRight: "8px",
+                  color: "#ff4d4f",
+                },
+              }}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  fill="currentColor"
+                />
+              </svg>
+              PetCareConnect
+            </Typography>
+            <Button
+              sx={{
+                // color: "black",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+              }}
+            >
+              Home
+            </Button>
+            <Button
+              sx={{
+                // color: "black",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+              }}
+              className="active"
+            >
+              Profile
+            </Button>
+            <Button
+              sx={{
+                // color: "black",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+              }}
+              className="active"
+            >
+              Logout
+            </Button>
+          </Toolbar>
+        </AppBar>
         <Container
           maxWidth={false}
           sx={{ backgroundColor: "white", height: "100vh" }}
@@ -364,4 +355,6 @@ export default function UserProfile({ userId }: UserProfileProps) {
     //   </Grid>
     // </>
   );
-}
+};
+
+export default UserProfile;
