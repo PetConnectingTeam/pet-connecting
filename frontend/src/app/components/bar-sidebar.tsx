@@ -9,6 +9,7 @@ import {
   Typography,
   Avatar,
   Divider,
+  Box,
 } from "@mui/material";
 import {
   Home,
@@ -21,8 +22,7 @@ import {
   HelpOutline,
   ExitToApp,
 } from "@mui/icons-material";
-
-import { useRouter } from "next/navigation";
+import Link from "next/link"; // Import the Next.js Link component
 
 const drawerWidth = 240;
 
@@ -33,119 +33,128 @@ const groups = [
   { name: "Pet Memes", avatar: "/placeholder.svg?height=40&width=40" },
 ];
 
-export default function SideBar() {
-  const router = useRouter();
+export default function Sidebar() {
   return (
-    <Drawer
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
+    <Box>
+      <Drawer
+        sx={{
           width: drawerWidth,
-          boxSizing: "border-box",
-          backgroundColor: "#f0f0f0",
-          height: `calc(100% - 60px)`,
-          marginTop: 8,
-        },
-      }}
-      variant="permanent"
-      anchor="left"
-    >
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => {
-              router.push("/home");
-            }}
-          >
-            <ListItemIcon>
-              <Home />
-            </ListItemIcon>
-            <ListItemText primary="Home" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => {
-              router.push("/userProfile");
-            }}
-          >
-            <ListItemIcon>
-              <Avatar
-                src="/placeholder.svg?height=40&width=40"
-                sx={{ width: 24, height: 24 }}
-              />
-            </ListItemIcon>
-            <ListItemText primary="Profile" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-      <Divider />
-      <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: "bold" }}>
-        Favorites
-      </Typography>
-      <List>
-        {["Messages", "Friends", "Feed", "Stories", "Events", "Memories"].map(
-          (text, index) => (
-            <ListItem key={text} disablePadding>
+          flexShrink: 0,
+          marginTop: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            marginTop: 10,
+            boxSizing: "border-box",
+            backgroundColor: "#f0f0f0",
+          },
+        }}
+        variant="permanent"
+      >
+        <List>
+          <ListItem>
+            <Link
+              href="/home"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <ListItemButton>
-                o
                 <ListItemIcon>
-                  {index === 0 ? (
-                    <Message />
-                  ) : index === 1 ? (
-                    <People />
-                  ) : index === 2 ? (
-                    <RssFeed />
-                  ) : index === 3 ? (
-                    <Collections />
-                  ) : index === 4 ? (
-                    <Event />
-                  ) : (
-                    <PhotoLibrary />
-                  )}
+                  <Home />
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary="Home" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
+
+          <ListItem>
+            <Link
+              href="/profile"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <ListItemButton>
+                <ListItemIcon>
+                  <Avatar
+                    src="/placeholder.svg?height=40&width=40"
+                    sx={{ width: 24, height: 24 }}
+                  />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
+        </List>
+        <Divider />
+        <Typography
+          variant="subtitle2"
+          sx={{ px: 2, py: 1, fontWeight: "bold" }}
+        >
+          Favorites
+        </Typography>
+        <List>
+          {[
+            { text: "Messages", icon: <Message />, link: "/messages" },
+            { text: "Friends", icon: <People />, link: "/friends" },
+            { text: "Feed", icon: <RssFeed />, link: "/feed" },
+            { text: "Stories", icon: <Collections />, link: "/stories" },
+            { text: "Events", icon: <Event />, link: "/events" },
+            { text: "Memories", icon: <PhotoLibrary />, link: "/memories" },
+          ].map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <Link
+                href={item.link}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <ListItemButton>
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+          ))}
+        </List>
+        <Divider />
+        <Typography
+          variant="subtitle2"
+          sx={{ px: 2, py: 1, fontWeight: "bold" }}
+        >
+          Groups
+        </Typography>
+        <List>
+          {groups.map((group) => (
+            <ListItem key={group.name} disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <Avatar src={group.avatar} sx={{ width: 24, height: 24 }} />
+                </ListItemIcon>
+                <ListItemText primary={group.name} />
               </ListItemButton>
             </ListItem>
-          )
-        )}
-      </List>
-      <Divider />
-      <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: "bold" }}>
-        Groups
-      </Typography>
-      <List>
-        {groups.map((group) => (
-          <ListItem key={group.name} disablePadding>
+          ))}
+        </List>
+        <Divider />
+        <List>
+          <ListItem>
+            <Link
+              href="/help"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <ListItemButton>
+                <ListItemIcon>
+                  <HelpOutline />
+                </ListItemIcon>
+                <ListItemText primary="Help & Support" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
+          <ListItem disablePadding>
             <ListItemButton>
               <ListItemIcon>
-                <Avatar src={group.avatar} sx={{ width: 24, height: 24 }} />
+                <ExitToApp />
               </ListItemIcon>
-              <ListItemText primary={group.name} />
+              <ListItemText primary="Log out" />
             </ListItemButton>
           </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <HelpOutline />
-            </ListItemIcon>
-            <ListItemText primary="Help & Support" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <ExitToApp />
-            </ListItemIcon>
-            <ListItemText primary="Log out" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Drawer>
+        </List>
+      </Drawer>
+    </Box>
   );
 }
