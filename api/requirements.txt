@@ -5,4 +5,5 @@ Flask-SQLAlchemy>=2.5.1
 cryptography
 Flask-JWT-Extended
 flask-bcrypt
+Flask-CORS
 requests
