@@ -69,10 +69,23 @@ class RequestService(db.Model):
     takerId = db.Column(db.BigInteger, db.ForeignKey('User.ID'))  # Relación opcional con la tabla User
     serviceDateIni = db.Column(db.DateTime, nullable=False)
     serviceDateEnd = db.Column(db.DateTime, nullable=False)
-    location = db.Column(db.String(255), nullable=False)
+    address = db.Column(db.String(255), nullable=False)
     cost = db.Column(db.Numeric(10, 2), nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
-    petId = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'), nullable=False)  #
+    petId = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'), nullable=False)
 
     def __repr__(self):
         return f'<RequestService {self.description[:20]}... (ServiceId: {self.ServiceId})>'
+    
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+
+class Application(db.Model):
+    __tablename__ = 'Application'
+
+    ServiceId = db.Column(db.BigInteger, db.ForeignKey('RequestService.ServiceId'), nullable=False, primary_key=True)
+    UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}

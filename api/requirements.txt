@@ -6,3 +6,4 @@ cryptography
 Flask-JWT-Extended
 flask-bcrypt
 Flask-CORS
+requests
