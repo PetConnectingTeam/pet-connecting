@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS User (
     Surname VARCHAR(100),
     RoleID BIGINT,
     Points FLOAT,
-    ProfilePhoto BLOB, 
+    ProfilePhoto LONGBLOB, 
     MimeType VARCHAR(50),
     Rating DECIMAL(5, 2),
     FOREIGN KEY (RoleID) REFERENCES Roles(ID)
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS Pet (
 CREATE TABLE IF NOT EXISTS PetPhotos (
     ID BIGINT AUTO_INCREMENT PRIMARY KEY,
     PetID BIGINT,
-    Photo BLOB,
+    Photo LONGBLOB,
     MimeType VARCHAR(50),
     FOREIGN KEY (PetID) REFERENCES Pet(ID)
 );
@@ -49,23 +49,29 @@ CREATE TABLE IF NOT EXISTS RequestService (
     PublisherId BIGINT NOT NULL,
     publishDate DATETIME NOT NULL,
     description TEXT NOT NULL,
-    takerId BIGINT, -- Puede ser NULL hasta que alguien acepte el servicio
     serviceDateIni DATETIME NOT NULL,
     serviceDateEnd DATETIME NOT NULL,
     address VARCHAR(255) NOT NULL,
     cost DECIMAL(10, 2) NOT NULL,
     completed BOOLEAN NOT NULL DEFAULT FALSE,
-    petId BIGINT NOT NULL,
-    FOREIGN KEY (PublisherId) REFERENCES User(ID),
-    FOREIGN KEY (takerId) REFERENCES User(ID),
-    FOREIGN KEY (petId) REFERENCES Pet(ID)
+    FOREIGN KEY (PublisherId) REFERENCES User(ID)
+);
+
+CREATE TABLE IF NOT EXISTS PetsInService (
+    UserId BIGINT NOT NULL,
+    ServiceId BIGINT NOT NULL,
+    PetId BIGINT NOT NULL,
+    PRIMARY KEY (UserId, ServiceId, PetId),
+    FOREIGN KEY (UserId) REFERENCES User(ID),
+    FOREIGN KEY (ServiceId) REFERENCES RequestService(ServiceId)
 );
 
 CREATE TABLE IF NOT EXISTS Application (
-    UserID BIGINT NOT NULL,
+    UserId BIGINT NOT NULL,
     ServiceId BIGINT NOT NULL,
-    PRIMARY KEY (UserID, ServiceId),
-    FOREIGN KEY (UserID) REFERENCES User(ID),
+    Accepted BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (UserId, ServiceId),
+    FOREIGN KEY (UserId) REFERENCES User(ID),
     FOREIGN KEY (ServiceId) REFERENCES RequestService(ServiceId)
 );
 
@@ -90,5 +96,5 @@ INSERT INTO Pet (UserID, Name, AnimalType, Breed, Description, Allergies, Weight
 (2, 'Paddy', 'Dog', '', 'Perro rebelde', '', 10.0, 'Medium', 4);
 
 -- Request Service
-INSERT INTO RequestService (PublisherId, publishDate, description, serviceDateIni, serviceDateEnd, address, cost, completed, petId)
-VALUES (1, NOW(), 'Cuidar perro durante el fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE, 1);
+INSERT INTO RequestService (PublisherId, publishDate, description, serviceDateIni, serviceDateEnd, address, cost, completed)
+VALUES (1, NOW(), 'Cuidar perro durante el fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE);

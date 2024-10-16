@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from app import app, db, bcrypt, utils
-from app.models import User, Role, Pet, PetPhotos, RequestService, Application
+from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import base64
 from flask_cors import CORS
@@ -282,6 +282,19 @@ def delete_pet(pet_id):
 
     return jsonify({'message': f'Pet with id {pet_id} has been deleted'}), 200
 
+@app.route('/pets/<int:pet_id>/photos', methods=['GET'])
+@jwt_required()
+def get_pet_photos(pet_id):
+
+    pet = Pet.query.filter_by(ID=pet_id).first()
+
+    if not pet:
+        return jsonify({"msg": "Pet not found or you do not have permission to view this pet's photos"}), 404
+
+    photos = PetPhotos.query.filter_by(PetID=pet_id).all()
+
+    photo_list = [photo.to_dict() for photo in photos]
+    return jsonify(photo_list)
 
 # --- Photos Endpoints ---
 
@@ -416,18 +429,18 @@ def post_service():
     service_date_fin = data.get("serviceDateFin")
     address = data.get("address")
     cost = data.get("cost")
-    pet_id = data.get("petId")
     description = data.get("description")
 
-    pet = Pet.query.get(pet_id)
+    pets = data.get("pets")
+    
+    for pet_id in pets:
+        pet = Pet.query.get(pet_id)
+        if not pet:
+            return jsonify({"msg": "Pet not found"}), 404
+        if(pet.UserID != current_user_id):
+            return jsonify({"msg": "The pet doesn't belong to the authenticated user"}), 404
 
-    if not pet:
-        return jsonify({"msg": "Pet not found"}), 404
-
-    if(pet.UserID != current_user_id):
-        return jsonify({"msg": "The pet doesn't belong to the authenticated user"}), 404
-
-    if not description or not service_date_ini or not service_date_fin or not address or not cost or not pet_id:
+    if not pets or not description or not service_date_ini or not service_date_fin or not address or not cost or not pet_id:
         return jsonify({"msg": "Missing data"}), 400
     
     """is_valid, val = utils.verify_address(address)
@@ -442,12 +455,19 @@ def post_service():
         serviceDateEnd = datetime.strptime(service_date_fin, DATE_FORMAT),
         address = address,
         cost = cost,
-        petId = pet_id,
-        takerId = None,
         completed = False
     )
 
     db.session.add(new_service)
+    db.session.commit()
+    for pet_id in pets:
+        new_pets_in_service = PetsInService(
+            PetId = pet_id,
+            ServiceId = new_service.ServiceId,
+            UserId = current_user_id
+        )
+        db.session.add(new_pets_in_service)
+
     db.session.commit()
     return jsonify({
         'id': new_service.ServiceId
@@ -472,16 +492,25 @@ def edit_service(service_id):
     service_date_fin = data.get("serviceDateFin")
     address = data.get("address")
     cost = data.get("cost")
-    pet_id = data.get("petId")
+    pets = data.get("pets")
 
-    pet = Pet.query.get(pet_id)
-
-    if not pet:
-        return jsonify({"msg": "Pet not found"}), 404
-
-    if pet.UserID != current_user_id:
-        return jsonify({"msg": "The pet doesn't belong to the authenticated user"}), 403
-
+    if pets:
+        pets_in_service = PetsInService.query.filter_by(ServiceId=service_id).all()
+        for pet_in_service in pets_in_service:
+            db.session.delete(pet_in_service)
+        for pet_id in pets:
+            pet = Pet.query.get(pet_id)
+            if not pet:
+                return jsonify({"msg": "Pet not found"}), 404
+            if pet.UserID != current_user_id:
+                return jsonify({"msg": "The pet doesn't belong to the authenticated user"}), 403
+            new_pets_in_service = PetsInService(
+                PetId = pet_id,
+                ServiceId = service_id,
+                UserId = current_user_id
+            )
+            db.session.add(new_pets_in_service)
+    
     if not description or not service_date_ini or not service_date_fin or not address or not cost or not pet_id:
         return jsonify({"msg": "Missing data"}), 400
     service.serviceDateIni = datetime.strptime(service_date_ini, DATE_FORMAT)
@@ -510,14 +539,18 @@ def delete_service(service_id):
         return jsonify({"msg": "You are not authorized to delete this service"}), 403
 
     db.session.delete(service)
+
+    pets_in_service = PetsInService.query.filter_by(ServiceId=service_id).all()
+    for pet_in_service in pets_in_service:
+        db.session.delete(pet_in_service)
+
     db.session.commit()
 
     return jsonify({"msg": "Service deleted successfully"}), 200
 
-
 @app.route('/service/<int:service_id>/apply', methods=['PUT'])
 @jwt_required()
-def take_service(service_id):
+def apply_for_service(service_id):
     current_user_id = get_jwt_identity()
 
     service = RequestService.query.get(service_id)
@@ -528,8 +561,12 @@ def take_service(service_id):
     if service.PublisherId == current_user_id:
         return jsonify({"msg": "You cannot take your own service"}), 400
 
-    if service.takerId:
-        return jsonify({"msg": "Service already taken"}), 400
+    applications = Application.query.filter_by(ServiceId=service_id).all()
+    for application in applications:
+        if application.UserId == current_user_id:
+            return jsonify({"msg": "You have already applied for this service"}), 400
+        if application.Accepted:
+            return jsonify({"msg": "Service already taken"}), 400
 
     application = Application(
         ServiceId = service_id,
@@ -563,30 +600,49 @@ def get_applications(service_id):
 def assign_service(service_id):
     data = request.get_json()
     current_user_id = get_jwt_identity()
-    takerId = data.get("takerId")
+    taker_id = data.get("taker_id")
+
     service = RequestService.query.get(service_id)
-    application = Application.query.filter_by(ServiceId=service_id, UserId=takerId).first()
 
     if not service:
         return jsonify({"msg": "Service not found"}), 404
     
-    if not application:
-        return jsonify({"msg": "Application not found"}), 404
-    
-    if not takerId:
-        return jsonify({"msg": "Missing data"}), 400
-    
-    if service.takerId:
-        return jsonify({"msg": "Service already taken"}), 400
-    
     if service.PublisherId != current_user_id:
         return jsonify({"msg": "You are not authorized to assign this service"}), 403
     
-    service.takerId = takerId
+    if not taker_id:
+        return jsonify({"msg": "Missing data"}), 400
+
+    if not User.query.get(taker_id):
+        return jsonify({"msg": "User to be assigned not found"}), 404
+    
+    application = Application.query.filter_by(ServiceId=service_id, UserId=taker_id).first()
+    if not application:
+        return jsonify({"msg": "User has not applied for this service"}), 400
+    
+    application.Accepted = True
     db.session.commit()
 
     return jsonify({"msg": "Service assigned successfully"}), 200
-    
+
+@app.route('/service/<int:service_id>/complete', methods=['PUT']) 
+@jwt_required()
+def complete_service(service_id):
+    current_user_id = get_jwt_identity()
+
+    service = RequestService.query.get(service_id)
+
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+
+    if service.PublisherId != current_user_id:
+        return jsonify({"msg": "You are not authorized to complete this service"}), 403
+
+    service.completed = True
+    db.session.commit()
+
+    return jsonify({"msg": "Service completed successfully"}), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
