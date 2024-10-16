@@ -1,4 +1,5 @@
 from . import db
+import base64
 
 class Role(db.Model):
     __tablename__ = 'Roles'  # Nombre de la tabla en la base de datos
@@ -58,6 +59,18 @@ class PetPhotos(db.Model):
     def __repr__(self):
         return f'<Photo for Pet ID: {self.PetID}>'
     
+    def to_dict(self):
+        result = {}
+
+        for column in self.__table__.columns:
+            if column.name == 'Photo':
+                result[column.name] = base64.b64encode(self.Photo).decode('utf-8')
+            else:    
+                result[column.name] = getattr(self, column.name)
+
+        return result
+                
+    
 
 class RequestService(db.Model):
     __tablename__ = 'RequestService'  # Nombre de la tabla en la base de datos
@@ -66,13 +79,11 @@ class RequestService(db.Model):
     PublisherId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False)  # Relación con la tabla User
     publishDate = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=False)
-    takerId = db.Column(db.BigInteger, db.ForeignKey('User.ID'))  # Relación opcional con la tabla User
     serviceDateIni = db.Column(db.DateTime, nullable=False)
     serviceDateEnd = db.Column(db.DateTime, nullable=False)
     address = db.Column(db.String(255), nullable=False)
     cost = db.Column(db.Numeric(10, 2), nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
-    petId = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'), nullable=False)
 
     def __repr__(self):
         return f'<RequestService {self.description[:20]}... (ServiceId: {self.ServiceId})>'
@@ -80,12 +91,22 @@ class RequestService(db.Model):
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
+class PetsInService(db.Model):
+    __tablename__ = 'PetsInService'
+
+    PetId = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'), nullable=False, primary_key=True)
+    ServiceId = db.Column(db.BigInteger, db.ForeignKey('RequestService.ServiceId'), nullable=False, primary_key=True)
+    UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
+    
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Application(db.Model):
     __tablename__ = 'Application'
 
     ServiceId = db.Column(db.BigInteger, db.ForeignKey('RequestService.ServiceId'), nullable=False, primary_key=True)
     UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
+    Accepted = db.Column(db.Boolean, nullable=False, default=False)
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
