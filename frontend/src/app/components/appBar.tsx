@@ -87,15 +87,15 @@ export default function NavigationBar() {
     null
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchRecentSearches();
-      await fetchMessagesCount();
-      await fetchNotifications();
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     await fetchRecentSearches();
+  //     await fetchMessagesCount();
+  //     await fetchNotifications();
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   const fetchRecentSearches = async () => {
     try {
