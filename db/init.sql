@@ -90,5 +90,6 @@ INSERT INTO Pet (UserID, Name, AnimalType, Breed, Description, Allergies, Weight
 (2, 'Paddy', 'Dog', '', 'Perro rebelde', '', 10.0, 'Medium', 4);
 
 -- Request Service
-INSERT INTO RequestService (PublisherId, publishDate, description, serviceDateIni, serviceDateEnd, address, cost, completed, petId)
-VALUES (1, NOW(), 'Cuidar perro durante el fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE, 1);
+INSERT INTO RequestService (PublisherId, publishDate, description, serviceDateIni, serviceDateEnd, address, cost, completed, petId) VALUES
+(1, NOW(), 'Cuidar perro durante el fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE, 1),
+(2, NOW(), 'Cuidar fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE, 1);
