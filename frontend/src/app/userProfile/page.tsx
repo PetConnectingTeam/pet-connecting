@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import {
@@ -16,74 +17,56 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import MenuAppBar from "../components/appBar";
-import { UNSTABLE_REVALIDATE_RENAME_ERROR } from "next/dist/lib/constants";
 
-const UserProfile: React.FC = () => {
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [userType, setUserType] = useState<string>("petOwner");
+export default function UserProfile() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [userType, setUserType] = useState("petOwner");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const accessToken=Cookies.get("accessToken");
-  const userId=Cookies.get("user_id");
+  const accessToken = Cookies.get("accessToken");
+  const userId = Cookies.get("user_id");
+
   useEffect(() => {
     const fetchUserData = async () => {
-
       try {
-        const response = await axios.get(`http://127.0.0.1:5001/users?id=${userId}`,
-          {headers:{Authorization:`Bearer ${accessToken}`}},
-        );
-        
-        
+        const response = await axios.get(`http://127.0.0.1:5001/users?id=${userId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
         const userData = response.data[0];
-       
-        setName(userData.name );
-        //console.log(response.data)
+        setName(userData.name);
         setEmail(userData.email);
-        
-        
       } catch (error: any) {
         console.error("Error fetching user data:", error);
-        if (error.response) {
-          setErrorMessage(`Error: ${error.response.status} - ${error.response.data}`);
-        } else if (error.request) {
-          setErrorMessage("Error: No response from server. Please check your connection.");
-        } else {
-          setErrorMessage(`Axios Error: ${error.message}`);
-        }
+        setErrorMessage(error.response?.data || error.message);
       }
     };
 
     fetchUserData();
-  }, [userId, accessToken]); 
+  }, [userId, accessToken]);
+
   const handleSaveChanges = async () => {
-    const userProfileData = {
-      name,
-      email,
-      userType,
-    };
-
-    console.log("Data to send:", userProfileData);
-
+   
     try {
-      const response = await axios.put("http://127.0.0.1:5001/user/1", userProfileData);
-
-      console.log("Response from server:", response.data);
+      
+      const userId = Cookies.get("user_id");
+          
+      const response = await axios.put(`http://127.0.0.1:5001/user?id=${userId}`, {
+        name,
+        email,
+      });
 
       if (response.status === 200) {
         alert("Profile updated successfully!");
+        setIsEditing(false);
       } else {
         alert("Failed to update profile.");
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      if (error.response) {
-        setErrorMessage(`Error: ${error.response.status} - ${error.response.data}`);
-      } else if (error.request) {
-        setErrorMessage("Error: No response from server. Please check your connection.");
-      } else {
-        setErrorMessage(`Axios Error: ${error.message}`);
-      }
+      setErrorMessage(error.response?.data || error.message);
     }
   };
 
@@ -108,24 +91,26 @@ const UserProfile: React.FC = () => {
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",             
+                alignItems: "center",
                 width: { xs: "100%", md: "200px" },
                 paddingTop: 10,
               }}
             >
               <Avatar src="/placeholder.svg?height=200&width=200" sx={{ width: 200, height: 200, mb: 2 }} />
-              <Button
-                sx={{
-                  backgroundColor: "#ff4d4f",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#ff7875",
-                  },
-                }}
-                variant="contained"
-              >
-                Change Picture
-              </Button>
+              {isEditing && (
+                <Button
+                  sx={{
+                    backgroundColor: "#ff4d4f",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#ff7875",
+                    },
+                  }}
+                  variant="contained"
+                >
+                  Change Picture
+                </Button>
+              )}
             </Box>
             <Box sx={{ flexGrow: 1, paddingTop: 10 }}>
               <form>
@@ -137,6 +122,10 @@ const UserProfile: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   margin="normal"
+                  InputProps={{
+                    readOnly: !isEditing,
+                    style: { color: "black" },
+                  }}
                 />
                 <TextField
                   fullWidth
@@ -146,6 +135,10 @@ const UserProfile: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   margin="normal"
+                  InputProps={{
+                    readOnly: !isEditing,
+                    style: { color: "black" },
+                  }}
                 />
                 <FormControl component="fieldset" margin="normal">
                   <FormLabel component="legend">User Type</FormLabel>
@@ -153,27 +146,46 @@ const UserProfile: React.FC = () => {
                     value={userType}
                     name="userType"
                     onChange={(e) => setUserType(e.target.value)}
+                    sx={{ color: "black" }}
                   >
-                    <FormControlLabel value="petOwner" control={<Radio />} label="Pet Owner" />
-                    <FormControlLabel value="veterinarian" control={<Radio />} label="Veterinarian" />
+                    <FormControlLabel
+                      value="petOwner"
+                      control={<Radio />}
+                      label="Pet Owner"
+                      disabled={!isEditing}
+                    />
+                    <FormControlLabel
+                      value="veterinarian"
+                      control={<Radio />}
+                      label="Veterinarian"
+                      disabled={!isEditing}
+                    />
                   </RadioGroup>
                 </FormControl>
                 {errorMessage && <Box sx={{ color: "red", mt: 2 }}>{errorMessage}</Box>}
                 <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 2 }}>
-                  <Button variant="outlined">Edit Profile</Button>
-                  <Button
-                    sx={{
-                      backgroundColor: "#ff4d4f",
-                      color: "white",
-                      "&:hover": {
-                        backgroundColor: "#ff7875",
-                      },
-                    }}
-                    variant="contained"
-                    onClick={handleSaveChanges}
-                  >
-                    Save Changes
-                  </Button>
+                  {!isEditing ? (
+                    <Button
+                      variant="outlined"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                  ) : (
+                    <Button
+                      sx={{
+                        backgroundColor: "#ff4d4f",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "#ff7875",
+                        },
+                      }}
+                      variant="contained"
+                      onClick={handleSaveChanges}
+                    >
+                      Save Changes
+                    </Button>
+                  )}
                 </Box>
               </form>
             </Box>
@@ -182,6 +194,4 @@ const UserProfile: React.FC = () => {
       </Box>
     </>
   );
-};
-
-export default UserProfile;
+}
