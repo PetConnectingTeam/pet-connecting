@@ -87,16 +87,6 @@ export default function NavigationBar() {
     null
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchRecentSearches();
-      await fetchMessagesCount();
-      await fetchNotifications();
-    };
-
-    fetchData();
-  }, []);
-
   const fetchRecentSearches = async () => {
     try {
       const response = await axios.get("/api/recent-searches");
