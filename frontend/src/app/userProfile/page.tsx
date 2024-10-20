@@ -33,9 +33,11 @@ export default function UserProfile() {
 
   const accessToken = Cookies.get("accessToken");
   const userId = Cookies.get("user_id");
+  const roleId = Cookies.get("role_id");
 
   const fetchUserData = useCallback(async () => {
     try {
+     
       const response = await axios.get(
         `http://127.0.0.1:5001/users?id=${userId}`,
         {
@@ -44,46 +46,109 @@ export default function UserProfile() {
       );
 
       const userData = response.data[0];
-      setName(userData.name);
-      setEmail(userData.email);
-      setProfileImageUrl(userData.profile_image_base64 || null);
+      if (response.status === 200) {
+        setName(userData.name);
+        setEmail(userData.email);
+
+        
+        const roleResponse = await axios.get(
+          `http://127.0.0.1:5001/roles?id=${roleId}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        const roleData = roleResponse.data[0];
+        if (roleResponse.status === 200) {
+          
+          switch (roleData.id) {
+            case 1:
+              setUserType("basic");
+              break;
+            case 2:
+              setUserType("premium");
+              break;
+            case 3:
+              setUserType("petOwner");
+            default:
+              setUserType("petOwner");
+          }
+        }
+      }
     } catch (error: any) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching user or role data:", error);
       setErrorMessage(error.response?.data?.msg || error.message);
     }
-  }, [userId, accessToken]);
+  }, [userId,roleId, accessToken]);
 
   useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5001/users?id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        const data = response.data[0];
+        if (response.status === 200 && data.profile_image_base64) {
+          const base64Image = `data:${data.image_mimeType};base64,${data.profile_image_base64}`;
+          setProfileImageUrl(base64Image); 
+        }
+      } catch (error) {
+        console.error("Error fetching user image:", error);
+      }
+    };
+
+    fetchUserInfo();
     fetchUserData();
-  }, [fetchUserData]);
+  }, [fetchUserData, userId, accessToken]);
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
-      const payload: any = { id: userId, name };
-
-      if (email !== email) {
-        payload.email = email;
+      let roleId;
+      switch (userType) {
+        case "basic":
+          roleId = 1;
+          break;
+        case "premium":
+          roleId = 2;
+          break;
+        case "petOwner":
+        default:
+          roleId = 3;
       }
-
+  
+      const payload: any = {
+        id: userId,
+        name,
+        email,
+        role_id: roleId,
+      };
+  
       const response = await axios.put(
-        `http://127.0.0.1:5001/user/1?id=${userId}`,
+        `http://127.0.0.1:5001/user/${userId}`,
         payload,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-
+  
       if (response.status === 200) {
         setIsEditing(false);
         setErrorMessage(null);
         setSuccessMessage("Profile updated successfully");
+  
+       
+        Cookies.set("role_id", roleId.toString());
 
         if (profilePicture) {
           await handleProfilePictureUpload();
         }
-
+  
+        
         await fetchUserData();
       } else {
         throw new Error("Failed to update profile");
@@ -97,7 +162,7 @@ export default function UserProfile() {
       );
     }
   };
-
+  
   const handleProfilePictureUpload = async () => {
     if (!profilePicture) return;
 
@@ -106,7 +171,7 @@ export default function UserProfile() {
 
     try {
       const response = await axios.put(
-        `http://127.0.0.1:5001/user/3/profile_photo`,
+        `http://127.0.0.1:5001/user/${userId}/profile_photo`,
         formData,
         {
           headers: {
@@ -118,7 +183,9 @@ export default function UserProfile() {
 
       if (response.status === 200) {
         setSuccessMessage("Profile picture updated successfully");
-        // Fetch updated user data to get the new profile picture
+         setTimeout(() => {
+    setSuccessMessage(null);
+  }, 3000);
         await fetchUserData();
       } else {
         throw new Error("Failed to update profile picture");
@@ -142,6 +209,10 @@ export default function UserProfile() {
   const handleCloseSnackbar = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
+  };
+
+  const handleEditProfile = () => {
+    setIsEditing(true);
   };
 
   return (
@@ -173,11 +244,12 @@ export default function UserProfile() {
                 paddingTop: 10,
               }}
             >
+              {}
               <Avatar
                 src={
                   profilePicture
                     ? URL.createObjectURL(profilePicture)
-                    : profileImageUrl || "/placeholder.svg?height=200&width=200"
+                    : profileImageUrl || "/placeholder.svg"
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
@@ -207,7 +279,7 @@ export default function UserProfile() {
               )}
             </Box>
             <Box sx={{ flexGrow: 1, paddingTop: 10 }}>
-              <form>
+              <div>
                 <TextField
                   fullWidth
                   label="Name"
@@ -237,10 +309,9 @@ export default function UserProfile() {
                 <FormControl component="fieldset" margin="normal">
                   <FormLabel component="legend">User Type</FormLabel>
                   <RadioGroup
+                    row
                     value={userType}
-                    name="userType"
                     onChange={(e) => setUserType(e.target.value)}
-                    sx={{ color: "black" }}
                   >
                     <FormControlLabel
                       value="petOwner"
@@ -249,62 +320,70 @@ export default function UserProfile() {
                       disabled={!isEditing}
                     />
                     <FormControlLabel
-                      value="veterinarian"
+                      value="basic"
                       control={<Radio />}
-                      label="Veterinarian"
+                      label="Basic User"
+                      disabled={!isEditing}
+                    />
+                    <FormControlLabel
+                      value="premium"
+                      control={<Radio />}
+                      label="Premium User"
                       disabled={!isEditing}
                     />
                   </RadioGroup>
                 </FormControl>
-                <Box
+              </div>
+              {isEditing ? (
+                <Button
                   sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
+                    backgroundColor: "#ff4d4f",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#ff7875",
+                    },
                     mt: 2,
-                    gap: 2,
                   }}
+                  variant="contained"
+                  onClick={handleSaveChanges}
                 >
-                  {!isEditing ? (
-                    <Button
-                      variant="outlined"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      Edit Profile
-                    </Button>
-                  ) : (
-                    <Button
-                      sx={{
-                        backgroundColor: "#ff4d4f",
-                        color: "white",
-                        "&:hover": {
-                          backgroundColor: "#ff7875",
-                        },
-                      }}
-                      variant="contained"
-                      onClick={handleSaveChanges}
-                    >
-                      Save Changes
-                    </Button>
-                  )}
-                </Box>
-              </form>
+                  Save Changes
+                </Button>
+              ) : (
+                <Button
+                  sx={{
+                    backgroundColor: "#ff4d4f",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#ff7875",
+                    },
+                    mt: 2,
+                  }}
+                  variant="contained"
+                  onClick={handleEditProfile}
+                >
+                  Edit Profile
+                </Button>
+              )}
             </Box>
           </Box>
         </Container>
-      </Box>
-      <Snackbar
-        open={!!errorMessage || !!successMessage}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert
+        <Snackbar
+          open={!!errorMessage || !!successMessage}
+          autoHideDuration={4000}
           onClose={handleCloseSnackbar}
-          severity={errorMessage ? "error" : "success"}
-          sx={{ width: "100%" }}
         >
-          {errorMessage || successMessage}
-        </Alert>
-      </Snackbar>
+          {errorMessage ? (
+            <Alert onClose={handleCloseSnackbar} severity="error">
+              {errorMessage}
+            </Alert>
+          ) : (
+            <Alert onClose={handleCloseSnackbar} severity="success">
+              {successMessage}
+            </Alert>
+          )}
+        </Snackbar>
+      </Box>
     </>
   );
 }
