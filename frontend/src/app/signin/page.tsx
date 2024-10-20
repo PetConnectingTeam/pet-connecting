@@ -57,6 +57,11 @@ const SignInSide: React.FC = () => {
       path: "/",
     });
 
+    Cookies.set("user_id", response.data.user_id, {
+      expires: expirationTime,
+      path: "/",
+    });
+
     if (response) {
       router.push("/home");
     }
