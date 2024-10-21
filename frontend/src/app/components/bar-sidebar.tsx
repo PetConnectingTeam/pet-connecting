@@ -68,7 +68,7 @@ export default function Sidebar() {
 
           <ListItem>
             <Link
-              href="/profile"
+              href="/userProfile"
               style={{ textDecoration: "none", color: "inherit" }}
             >
               <ListItemButton>
