@@ -152,7 +152,7 @@ export default function NavigationBar() {
   };
 
   return (
-    <StyledAppBar position="static">
+    <StyledAppBar position="fixed">
       <Toolbar>
         <Typography
           variant="h6"
