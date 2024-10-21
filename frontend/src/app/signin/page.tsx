@@ -56,6 +56,10 @@ const SignInSide: React.FC = () => {
       expires: expirationTime,
       path: "/",
     });
+    Cookies.set("user_id", response.data.user_id, {
+      expires: expirationTime,
+      path: "/",
+    });
 
     Cookies.set("user_id", response.data.user_id, {
       expires: expirationTime,
