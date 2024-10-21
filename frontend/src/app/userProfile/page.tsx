@@ -37,7 +37,6 @@ export default function UserProfile() {
 
   const fetchUserData = useCallback(async () => {
     try {
-     
       const response = await axios.get(
         `http://127.0.0.1:5001/users?id=${userId}`,
         {
@@ -50,7 +49,6 @@ export default function UserProfile() {
         setName(userData.name);
         setEmail(userData.email);
 
-        
         const roleResponse = await axios.get(
           `http://127.0.0.1:5001/roles?id=${roleId}`,
           {
@@ -60,7 +58,6 @@ export default function UserProfile() {
 
         const roleData = roleResponse.data[0];
         if (roleResponse.status === 200) {
-          
           switch (roleData.id) {
             case 1:
               setUserType("basic");
@@ -79,7 +76,7 @@ export default function UserProfile() {
       console.error("Error fetching user or role data:", error);
       setErrorMessage(error.response?.data?.msg || error.message);
     }
-  }, [userId,roleId, accessToken]);
+  }, [userId, roleId, accessToken]);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -93,7 +90,7 @@ export default function UserProfile() {
         const data = response.data[0];
         if (response.status === 200 && data.profile_image_base64) {
           const base64Image = `data:${data.image_mimeType};base64,${data.profile_image_base64}`;
-          setProfileImageUrl(base64Image); 
+          setProfileImageUrl(base64Image);
         }
       } catch (error) {
         console.error("Error fetching user image:", error);
@@ -106,7 +103,7 @@ export default function UserProfile() {
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       let roleId;
       switch (userType) {
@@ -120,14 +117,14 @@ export default function UserProfile() {
         default:
           roleId = 3;
       }
-  
+
       const payload: any = {
         id: userId,
         name,
         email,
         role_id: roleId,
       };
-  
+
       const response = await axios.put(
         `http://127.0.0.1:5001/user/${userId}`,
         payload,
@@ -135,20 +132,18 @@ export default function UserProfile() {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-  
+
       if (response.status === 200) {
         setIsEditing(false);
         setErrorMessage(null);
         setSuccessMessage("Profile updated successfully");
-  
-       
+
         Cookies.set("role_id", roleId.toString());
 
         if (profilePicture) {
           await handleProfilePictureUpload();
         }
-  
-        
+
         await fetchUserData();
       } else {
         throw new Error("Failed to update profile");
@@ -162,7 +157,7 @@ export default function UserProfile() {
       );
     }
   };
-  
+
   const handleProfilePictureUpload = async () => {
     if (!profilePicture) return;
 
@@ -183,9 +178,9 @@ export default function UserProfile() {
 
       if (response.status === 200) {
         setSuccessMessage("Profile picture updated successfully");
-         setTimeout(() => {
-    setSuccessMessage(null);
-  }, 3000);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
         await fetchUserData();
       } else {
         throw new Error("Failed to update profile picture");
@@ -233,6 +228,7 @@ export default function UserProfile() {
               backgroundColor: "white",
               width: "100%",
               height: "100%",
+              paddingTop: 7,
             }}
           >
             <Box

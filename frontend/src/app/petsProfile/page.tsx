@@ -171,6 +171,7 @@ const PetsProfilePage: React.FC<PetProfileProps> = (
           boxShadow: 3,
           backgroundColor: "white",
           height: "100vh",
+          paddingTop: 7,
         }}
       >
         <Box
@@ -233,7 +234,7 @@ const PetsProfilePage: React.FC<PetProfileProps> = (
 
         <Box sx={{ flexGlow: 1 }}>
           <Grid container spacing={2} columns={16}>
-            <Grid size={6}>
+            <Grid size={7}>
               <Stack direction="column" spacing={2} ml={5} mt={3}>
                 <Paper
                   sx={{
@@ -281,7 +282,7 @@ const PetsProfilePage: React.FC<PetProfileProps> = (
                     marginLeft: 2,
                     boxShadow: 2,
                     width: 650,
-                    height: 420,
+                    height: 340,
                     backgroundColor: "#f0f0f0",
                   }}
                 >
@@ -326,7 +327,7 @@ const PetsProfilePage: React.FC<PetProfileProps> = (
                 </Paper>
               </Stack>
             </Grid>
-            <Grid size={10}>
+            <Grid size={9}>
               <Stack direction="column" spacing={2} mt={3}>
                 <Paper
                   sx={{
