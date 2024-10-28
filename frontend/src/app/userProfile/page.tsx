@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
 import {
@@ -35,32 +34,33 @@ export default function UserProfile() {
   const userId = Cookies.get("user_id");
   const roleId = Cookies.get("role_id");
 
+  const getErrorMessage = (error: any) => {
+    return error?.response?.data?.msg || error?.message || "An unknown error occurred";
+  };
+
   const fetchUserData = useCallback(async () => {
     try {
-     
       const response = await axios.get(
         `http://127.0.0.1:5001/users?id=${userId}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-
+  
       const userData = response.data[0];
       if (response.status === 200) {
         setName(userData.name);
         setEmail(userData.email);
-
-        
+  
         const roleResponse = await axios.get(
           `http://127.0.0.1:5001/roles?id=${roleId}`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
-
+  
         const roleData = roleResponse.data[0];
         if (roleResponse.status === 200) {
-          
           switch (roleData.id) {
             case 1:
               setUserType("basic");
@@ -70,16 +70,20 @@ export default function UserProfile() {
               break;
             case 3:
               setUserType("petOwner");
+              break;
             default:
               setUserType("petOwner");
+              break;
           }
         }
       }
     } catch (error: any) {
       console.error("Error fetching user or role data:", error);
-      setErrorMessage(error.response?.data?.msg || error.message);
+      setErrorMessage(error?.response?.data?.msg || error?.message || "An unknown error occurred");
     }
-  }, [userId,roleId, accessToken]);
+  }, [userId, roleId, accessToken]);
+  
+  
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -93,7 +97,7 @@ export default function UserProfile() {
         const data = response.data[0];
         if (response.status === 200 && data.profile_image_base64) {
           const base64Image = `data:${data.image_mimeType};base64,${data.profile_image_base64}`;
-          setProfileImageUrl(base64Image); 
+          setProfileImageUrl(base64Image);
         }
       } catch (error) {
         console.error("Error fetching user image:", error);
@@ -106,7 +110,7 @@ export default function UserProfile() {
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       let roleId;
       switch (userType) {
@@ -120,14 +124,14 @@ export default function UserProfile() {
         default:
           roleId = 3;
       }
-  
+
       const payload: any = {
         id: userId,
         name,
         email,
         role_id: roleId,
       };
-  
+
       const response = await axios.put(
         `http://127.0.0.1:5001/user/${userId}`,
         payload,
@@ -135,34 +139,28 @@ export default function UserProfile() {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-  
+
       if (response.status === 200) {
         setIsEditing(false);
         setErrorMessage(null);
         setSuccessMessage("Profile updated successfully");
-  
-       
+
         Cookies.set("role_id", roleId.toString());
 
         if (profilePicture) {
           await handleProfilePictureUpload();
         }
-  
-        
+
         await fetchUserData();
       } else {
         throw new Error("Failed to update profile");
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      setErrorMessage(
-        error.response?.data?.msg ||
-          error.message ||
-          "An error occurred while updating the profile"
-      );
+      setErrorMessage(getErrorMessage(error));
     }
   };
-  
+
   const handleProfilePictureUpload = async () => {
     if (!profilePicture) return;
 
@@ -183,20 +181,16 @@ export default function UserProfile() {
 
       if (response.status === 200) {
         setSuccessMessage("Profile picture updated successfully");
-         setTimeout(() => {
-    setSuccessMessage(null);
-  }, 3000);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
         await fetchUserData();
       } else {
         throw new Error("Failed to update profile picture");
       }
     } catch (error: any) {
       console.error("Error updating profile picture:", error);
-      setErrorMessage(
-        error.response?.data?.msg ||
-          error.message ||
-          "An error occurred while updating the profile picture"
-      );
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -244,12 +238,11 @@ export default function UserProfile() {
                 paddingTop: 10,
               }}
             >
-              {}
               <Avatar
                 src={
                   profilePicture
                     ? URL.createObjectURL(profilePicture)
-                    : profileImageUrl || "/placeholder.svg"
+                    : profileImageUrl ?? "/placeholder.svg"
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
@@ -288,9 +281,18 @@ export default function UserProfile() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   margin="normal"
-                  InputProps={{
-                    readOnly: !isEditing,
-                    style: { color: "black" },
+                  disabled={!isEditing}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isEditing ? "black" : "gray",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isEditing ? "black" : "gray",
+                    },
+                    "& .MuiInputBase-input.Mui-disabled": {
+                       color: "red !important",
+                      },
+
                   }}
                 />
                 <TextField
@@ -301,35 +303,37 @@ export default function UserProfile() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   margin="normal"
-                  InputProps={{
-                    readOnly: !isEditing,
-                    style: { color: "black" },
+                  disabled={!isEditing}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isEditing ? "black" : "gray",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isEditing ? "black" : "gray",
+                    },
                   }}
                 />
+
                 <FormControl component="fieldset" margin="normal">
                   <FormLabel component="legend">User Type</FormLabel>
-                  <RadioGroup
-                    row
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value)}
-                  >
+                  <RadioGroup row value={userType}>
                     <FormControlLabel
                       value="petOwner"
                       control={<Radio />}
                       label="Pet Owner"
-                      disabled={!isEditing}
+                      disabled
                     />
                     <FormControlLabel
                       value="basic"
                       control={<Radio />}
                       label="Basic User"
-                      disabled={!isEditing}
+                      disabled
                     />
                     <FormControlLabel
                       value="premium"
                       control={<Radio />}
                       label="Premium User"
-                      disabled={!isEditing}
+                      disabled
                     />
                   </RadioGroup>
                 </FormControl>
