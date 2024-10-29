@@ -194,12 +194,9 @@ def get_pets():
         query = query.filter(Pet.UserID == user_id)   
 
     pets = query.all()  
-    if pets:
-        return jsonify([{
-            'id': pet.ID,
-            'name': pet.Name,
-            'animal_type': pet.AnimalType
-        } for pet in pets])
+
+    pets_list = [pet.to_dict() for pet in pets]
+    return jsonify(pets_list)
     
 @app.route('/pets', methods=['POST'])
 @jwt_required()
@@ -369,6 +366,26 @@ def add_pet_photo(pet_id):
     return jsonify({'error': 'Invalid file type'}), 400
     
 
+@app.route('/pets/<int:pet_id>/photos/<int:photo_id>', methods=['DELETE']) 
+@jwt_required()
+def delete_pet_photo(pet_id, photo_id):
+    current_user_id = get_jwt_identity()
+
+    pet = Pet.query.filter_by(ID=pet_id, UserID=current_user_id).first()
+
+    if not pet:
+        return jsonify({'error': 'Pet not found or you are not authorized to delete this pet photo'}), 404
+
+    photo = PetPhotos.query.filter_by(ID=photo_id, PetID=pet_id).first()
+
+    if not photo:
+        return jsonify({'error': 'Photo not found'}), 404
+
+    db.session.delete(photo)
+    db.session.commit()
+
+    return jsonify({'message': 'Photo deleted successfully'}), 200
+
 # --- Service Endpoints ---
 @app.route('/services', methods=['GET'])
 @jwt_required()
@@ -418,6 +435,22 @@ def get_services():
 
     services = query.all()
     services_list = [service.to_dict() for service in services]
+
+    for service in services_list:
+        pets_in_service = PetsInService.query.filter_by(ServiceId=service['ServiceId']).all()
+        pets_list = []
+        photos_list = []
+        for pet_in_service in pets_in_service:
+            pet = Pet.query.get(pet_in_service.PetId)
+            pets_list.append(pet.Name)
+
+            pet_photo = PetPhotos.query.filter_by(PetID=pet.ID).first()
+            if pet_photo:
+                photos_list.append(pet_photo.to_dict())
+
+        service['pets'] = pets_list
+        service['photos'] = photos_list
+
     return jsonify(services_list)
 
 @app.route('/service', methods=['POST'])

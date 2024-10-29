@@ -46,6 +46,9 @@ class Pet(db.Model):
 
     def __repr__(self):
         return f'<Pet {self.Name}, Type: {self.AnimalType}>'
+    
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
 class PetPhotos(db.Model):
