@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
 import {
@@ -35,6 +34,14 @@ export default function UserProfile() {
   const userId = Cookies.get("user_id");
   const roleId = Cookies.get("role_id");
 
+  const getErrorMessage = (error: any) => {
+    return (
+      error?.response?.data?.msg ||
+      error?.message ||
+      "An unknown error occurred"
+    );
+  };
+
   const fetchUserData = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -67,14 +74,20 @@ export default function UserProfile() {
               break;
             case 3:
               setUserType("petOwner");
+              break;
             default:
               setUserType("petOwner");
+              break;
           }
         }
       }
     } catch (error: any) {
       console.error("Error fetching user or role data:", error);
-      setErrorMessage(error.response?.data?.msg || error.message);
+      setErrorMessage(
+        error?.response?.data?.msg ||
+          error?.message ||
+          "An unknown error occurred"
+      );
     }
   }, [userId, roleId, accessToken]);
 
@@ -150,11 +163,7 @@ export default function UserProfile() {
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      setErrorMessage(
-        error.response?.data?.msg ||
-          error.message ||
-          "An error occurred while updating the profile"
-      );
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -187,11 +196,7 @@ export default function UserProfile() {
       }
     } catch (error: any) {
       console.error("Error updating profile picture:", error);
-      setErrorMessage(
-        error.response?.data?.msg ||
-          error.message ||
-          "An error occurred while updating the profile picture"
-      );
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -240,12 +245,11 @@ export default function UserProfile() {
                 paddingTop: 10,
               }}
             >
-              {}
               <Avatar
                 src={
                   profilePicture
                     ? URL.createObjectURL(profilePicture)
-                    : profileImageUrl || "/placeholder.svg"
+                    : profileImageUrl ?? "/placeholder.svg"
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
@@ -284,9 +288,17 @@ export default function UserProfile() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   margin="normal"
-                  InputProps={{
-                    readOnly: !isEditing,
-                    style: { color: "black" },
+                  disabled={!isEditing}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isEditing ? "black" : "gray",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isEditing ? "black" : "gray",
+                    },
+                    "& .MuiInputBase-input.Mui-disabled": {
+                      color: "red !important",
+                    },
                   }}
                 />
                 <TextField
@@ -297,35 +309,37 @@ export default function UserProfile() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   margin="normal"
-                  InputProps={{
-                    readOnly: !isEditing,
-                    style: { color: "black" },
+                  disabled={!isEditing}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isEditing ? "black" : "gray",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isEditing ? "black" : "gray",
+                    },
                   }}
                 />
+
                 <FormControl component="fieldset" margin="normal">
                   <FormLabel component="legend">User Type</FormLabel>
-                  <RadioGroup
-                    row
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value)}
-                  >
+                  <RadioGroup row value={userType}>
                     <FormControlLabel
                       value="petOwner"
                       control={<Radio />}
                       label="Pet Owner"
-                      disabled={!isEditing}
+                      disabled
                     />
                     <FormControlLabel
                       value="basic"
                       control={<Radio />}
                       label="Basic User"
-                      disabled={!isEditing}
+                      disabled
                     />
                     <FormControlLabel
                       value="premium"
                       control={<Radio />}
                       label="Premium User"
-                      disabled={!isEditing}
+                      disabled
                     />
                   </RadioGroup>
                 </FormControl>
