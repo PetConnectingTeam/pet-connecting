@@ -7,3 +7,5 @@ Flask-JWT-Extended
 flask-bcrypt
 Flask-CORS
 requests
+Flask-SocketIO
+eventlet

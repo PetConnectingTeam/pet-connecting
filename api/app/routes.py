@@ -17,6 +17,7 @@ def index():
 # --- User Endpoints ---
 
 @app.route('/users', methods=['GET'])
+@jwt_required()
 def get_users():
     user_id = request.args.get('id', type=int)  
     name_filter = request.args.get('name')  
@@ -50,6 +51,7 @@ def get_users():
 
 
 @app.route('/user/<int:user_id>', methods=['PUT'])
+@jwt_required()
 def edit_user(user_id):
     data = request.get_json()
 
@@ -143,6 +145,7 @@ def login_user():
 # --- Role Endpoints ---
 
 @app.route('/roles', methods=['GET'])
+@jwt_required()
 def get_roles():
     role_id = request.args.get('id', type=int) 
     query = Role.query
@@ -162,6 +165,7 @@ def get_roles():
 
 
 @app.route('/roles', methods=['POST'])
+@jwt_required()
 def create_role():
     data = request.get_json()
     new_role = Role(
