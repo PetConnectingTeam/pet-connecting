@@ -29,6 +29,16 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.Name}, Email: {self.Email}>'
 
+class Message(db.Model):
+    __tablename__ = 'Messages'
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    sender_id = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False)
+    receiver_id = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+    
+    sender = db.relationship('User', foreign_keys=[sender_id])
+    receiver = db.relationship('User', foreign_keys=[receiver_id])
 
 class Pet(db.Model):
     __tablename__ = 'Pet'  # Nombre de la tabla en la base de datos
