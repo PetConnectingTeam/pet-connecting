@@ -123,7 +123,7 @@ export default function NavigationBar() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedPets, setSelectedPets] = useState<string[]>([]);
-  
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   const fetchPetList = async () => {
     const token = Cookies.get("accessToken");
@@ -270,13 +270,40 @@ export default function NavigationBar() {
     }
   };
 
- 
-
   useEffect(() => {
     if (dialogOpen) fetchPetList();
   }, [dialogOpen]);
 
-  
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const token = Cookies.get("accessToken");
+      const userId = Cookies.get("user_id");
+
+      if (!userId || !token) {
+        console.error("User ID or Auth Token is not available in cookies");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5001/users?id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = response.data[0];
+        if (response.status === 200 && data.profile_image_base64) {
+          const base64Image = `data:${data.image_mimeType};base64,${data.profile_image_base64}`;
+          setProfileImageUrl(base64Image);
+        }
+      } catch (error) {
+        console.error("Error fetching user image:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
   return (
     <StyledAppBar position="fixed">
       <Toolbar>
@@ -358,8 +385,7 @@ export default function NavigationBar() {
             Pet Care
           </Typography>
           <Avatar
-           
-           
+            src={profileImageUrl ?? "/placeholder.svg"}
             sx={{ width: 32, height: 32 }}
             onMouseEnter={handleProfileHover}
           />
@@ -464,25 +490,20 @@ export default function NavigationBar() {
           <Button onClick={handleDialogClose}>
             Cancel
           </Button>
-          <DialogActions>
-
-            <Button
-              onClick={handleSubmitService}
-              variant="contained"
-              sx={{
-                backgroundColor: "#FF4D4F", // Custom color
-                color: "white",             // Text color
-                "&:hover": {
-                  backgroundColor: "#FF4D4F", // Hover color
-                },
-              }}
-              disabled={!description || !location || !cost || !startDate || !endDate || selectedPets.length === 0}
-            >
-              Submit
-            </Button>
-          </DialogActions>
-
-
+          <Button
+            onClick={handleSubmitService}
+            variant="contained"
+            sx={{
+              backgroundColor: "#FF4D4F",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#FF4D4F",
+              },
+            }}
+            disabled={!description || !location || !cost || !startDate || !endDate || selectedPets.length === 0}
+          >
+            Submit
+          </Button>
         </DialogActions>
       </Dialog>
     </StyledAppBar>
