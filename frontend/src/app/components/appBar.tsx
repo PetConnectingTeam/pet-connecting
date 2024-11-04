@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   TextField,
   Select,
   FormControl,
@@ -30,30 +29,18 @@ import {
   Search as SearchIcon,
   Close as CloseIcon,
   Chat as ChatIcon,
-  Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   PhotoLibrary as PhotoLibraryIcon,
   Pets as PetsIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import PetsIcon from "@mui/icons-material/Pets";
-import Cookies from "js-cookie";
 import Link from "next/link";
 
 // Define types for pet list and events
 interface Pet {
   ID: number;
   Name: string;
-}
-
-// Add this interface near the top of your file with other interfaces
-interface UserProfile {
-  email: string;
-  id: number;
-  image_mimetype: string | null;
-  name: string;
-  profile_image_base64: string | null;
 }
 
 // Styled components
@@ -93,7 +80,6 @@ const StyledInputBase = styled(InputBase)(({}) => ({
     borderRadius: "20px",
     padding: "10px 10px",
     color: "red",
-    color: "red",
   },
 }));
 
@@ -110,16 +96,10 @@ export default function NavigationBar() {
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [messagesCount, setMessagesCount] = useState(0);
-  const [notificationsCount, setNotificationsCount] = useState(0);
-  const [notifications, setNotifications] = useState<string[]>([]);
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
     null
   );
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedPet, setSelectedPet] = useState("");
   const [petList, setPetList] = useState<Pet[]>([]);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -156,17 +136,7 @@ export default function NavigationBar() {
     }
   };
 
-  const handleSearchChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setSearchTerm(event.target.value);
-    try {
-      const response = await axios.get(`/api/search?q=${event.target.value}`);
-      setSearchResults(response.data.results);
-    } catch (error) {
-      console.error("Error fetching search results", error);
-    }
-  };
+  const handleSearchChange = async () => {};
 
   const handleClearSearch = () => {
     setSearchTerm("");
@@ -180,10 +150,6 @@ export default function NavigationBar() {
     setDialogOpen(true);
   };
 
-  const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
   const handleProfileHover = (event: React.MouseEvent<HTMLElement>) => {
     setProfileAnchorEl(event.currentTarget);
   };
@@ -195,7 +161,6 @@ export default function NavigationBar() {
   const userId = Cookies.get("user_id");
   const accessToken = Cookies.get("accessToken");
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [petAnchorEl, setPetAnchorEl] = React.useState<null | HTMLElement>(
     null
   );
@@ -452,33 +417,14 @@ export default function NavigationBar() {
           </Menu>
 
           <ActionButton size="small" onClick={handleChatClick}>
-            <Badge
-              badgeContent={messagesCount}
-              color="error"
-              overlap="circular"
-              variant="dot"
-            >
+            <Badge color="error" overlap="circular" variant="dot">
               <ChatIcon fontSize="small" />
             </Badge>
           </ActionButton>
           <ActionButton size="small" onClick={handlePawClick}>
             <PetsIcon fontSize="small" />
           </ActionButton>
-          <ActionButton size="small" onClick={handleNotificationsClick}>
-            <Badge
-              badgeContent={notificationsCount}
-              color="error"
-              overlap="circular"
-              variant="dot"
-            >
-              <NotificationsIcon fontSize="small" />
-            </Badge>
-          </ActionButton>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)}>
-            {notifications.map((notification, index) => (
-              <MenuItem key={index}>{notification}</MenuItem>
-            ))}
-          </Menu>
+
           <Typography
             variant="body2"
             sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
