@@ -83,12 +83,7 @@ export default function ReviewRating() {
         <IconButton>
           <CloseIcon />
         </IconButton>
-        <Typography
-          component="button"
-          sx={{ color: 'primary.main', fontWeight: 500 }}
-        >
-          Post
-        </Typography>
+        
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
@@ -99,16 +94,7 @@ export default function ReviewRating() {
         />
         <Box>
           <Typography fontWeight={500}>{name}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Reviews are public and include your account and device info.
-            <Typography
-              component="a"
-              href="#"
-              sx={{ color: 'primary.main', ml: 1 }}
-            >
-              Learn more
-            </Typography>
-          </Typography>
+          
         </Box>
       </Box>
 
@@ -138,31 +124,7 @@ export default function ReviewRating() {
         </Box>
       </Box>
 
-      <Box sx={{ mb: 4 }}>
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-          placeholder="Describe your experience (optional)"
-          value={review}
-          onChange={(e) => setReview(e.target.value)}
-          inputProps={{ maxLength: 500 }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'primary.main',
-              },
-            },
-          }}
-        />
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ textAlign: 'right' }}
-        >
-          {review.length}/500
-        </Typography>
-      </Box>
+      
     </Box>
   )
 }

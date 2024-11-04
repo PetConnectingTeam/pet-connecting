@@ -3,7 +3,7 @@
 import React from "react";
 import NavigationBar from "../components/appBar";
 import SideBar from "../components/bar-sidebar";
-import Review from "../components/review"
+
 import { CssBaseline, Box } from "@mui/material";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SideBar />
         
         {children}
-        <Review/>
+      
 
       </Box>
     </>
