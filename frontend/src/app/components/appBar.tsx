@@ -1,6 +1,7 @@
-"use client"; // Make sure this is the first line
+"use client";
 
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import {
   AppBar,
   Toolbar,
@@ -14,6 +15,16 @@ import {
   Menu,
   MenuItem,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -22,6 +33,7 @@ import {
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   PhotoLibrary as PhotoLibraryIcon,
+  Pets as PetsIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -29,6 +41,22 @@ import PetsIcon from "@mui/icons-material/Pets";
 import Cookies from "js-cookie";
 import Link from "next/link";
 
+// Define types for pet list and events
+interface Pet {
+  ID: number;
+  Name: string;
+}
+
+// Add this interface near the top of your file with other interfaces
+interface UserProfile {
+  email: string;
+  id: number;
+  image_mimetype: string | null;
+  name: string;
+  profile_image_base64: string | null;
+}
+
+// Styled components
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "white",
   boxShadow: "none",
@@ -65,6 +93,7 @@ const StyledInputBase = styled(InputBase)(({}) => ({
     borderRadius: "20px",
     padding: "10px 10px",
     color: "red",
+    color: "red",
   },
 }));
 
@@ -89,32 +118,41 @@ export default function NavigationBar() {
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
     null
   );
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPet, setSelectedPet] = useState("");
+  const [petList, setPetList] = useState<Pet[]>([]);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [cost, setCost] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedPets, setSelectedPets] = useState<string[]>([]);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-  const fetchRecentSearches = async () => {
-    try {
-      const response = await axios.get("/api/recent-searches");
-      setRecentSearches(response.data.recentSearches);
-    } catch (error) {
-      console.error("Error fetching recent searches", error);
+  const fetchPetList = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    console.log("accessToken:", token);
+    console.log("User ID:", userId);
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available in cookies");
+      return;
     }
-  };
 
-  const fetchMessagesCount = async () => {
     try {
-      const response = await axios.get("/api/messages-count");
-      setMessagesCount(response.data.count);
+      const response = await axios.get(
+        `http://127.0.0.1:5001/pets?name=&id=&user_id=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPetList(response.data);
     } catch (error) {
-      console.error("Error fetching messages count", error);
-    }
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await axios.get("/api/notifications");
-      setNotifications(response.data.notifications);
-      setNotificationsCount(response.data.count);
-    } catch (error) {
-      console.error("Error fetching notifications", error);
+      console.error("Error fetching pet list", error);
     }
   };
 
@@ -136,6 +174,14 @@ export default function NavigationBar() {
 
   const handleChatClick = () => {
     router.push("/messages");
+  };
+
+  const handlePawClick = () => {
+    setDialogOpen(true);
+  };
+
+  const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
   const handleProfileHover = (event: React.MouseEvent<HTMLElement>) => {
@@ -198,6 +244,131 @@ export default function NavigationBar() {
     };
 
     fetchPetData();
+  }, []);
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handlePetChange = (event: SelectChangeEvent<string[]>) => {
+    setSelectedPets(
+      typeof event.target.value === "string"
+        ? event.target.value.split(",")
+        : event.target.value
+    );
+  };
+
+  const handleSubmitService = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    console.log("accessToken:", token);
+    console.log("User ID:", userId);
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available");
+      return;
+    }
+
+    if (
+      !description ||
+      !location ||
+      !cost ||
+      !startDate ||
+      !endDate ||
+      selectedPets.length === 0
+    ) {
+      console.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      // Format dates properly
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}/${(
+          date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
+      };
+
+      const serviceData = {
+        description: description,
+        serviceDateIni: formatDate(startDate),
+        serviceDateFin: formatDate(endDate),
+        address: location,
+        cost: cost,
+        pets: selectedPets.map(String), // Ensure all pet IDs are strings
+      };
+
+      console.log("Submitting service data:", serviceData);
+
+      const response = await axios.post(
+        "http://127.0.0.1:5001/service",
+        serviceData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("API Response:", response);
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("Service created successfully");
+        // Clear form fields
+        setDescription("");
+        setLocation("");
+        setCost("");
+        setStartDate("");
+        setEndDate("");
+        setSelectedPets([]);
+        handleDialogClose();
+      }
+    } catch (error) {
+      console.error("Error creating service:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Response data:", error.response?.data);
+        console.error("Status code:", error.response?.status);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (dialogOpen) fetchPetList();
+  }, [dialogOpen]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const token = Cookies.get("accessToken");
+      const userId = Cookies.get("user_id");
+
+      if (!userId || !token) {
+        console.error("User ID or Auth Token is not available in cookies");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5001/users?id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = response.data[0];
+        if (response.status === 200 && data.profile_image_base64) {
+          const base64Image = `data:${data.image_mimeType};base64,${data.profile_image_base64}`;
+          setProfileImageUrl(base64Image);
+        }
+      } catch (error) {
+        console.error("Error fetching user image:", error);
+      }
+    };
+
+    fetchUserInfo();
   }, []);
 
   return (
@@ -290,7 +461,10 @@ export default function NavigationBar() {
               <ChatIcon fontSize="small" />
             </Badge>
           </ActionButton>
-          <ActionButton size="small">
+          <ActionButton size="small" onClick={handlePawClick}>
+            <PetsIcon fontSize="small" />
+          </ActionButton>
+          <ActionButton size="small" onClick={handleNotificationsClick}>
             <Badge
               badgeContent={notificationsCount}
               color="error"
@@ -312,8 +486,7 @@ export default function NavigationBar() {
             Pet Care
           </Typography>
           <Avatar
-            src="https://via.placeholder.com/32"
-            alt="User Avatar"
+            src={profileImageUrl ?? "/placeholder.svg"}
             sx={{ width: 32, height: 32 }}
             onMouseEnter={handleProfileHover}
           />
@@ -332,6 +505,113 @@ export default function NavigationBar() {
           </Menu>
         </Box>
       </Toolbar>
+
+      {/* Dialog Popup */}
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        aria-labelledby="service-dialog-title"
+        aria-describedby="service-dialog-description"
+      >
+        <DialogTitle id="service-dialog-title">Pet Care Services</DialogTitle>
+        <DialogContent id="service-dialog-description">
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel id="pet-select-label">Select Pets</InputLabel>
+            <Select
+              labelId="pet-select-label"
+              multiple
+              value={selectedPets}
+              onChange={handlePetChange}
+              label="Select Pets"
+            >
+              {petList.map((pet) => (
+                <MenuItem key={pet.ID} value={pet.ID.toString()}>
+                  {pet.Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Location"
+            fullWidth
+            variant="outlined"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Cost"
+            fullWidth
+            variant="outlined"
+            type="number"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Start Date & Time"
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="End Date & Time"
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Cancel</Button>
+          <Button
+            onClick={handleSubmitService}
+            variant="contained"
+            sx={{
+              backgroundColor: "#FF4D4F",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#FF4D4F",
+              },
+            }}
+            disabled={
+              !description ||
+              !location ||
+              !cost ||
+              !startDate ||
+              !endDate ||
+              selectedPets.length === 0
+            }
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StyledAppBar>
   );
 }
