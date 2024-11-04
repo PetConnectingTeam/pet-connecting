@@ -98,7 +98,13 @@ const HomePage: React.FC = () => {
                   }}
                 >
                   {/* Encabezado del servicio */}
-                  <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 2,
+                    }}
+                  >
                     <img
                       src="profile_picture_url"
                       alt="Profile"
@@ -110,7 +116,10 @@ const HomePage: React.FC = () => {
                       }}
                     />
                     <Box>
-                      <Typography variant="body1" sx={{ fontWeight: "bold", color: "#14171A" }}>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: "bold", color: "#14171A" }}
+                      >
                         Amelie Shiba
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#657786" }}>
@@ -120,7 +129,14 @@ const HomePage: React.FC = () => {
                   </Box>
 
                   {/* Descripción y detalles del servicio */}
-                  <Typography variant="body1" sx={{ color: "#14171A", fontWeight: "bold", marginBottom: 2 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "#14171A",
+                      fontWeight: "bold",
+                      marginBottom: 2,
+                    }}
+                  >
                     {service.description}
                   </Typography>
                   <Box sx={{ marginBottom: 2 }}>
@@ -131,8 +147,8 @@ const HomePage: React.FC = () => {
                       💸 {service.cost} Points
                     </Typography>
                     <Typography variant="body2" sx={{ color: "#657786" }}>
-                      🗓 {new Date(service.serviceDateIni).toLocaleDateString()} -{" "}
-                      {new Date(service.serviceDateEnd).toLocaleDateString()}
+                      🗓 {new Date(service.serviceDateIni).toLocaleDateString()}{" "}
+                      - {new Date(service.serviceDateEnd).toLocaleDateString()}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "#657786" }}>
                       🐾 Pets: {service.pets.join(", ")}
@@ -170,17 +186,21 @@ const HomePage: React.FC = () => {
                             border: "1px solid #ddd",
                           }}
                         >
-                        <a href={`/petsProfile/${photo.PetID}`} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={`data:${photo.MimeType};base64,${photo.Photo}`}
-                            alt={`Pet Image ${index + 1}`}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </a>
+                          <a
+                            href={`/petsProfile/${photo.PetID}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              src={`data:${photo.MimeType};base64,${photo.Photo}`}
+                              alt={`Pet Image ${index + 1}`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </a>
                         </Box>
                       ))
                     ) : (
@@ -191,13 +211,51 @@ const HomePage: React.FC = () => {
                   </Box>
 
                   {/* Sección de interacciones */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <button style={{ border: "none", background: "transparent" }}>👍 Like 18</button>
-                      <button style={{ border: "none", background: "transparent", marginLeft: 15 }}>💬 Comment 2</button>
-                      <button style={{ border: "none", background: "transparent", marginLeft: 15 }}>🔄 Share 0</button>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginTop: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        color: "#000000",
+                      }}
+                    >
+                      <button
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                        }}
+                      >
+                        👍 Like
+                      </button>
+                      <button
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          marginLeft: 15,
+                        }}
+                      >
+                        💬 Comment
+                      </button>
+                      <button
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          marginLeft: 15,
+                        }}
+                      >
+                        🔄 Share
+                      </button>
                     </Box>
-                    <Typography variant="body2" sx={{ color: "#657786" }}>...</Typography>
+                    <Typography variant="body2" sx={{ color: "#657786" }}>
+                      ...
+                    </Typography>
                   </Box>
                 </Box>
               ))
