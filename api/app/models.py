@@ -24,7 +24,8 @@ class User(db.Model):
     Points = db.Column(db.Float)
     ProfilePhoto = db.Column(db.LargeBinary, nullable=True)  # Cambiar el tipo según lo que necesites
     MimeType = db.Column(db.String(50), nullable=True)
-    Rating = db.Column(db.Numeric(5, 2))
+    TotalRating = db.Column(db.Numeric(5, 2))
+    RatingCount = db.Column(db.Integer)
 
     def __repr__(self):
         return f'<User {self.Name}, Email: {self.Email}>'
@@ -97,6 +98,7 @@ class RequestService(db.Model):
     address = db.Column(db.String(255), nullable=False)
     cost = db.Column(db.Numeric(10, 2), nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
+    rated = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return f'<RequestService {self.description[:20]}... (ServiceId: {self.ServiceId})>'

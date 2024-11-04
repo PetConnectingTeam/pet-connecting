@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS User (
     Points FLOAT,
     ProfilePhoto LONGBLOB, 
     MimeType VARCHAR(50),
-    Rating DECIMAL(5, 2),
+    TotalRating DECIMAL(5, 2),
+    RatingCount INT,
     FOREIGN KEY (RoleID) REFERENCES Roles(ID)
 );
 
@@ -54,6 +55,7 @@ CREATE TABLE IF NOT EXISTS RequestService (
     address VARCHAR(255) NOT NULL,
     cost DECIMAL(10, 2) NOT NULL,
     completed BOOLEAN NOT NULL DEFAULT FALSE,
+    rated BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (PublisherId) REFERENCES User(ID)
 );
 
@@ -95,9 +97,9 @@ INSERT INTO Roles (RolType, Description) VALUES
 ('Owner', 'Owner user');
 
 --  User
-INSERT INTO User (Email, Password, Name, Surname, RoleID, Points, ProfilePhoto, Rating) VALUES
-('user1@example.com', 'password123', 'John', 'Doe', 1, 100, NULL, 4.5),
-('user2@example.com', 'password456', 'Jane', 'Doe', 2, 200, NULL, 5.0);
+INSERT INTO User (Email, Password, Name, Surname, RoleID, Points, ProfilePhoto, TotalRating, RatingCount) VALUES
+('user1@example.com', 'password123', 'John', 'Doe', 1, 100, NULL, 0.0, 0),
+('user2@example.com', 'password456', 'Jane', 'Doe', 2, 200, NULL, 0.0, 0);
 
 --  Pet
 INSERT INTO Pet (UserID, Name, AnimalType, Breed, Description, Allergies, Weight, Size, Age) VALUES
