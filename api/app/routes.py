@@ -654,9 +654,41 @@ def assign_service(service_id):
         return jsonify({"msg": "User has not applied for this service"}), 400
     
     application.Accepted = True
+    
     db.session.commit()
 
     return jsonify({"msg": "Service assigned successfully"}), 200
+
+@app.route('/service/<int:service_id>/unassign', methods=['PUT'])
+@jwt_required()
+def unassign_service(service_id):
+    data = request.get_json()
+    current_user_id = get_jwt_identity()
+    taker_id = data.get("taker_id")
+
+    service = RequestService.query.get(service_id)
+
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+    
+    if service.PublisherId != current_user_id:
+        return jsonify({"msg": "You are not authorized to unassign this service"}), 403
+    
+    if not taker_id:
+        return jsonify({"msg": "Missing data"}), 400
+
+    if not User.query.get(taker_id):
+        return jsonify({"msg": "User to be unassigned not found"}), 404
+    
+    application = Application.query.filter_by(ServiceId=service_id, UserId=taker_id).first()
+    if not application:
+        return jsonify({"msg": "User has not applied for this service"}), 400
+    
+    application.Accepted = False
+    
+    db.session.commit()
+
+    return jsonify({"msg": "Service unassigned successfully"}), 200
 
 @app.route('/service/<int:service_id>/complete', methods=['PUT']) 
 @jwt_required()
@@ -675,6 +707,13 @@ def complete_service(service_id):
     db.session.commit()
 
     return jsonify({"msg": "Service completed successfully"}), 200
+
+@app.route('/service/applications', methods=['GET'])
+@jwt_required()
+def get_allapplications():
+    applications = Application.query.all()
+    application_list = [application.to_dict() for application in applications]
+    return jsonify(application_list)
 
 
 if __name__ == '__main__':
