@@ -27,7 +27,7 @@ const labels: { [index: number]: string } = {
   4.5: 'Excellent',
   5: 'Excellent+',
 }
-
+//
 const getLabelText = (value: number) => {
   return `${value} Star${value !== 6 ? 's' : ''}, ${labels[value]}`
 }
