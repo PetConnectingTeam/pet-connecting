@@ -409,7 +409,19 @@ const handleUnAcceptApplication = async (userId: number) => {
                   variant="contained"
                   color="primary"
                   onClick={() => handleOpenModal(service.ServiceId)}
-                  sx={{ marginTop: 2 }}
+                  sx={{
+                    mt: 1,
+                    backgroundColor: "#e53935", // Rojo
+                    color: "##ff4d4f",
+                    '&:hover': {
+                      backgroundColor: "#d32f2f", // Un rojo más oscuro en hover
+                    },
+                    borderRadius: 2,
+                    boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                    fontWeight: "bold",
+                    padding: "8px 16px",
+                    textTransform: "none",
+                  }}
                 >
                   View Applications
                 </Button>
@@ -438,7 +450,7 @@ const handleUnAcceptApplication = async (userId: number) => {
             p: 4,
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
             Applications for Service {selectedServiceId}
           </Typography>
           {applicationsForService.length > 0 ? (
@@ -459,7 +471,19 @@ const handleUnAcceptApplication = async (userId: number) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ mt: 1 }}
+                  sx={{
+                    mt: 1,
+                    backgroundColor: "#e53935", // Rojo
+                    color: "##ff4d4f",
+                    '&:hover': {
+                      backgroundColor: "#d32f2f", // Un rojo más oscuro en hover
+                    },
+                    borderRadius: 2,
+                    boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                    fontWeight: "bold",
+                    padding: "8px 16px",
+                    textTransform: "none",
+                  }}
                   onClick={() => {
                     const confirmed = window.confirm("Are you sure you want to accept this application?");
                     if (confirmed) {
