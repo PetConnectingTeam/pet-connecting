@@ -7,6 +7,9 @@ import {
   Stack,
   Typography,
   CircularProgress,
+  Divider,
+  Button,
+  Modal,
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -25,6 +28,12 @@ interface Service {
   photos: PhotoState[];
 }
 
+interface Aplication {
+  Accepted: boolean;
+  ServiceId: number;
+  UserId: number;
+}
+
 interface PhotoState {
   ID: number;
   MimeType: string;
@@ -33,8 +42,18 @@ interface PhotoState {
 }
 
 const HomePage: React.FC = () => {
+  const [aplications, setAplications] = useState<Aplication[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
+  const [applicationsForService, setApplicationsForService] = useState<
+    Aplication[]
+  >([]);
+
+  const UserId = Number(Cookies.get("user_id"));
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -55,18 +74,144 @@ const HomePage: React.FC = () => {
       }
     };
 
+    const fetchAplications = async () => {
+      try {
+        const token = Cookies.get("accessToken");
+        const response = await axios.get(
+          "http://127.0.0.1:5001/service/applications",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (Array.isArray(response.data)) {
+          setAplications(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchServices();
+    fetchAplications();
   }, []);
+
+  // Filtrar servicios por aceptar y servicios solicitados
+  const servicesToAccept = services.filter((service) =>
+    aplications.some(
+      (aplication) =>
+        aplication.ServiceId === service.ServiceId &&
+        aplication.UserId === UserId
+    )
+  );
+
+  const servicesRequested = services.filter(
+    (service) => service.PublisherId === UserId
+  );
+
+  const handleOpenModal = async (serviceId: number) => {
+    setSelectedServiceId(serviceId);
+    setOpenModal(true);
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.get(
+        `http://127.0.0.1:5001/service/${serviceId}/applications`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (Array.isArray(response.data)) {
+        setApplicationsForService(response.data);
+
+        // Verificar si hay alguna aplicación aceptada
+        response.data.some((app: Aplication) => app.Accepted);
+      }
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    }
+  };
+  // Función para cerrar el modal
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setApplicationsForService([]);
+  };
+
+  // Función para aceptar una solicitud
+  const handleAcceptApplication = async (userId: number) => {
+    if (!selectedServiceId) return;
+
+    try {
+      const token = Cookies.get("accessToken");
+      await axios.put(
+        `http://127.0.0.1:5001/service/${selectedServiceId}/assign`,
+        { taker_id: userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Application accepted successfully!");
+
+      // Opcional: actualizar el estado de aplicaciones o recargar la lista
+      setApplicationsForService((prev) =>
+        prev.map((app) =>
+          app.UserId === userId ? { ...app, Accepted: true } : app
+        )
+      );
+    } catch (error) {
+      console.error("Error accepting application:", error);
+      alert("Failed to accept application.");
+    }
+  };
+  // Función para cancelar una solicitud
+  const handleUnAcceptApplication = async (userId: number) => {
+    if (!selectedServiceId) return;
+
+    try {
+      const token = Cookies.get("accessToken");
+      await axios.put(
+        `http://127.0.0.1:5001/service/${selectedServiceId}/unassign`,
+        { taker_id: userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Application unaccepted successfully!");
+
+      // Opcional: actualizar el estado de aplicaciones o recargar la lista
+      setApplicationsForService((prev) =>
+        prev.map((app) =>
+          app.UserId === userId ? { ...app, Accepted: false } : app
+        )
+      );
+    } catch (error) {
+      console.error("Error cancel application:", error);
+      alert("Failed to cancel application.");
+    }
+  };
 
   return (
     <Box
       sx={{
-        alignItems: "center",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "flex-start",
         minHeight: "100vh",
         bgcolor: "#f5f5f5",
+        padding: 2,
       }}
     >
-      <Container>
+      <Container sx={{ flex: 1, marginRight: 2 }}>
         {loading ? (
           <CircularProgress />
         ) : (
@@ -74,11 +219,11 @@ const HomePage: React.FC = () => {
             spacing={3}
             paddingTop={5}
             sx={{
-              flexDirection: "column", // Cambiado para apilar servicios verticalmente
+              flexDirection: "column",
               alignItems: "center",
               "& > :not(style)": {
                 width: "100%",
-                maxWidth: "700px", // Ajustar ancho máximo de cada servicio
+                maxWidth: "700px",
               },
             }}
           >
@@ -97,7 +242,6 @@ const HomePage: React.FC = () => {
                     width: "100%",
                   }}
                 >
-                  {/* Encabezado del servicio */}
                   <Box
                     sx={{
                       display: "flex",
@@ -123,12 +267,11 @@ const HomePage: React.FC = () => {
                         Amelie Shiba
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#657786" }}>
-                        Thursday, 17 August 10:40 AM
+                        {new Date(service.publishDate).toLocaleDateString()}
                       </Typography>
                     </Box>
                   </Box>
 
-                  {/* Descripción y detalles del servicio */}
                   <Typography
                     variant="body1"
                     sx={{
@@ -164,11 +307,10 @@ const HomePage: React.FC = () => {
                     </Typography>
                   </Box>
 
-                  {/* Galería de fotos */}
                   <Box
                     sx={{
                       display: "flex",
-                      overflowX: "auto", // Añadido para permitir desplazamiento horizontal
+                      overflowX: "auto",
                       gap: 1,
                       padding: 1,
                     }}
@@ -178,7 +320,7 @@ const HomePage: React.FC = () => {
                         <Box
                           key={index}
                           sx={{
-                            minWidth: "100px", // Tamaño de cada imagen
+                            minWidth: "100px",
                             height: "100px",
                             borderRadius: "8px",
                             overflow: "hidden",
@@ -187,7 +329,7 @@ const HomePage: React.FC = () => {
                           }}
                         >
                           <a
-                            href={`/petsProfile/${photo.PetID}`}
+                            href={`/pets/${photo.PetID}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -209,60 +351,234 @@ const HomePage: React.FC = () => {
                       </Typography>
                     )}
                   </Box>
-
-                  {/* Sección de interacciones */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 2,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        color: "#000000",
-                      }}
-                    >
-                      <button
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                        }}
-                      >
-                        👍 Like
-                      </button>
-                      <button
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          marginLeft: 15,
-                        }}
-                      >
-                        💬 Comment
-                      </button>
-                      <button
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          marginLeft: 15,
-                        }}
-                      >
-                        🔄 Share
-                      </button>
-                    </Box>
-                    <Typography variant="body2" sx={{ color: "#657786" }}>
-                      ...
-                    </Typography>
-                  </Box>
                 </Box>
               ))
             )}
           </Stack>
         )}
       </Container>
+
+      <Box sx={{ width: "300px", marginLeft: 3 }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+        >
+          Services where you applied
+        </Typography>
+        <Stack spacing={2}>
+          {servicesToAccept.length > 0 ? (
+            servicesToAccept.map((service) => {
+              const application = aplications.find(
+                (aplication) =>
+                  aplication.ServiceId === service.ServiceId &&
+                  aplication.UserId === UserId
+              );
+
+              return (
+                <Box
+                  key={service.ServiceId}
+                  sx={{
+                    padding: 2,
+                    bgcolor: application?.Accepted ? "#b1fcb2" : "#ffebee",
+                    borderRadius: 2,
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    border: "1px solid #e1e8ed",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: "bold", color: "#14171A" }}
+                  >
+                    {service.description}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#657786" }}>
+                    🐾 Pets:{" "}
+                    {Array.isArray(service.pets)
+                      ? service.pets.join(", ")
+                      : "N/A"}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: application?.Accepted ? "#4caf50" : "#e0245e",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {application?.Accepted
+                      ? "Approved"
+                      : "Application pending approval"}
+                  </Typography>
+                </Box>
+              );
+            })
+          ) : (
+            <Typography variant="body2" sx={{ color: "#657786" }}>
+              No hay servicios por aceptar.
+            </Typography>
+          )}
+        </Stack>
+        <Divider sx={{ my: 3 }} />
+
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+        >
+          Services published
+        </Typography>
+        <Stack spacing={2}>
+          {servicesRequested.length > 0 ? (
+            servicesRequested.map((service) => (
+              <Box
+                key={service.ServiceId}
+                sx={{
+                  padding: 2,
+                  bgcolor: "#fff",
+                  borderRadius: 2,
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e1e8ed",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: "bold", color: "#14171A" }}
+                >
+                  {service.description}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#657786" }}>
+                  🐾 Pets: {service.pets.join(", ")}
+                </Typography>
+
+                {/* Botón para ver aplicaciones */}
+                {!service.completed && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleOpenModal(service.ServiceId)}
+                    sx={{
+                      mt: 1,
+                      backgroundColor: "#e53935", // Rojo
+                      color: "##ff4d4f",
+                      "&:hover": {
+                        backgroundColor: "#d32f2f", // Un rojo más oscuro en hover
+                      },
+                      borderRadius: 2,
+                      boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                      fontWeight: "bold",
+                      padding: "8px 16px",
+                      textTransform: "none",
+                    }}
+                  >
+                    View Applications
+                  </Button>
+                )}
+              </Box>
+            ))
+          ) : (
+            <Typography variant="body2" sx={{ color: "#657786" }}>
+              No has solicitado ningún servicio.
+            </Typography>
+          )}
+        </Stack>
+
+        {/* Modal para mostrar las aplicaciones */}
+        <Modal open={openModal} onClose={handleCloseModal}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
+              Applications for Service {selectedServiceId}
+            </Typography>
+            {applicationsForService.length > 0 ? (
+              applicationsForService.map((application) => (
+                <Box
+                  key={application.UserId}
+                  sx={{
+                    mb: 1,
+                    p: 2,
+                    bgcolor: application.Accepted ? "#e8f5e9" : "#ffebee",
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ color: application.Accepted ? "#4caf50" : "#e0245e" }}
+                  >
+                    User ID: {application.UserId} -{" "}
+                    {application.Accepted ? "Approved" : "Pending Approval"}
+                  </Typography>
+                  {!application.Accepted ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        mt: 1,
+                        backgroundColor: "#e53935", // Rojo
+                        color: "##ff4d4f",
+                        "&:hover": {
+                          backgroundColor: "#d32f2f", // Un rojo más oscuro en hover
+                        },
+                        borderRadius: 2,
+                        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                        fontWeight: "bold",
+                        padding: "8px 16px",
+                        textTransform: "none",
+                      }}
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          "Are you sure you want to accept this application?"
+                        );
+                        if (confirmed) {
+                          handleAcceptApplication(application.UserId);
+                        }
+                      }}
+                    >
+                      Accept
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{ mt: 1 }}
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          "Are you sure you want to cancel this application?"
+                        );
+                        if (confirmed) {
+                          handleUnAcceptApplication(application.UserId);
+                        }
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body2" sx={{ mt: 2 }}>
+                No applications available for this service.
+              </Typography>
+            )}
+            <Button
+              onClick={handleCloseModal}
+              sx={{ mt: 2 }}
+              variant="contained"
+              color="secondary"
+            >
+              Close
+            </Button>
+          </Box>
+        </Modal>
+      </Box>
     </Box>
   );
 };
