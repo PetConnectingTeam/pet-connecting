@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
+import StarIcon from '@mui/icons-material/Star'
 import {
   Avatar,
   Button,
@@ -85,8 +86,8 @@ export default function UserProfile() {
       console.error("Error fetching user or role data:", error);
       setErrorMessage(
         error?.response?.data?.msg ||
-          error?.message ||
-          "An unknown error occurred"
+        error?.message ||
+        "An unknown error occurred"
       );
     }
   }, [userId, roleId, accessToken]);
@@ -253,6 +254,19 @@ export default function UserProfile() {
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '1.7rem',
+                justifyContent: 'center',
+                padding: 2.5
+              }}>
+                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
+                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
+                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
+                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
+                <StarIcon sx={{ color: "gray", fontSize: "inherit" }} />
+              </Box>
               {isEditing && (
                 <>
                   <input
@@ -344,6 +358,7 @@ export default function UserProfile() {
                   </RadioGroup>
                 </FormControl>
               </div>
+
               {isEditing ? (
                 <Button
                   sx={{
