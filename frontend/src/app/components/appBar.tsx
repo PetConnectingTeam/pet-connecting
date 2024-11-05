@@ -1,6 +1,7 @@
-"use client"; // Make sure this is the first line
+"use client";
 
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import {
   AppBar,
   Toolbar,
@@ -13,18 +14,36 @@ import {
   Badge,
   Menu,
   MenuItem,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   Search as SearchIcon,
   Close as CloseIcon,
   Chat as ChatIcon,
-  Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   PhotoLibrary as PhotoLibraryIcon,
+  Pets as PetsIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Link from "next/link";
 
+// Define types for pet list and events
+interface Pet {
+  ID: number;
+  Name: string;
+}
+
+// Styled components
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "white",
   boxShadow: "none",
@@ -60,7 +79,7 @@ const StyledInputBase = styled(InputBase)(({}) => ({
   "& .MuiInputBase-input": {
     borderRadius: "20px",
     padding: "10px 10px",
-    color: "red", //font color
+    color: "red",
   },
 }));
 
@@ -77,55 +96,47 @@ export default function NavigationBar() {
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [messagesCount, setMessagesCount] = useState(0);
-  const [notificationsCount, setNotificationsCount] = useState(0);
-  const [notifications, setNotifications] = useState<string[]>([]);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
     null
   );
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [petList, setPetList] = useState<Pet[]>([]);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [cost, setCost] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedPets, setSelectedPets] = useState<string[]>([]);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-  const fetchRecentSearches = async () => {
+  const fetchPetList = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    console.log("accessToken:", token);
+    console.log("User ID:", userId);
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available in cookies");
+      return;
+    }
+
     try {
-      const response = await axios.get("/api/recent-searches");
-      setRecentSearches(response.data.recentSearches);
+      const response = await axios.get(
+        `http://127.0.0.1:5001/pets?name=&id=&user_id=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPetList(response.data);
     } catch (error) {
-      console.error("Error fetching recent searches", error);
+      console.error("Error fetching pet list", error);
     }
   };
 
-  const fetchMessagesCount = async () => {
-    try {
-      const response = await axios.get("/api/messages-count");
-      setMessagesCount(response.data.count);
-    } catch (error) {
-      console.error("Error fetching messages count", error);
-    }
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await axios.get("/api/notifications");
-      setNotifications(response.data.notifications);
-      setNotificationsCount(response.data.count);
-    } catch (error) {
-      console.error("Error fetching notifications", error);
-    }
-  };
-
-  const handleSearchChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setSearchTerm(event.target.value);
-    try {
-      const response = await axios.get(`/api/search?q=${event.target.value}`);
-      setSearchResults(response.data.results);
-    } catch (error) {
-      console.error("Error fetching search results", error);
-    }
-  };
+  const handleSearchChange = async () => {};
 
   const handleClearSearch = () => {
     setSearchTerm("");
@@ -135,12 +146,8 @@ export default function NavigationBar() {
     router.push("/messages");
   };
 
-  const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleNotificationsClose = () => {
-    setAnchorEl(null);
+  const handlePawClick = () => {
+    setDialogOpen(true);
   };
 
   const handleProfileHover = (event: React.MouseEvent<HTMLElement>) => {
@@ -150,6 +157,184 @@ export default function NavigationBar() {
   const handleProfileClose = () => {
     setProfileAnchorEl(null);
   };
+
+  const userId = Cookies.get("user_id");
+  const accessToken = Cookies.get("accessToken");
+
+  const [petAnchorEl, setPetAnchorEl] = React.useState<null | HTMLElement>(
+    null
+  );
+  const open = Boolean(petAnchorEl);
+  const [petsData, setPetsData] = useState<
+    {
+      animal_type: string;
+      id: number;
+      name: string;
+    }[]
+  >();
+
+  const handlePetsButton = (event: React.MouseEvent<HTMLElement>) => {
+    setPetAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePetMenu = () => {
+    setPetAnchorEl(null);
+  };
+
+  useEffect(() => {
+    const fetchPetData = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5001/pets?name=&id=&user_id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        if (response.status === 200) {
+          for (const pet of response.data) {
+            setPetsData((prevState) => [
+              ...(prevState ?? []),
+              {
+                animal_type: pet.AnimalType,
+                id: pet.ID,
+                name: pet.Name,
+              },
+            ]);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPetData();
+  }, []);
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handlePetChange = (event: SelectChangeEvent<string[]>) => {
+    setSelectedPets(
+      typeof event.target.value === "string"
+        ? event.target.value.split(",")
+        : event.target.value
+    );
+  };
+
+  const handleSubmitService = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    console.log("accessToken:", token);
+    console.log("User ID:", userId);
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available");
+      return;
+    }
+
+    if (
+      !description ||
+      !location ||
+      !cost ||
+      !startDate ||
+      !endDate ||
+      selectedPets.length === 0
+    ) {
+      console.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      // Format dates properly
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}/${(
+          date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
+      };
+
+      const serviceData = {
+        description: description,
+        serviceDateIni: formatDate(startDate),
+        serviceDateFin: formatDate(endDate),
+        address: location,
+        cost: cost,
+        pets: selectedPets.map(String), // Ensure all pet IDs are strings
+      };
+
+      console.log("Submitting service data:", serviceData);
+
+      const response = await axios.post(
+        "http://127.0.0.1:5001/service",
+        serviceData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("API Response:", response);
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("Service created successfully");
+        // Clear form fields
+        setDescription("");
+        setLocation("");
+        setCost("");
+        setStartDate("");
+        setEndDate("");
+        setSelectedPets([]);
+        handleDialogClose();
+      }
+    } catch (error) {
+      console.error("Error creating service:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Response data:", error.response?.data);
+        console.error("Status code:", error.response?.status);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (dialogOpen) fetchPetList();
+  }, [dialogOpen]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const token = Cookies.get("accessToken");
+      const userId = Cookies.get("user_id");
+
+      if (!userId || !token) {
+        console.error("User ID or Auth Token is not available in cookies");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5001/users?id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = response.data[0];
+        if (response.status === 200 && data.profile_image_base64) {
+          const base64Image = `data:${data.image_mimeType};base64,${data.profile_image_base64}`;
+          setProfileImageUrl(base64Image);
+        }
+      } catch (error) {
+        console.error("Error fetching user image:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   return (
     <StyledAppBar position="fixed">
@@ -167,6 +352,7 @@ export default function NavigationBar() {
         >
           Find Pet Care
         </Typography>
+
         <SearchWrapper>
           <SearchIconWrapper>
             <SearchIcon sx={{ color: "action.active" }} />
@@ -193,35 +379,52 @@ export default function NavigationBar() {
         </SearchWrapper>
         <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <ActionButton size="small" onClick={handleChatClick}>
-            <Badge
-              badgeContent={messagesCount}
-              color="error"
-              overlap="circular"
-              variant="dot"
+          <Button
+            size="small"
+            onClick={handlePetsButton}
+            aria-controls={open ? "demo-positioned-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+          >
+            <PetsIcon fontSize="small" />
+            <Typography
+              variant="body2"
+              sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
             >
+              Pets list
+            </Typography>
+          </Button>
+          <Menu
+            id="demo-positioned-menu"
+            aria-labelledby="demo-positioned-button"
+            anchorEl={petAnchorEl}
+            open={open}
+            onClose={handleClosePetMenu}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+          >
+            {petsData?.map((pet) => (
+              <MenuItem key={pet.id} onClick={handleClosePetMenu}>
+                <Link href={`/petsProfile/${pet.id}`}>{pet.name}</Link>
+              </MenuItem>
+            ))}
+          </Menu>
+
+          <ActionButton size="small" onClick={handleChatClick}>
+            <Badge color="error" overlap="circular" variant="dot">
               <ChatIcon fontSize="small" />
             </Badge>
           </ActionButton>
-          <ActionButton size="small" onClick={handleNotificationsClick}>
-            <Badge
-              badgeContent={notificationsCount}
-              color="error"
-              overlap="circular"
-              variant="dot"
-            >
-              <NotificationsIcon fontSize="small" />
-            </Badge>
+          <ActionButton size="small" onClick={handlePawClick}>
+            <PetsIcon fontSize="small" />
           </ActionButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleNotificationsClose}
-          >
-            {notifications.map((notification, index) => (
-              <MenuItem key={index}>{notification}</MenuItem>
-            ))}
-          </Menu>
+
           <Typography
             variant="body2"
             sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
@@ -229,8 +432,7 @@ export default function NavigationBar() {
             Pet Care
           </Typography>
           <Avatar
-            src="https://via.placeholder.com/32"
-            alt="User Avatar"
+            src={profileImageUrl ?? "/placeholder.svg"}
             sx={{ width: 32, height: 32 }}
             onMouseEnter={handleProfileHover}
           />
@@ -249,6 +451,113 @@ export default function NavigationBar() {
           </Menu>
         </Box>
       </Toolbar>
+
+      {/* Dialog Popup */}
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        aria-labelledby="service-dialog-title"
+        aria-describedby="service-dialog-description"
+      >
+        <DialogTitle id="service-dialog-title">Pet Care Services</DialogTitle>
+        <DialogContent id="service-dialog-description">
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel id="pet-select-label">Select Pets</InputLabel>
+            <Select
+              labelId="pet-select-label"
+              multiple
+              value={selectedPets}
+              onChange={handlePetChange}
+              label="Select Pets"
+            >
+              {petList.map((pet) => (
+                <MenuItem key={pet.ID} value={pet.ID.toString()}>
+                  {pet.Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Location"
+            fullWidth
+            variant="outlined"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Cost"
+            fullWidth
+            variant="outlined"
+            type="number"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Start Date & Time"
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+          <TextField
+            margin="dense"
+            label="End Date & Time"
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Cancel</Button>
+          <Button
+            onClick={handleSubmitService}
+            variant="contained"
+            sx={{
+              backgroundColor: "#FF4D4F",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#FF4D4F",
+              },
+            }}
+            disabled={
+              !description ||
+              !location ||
+              !cost ||
+              !startDate ||
+              !endDate ||
+              selectedPets.length === 0
+            }
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StyledAppBar>
   );
 }

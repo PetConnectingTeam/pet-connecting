@@ -4,6 +4,7 @@ from app.models import User, Role, Pet, PetPhotos, RequestService, Application, 
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import base64
 from flask_cors import CORS
+from sqlalchemy import func
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 from datetime import datetime
@@ -17,6 +18,7 @@ def index():
 # --- User Endpoints ---
 
 @app.route('/users', methods=['GET'])
+@jwt_required()
 def get_users():
     user_id = request.args.get('id', type=int)  
     name_filter = request.args.get('name')  
@@ -41,7 +43,8 @@ def get_users():
                 'name': user.Name,
                 'email': user.Email,
                 'profile_image_base64': profile_image_base64,
-                'image_mimetype': user.MimeType
+                'image_mimetype': user.MimeType,
+                'rating' : user.TotalRating / user.RatingCount if user.RatingCount > 0 else 0
             })
 
         return jsonify(response)
@@ -50,6 +53,7 @@ def get_users():
 
 
 @app.route('/user/<int:user_id>', methods=['PUT'])
+@jwt_required()
 def edit_user(user_id):
     data = request.get_json()
 
@@ -64,7 +68,6 @@ def edit_user(user_id):
     surname = data.get("surname", user.Surname)
     roleID = data.get("role_id", user.RoleID)
     points = data.get('points', user.Points)
-    rating = data.get('rating', user.Rating)
 
     existing_user = User.query.filter_by(Email=email).first()
     if existing_user and existing_user.ID != user_id:
@@ -77,7 +80,6 @@ def edit_user(user_id):
     user.Surname = surname
     user.RoleID = roleID
     user.Points = points
-    user.Rating = rating
 
     db.session.commit()
 
@@ -114,7 +116,8 @@ def register_user():
         RoleID=1,
         Points=100,
         ProfilePhoto=None,
-        Rating=None
+        TotalRating=0,
+        RatingCount=0
     )
     db.session.add(new_user)
     db.session.commit()
@@ -143,6 +146,7 @@ def login_user():
 # --- Role Endpoints ---
 
 @app.route('/roles', methods=['GET'])
+@jwt_required()
 def get_roles():
     role_id = request.args.get('id', type=int) 
     query = Role.query
@@ -162,6 +166,7 @@ def get_roles():
 
 
 @app.route('/roles', methods=['POST'])
+@jwt_required()
 def create_role():
     data = request.get_json()
     new_role = Role(
@@ -183,7 +188,7 @@ def create_role():
 def get_pets():
     pet_id = request.args.get('id', type=int)  
     name_filter = request.args.get('name') 
-    user_id = request.args.get('user_id', type=int) 
+    user_id = request.args.get('user_id', type=int)
     query = Pet.query  
 
     if pet_id is not None:  
@@ -401,6 +406,8 @@ def get_services():
     pet_id = request.args.get("petId")
     taker_id = request.args.get("takerId")
 
+    animal_type = request.args.get("animal_type")
+
     query = RequestService.query
 
     if publisher_id is not None:
@@ -412,9 +419,11 @@ def get_services():
     if  taker_id is not None:
         query = query.filter(RequestService.takerId == taker_id)
         query = query.filter(RequestService.serviceDateIni >= datetime.strptime(min_date, DATE_FORMAT))
+    
     if min_date is not None:
         query = query.filter(RequestService.serviceDateIni >= datetime.strptime(min_date, DATE_FORMAT))
         query = query.filter(RequestService.serviceDateEnd <= datetime.strptime(max_date, DATE_FORMAT))
+    
     if max_date is not None:
         query = query.filter(RequestService.serviceDateEnd <= datetime.strptime(max_date, DATE_FORMAT))
 
@@ -432,6 +441,12 @@ def get_services():
     
     if pet_id is not None:
         query = query.filter(RequestService.petId == pet_id)
+
+    if pet_id is not None:
+        query = query.join(PetsInService, PetsInService.ServiceId == RequestService.ServiceId).filter(PetsInService.PetId == pet_id)
+
+    if animal_type is not None:
+        query = query.join(PetsInService, PetsInService.ServiceId == RequestService.ServiceId).join(Pet, Pet.ID == PetsInService.PetId).filter(func.lower(Pet.AnimalType)==str(animal_type).lower())
 
     services = query.all()
     services_list = [service.to_dict() for service in services]
@@ -707,6 +722,37 @@ def complete_service(service_id):
     db.session.commit()
 
     return jsonify({"msg": "Service completed successfully"}), 200
+
+@app.route('/service/<int:service_id>/rate', methods=['PUT'])
+@jwt_required()
+def rate_service(service_id):
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    rating = data.get("rating")
+
+    if not rating:  
+        return jsonify({"msg": "Missing data"}), 400
+
+    service = RequestService.query.get(service_id)
+    
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+    if service.PublisherId != current_user_id:
+        return jsonify({"msg": "You are not authorized to rate this service"}), 403
+    if service.rated == True:
+        return jsonify({"msg": "Service already rated"}), 400
+    
+    application = Application.query.filter_by(ServiceId=service_id, Accepted=True).first()
+    appliant = User.query.get(application.UserId)
+    appliant.RatingCount = appliant.RatingCount + 1
+    print(appliant.TotalRating)
+    appliant.TotalRating = float(appliant.TotalRating) + float(rating)
+    
+    service.rated = True
+
+    db.session.commit()
+
+    return jsonify({"msg": "Service rated successfully"}), 200
 
 @app.route('/service/applications', methods=['GET'])
 @jwt_required()
