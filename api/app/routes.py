@@ -463,6 +463,9 @@ def get_services():
             if pet_photo:
                 photos_list.append(pet_photo.to_dict())
 
+        publisher = User.query.get(service['PublisherId'])
+        service['publisher'] = publisher.Name + ' ' + publisher.Surname
+
         service['pets'] = pets_list
         service['photos'] = photos_list
 
