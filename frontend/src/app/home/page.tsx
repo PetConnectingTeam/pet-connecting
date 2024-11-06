@@ -26,6 +26,7 @@ interface Service {
   serviceDateEnd: string;
   serviceDateIni: string;
   photos: PhotoState[];
+  publisher: string;
 }
 
 interface Aplication {
@@ -49,6 +50,7 @@ const HomePage: React.FC = () => {
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
   );
+  const [serviceInfo, setServiceInfo] = useState<Service | null>(null); // Nuevo estado para almacenar la información del servicio
   const [applicationsForService, setApplicationsForService] = useState<
     Aplication[]
   >([]);
@@ -117,7 +119,9 @@ const HomePage: React.FC = () => {
     setOpenModal(true);
     try {
       const token = Cookies.get("accessToken");
-      const response = await axios.get(
+  
+      // Obtener las aplicaciones para el servicio
+      const applicationResponse = await axios.get(
         `http://127.0.0.1:5001/service/${serviceId}/applications`,
         {
           headers: {
@@ -125,29 +129,43 @@ const HomePage: React.FC = () => {
           },
         }
       );
-      if (Array.isArray(response.data)) {
-        setApplicationsForService(response.data);
-
-        // Verificar si hay alguna aplicación aceptada
-        response.data.some((app: Aplication) => app.Accepted);
+      if (Array.isArray(applicationResponse.data)) {
+        setApplicationsForService(applicationResponse.data);
+      }
+  
+      // Obtener todos los servicios y encontrar el que coincide con `serviceId`
+      const servicesResponse = await axios.get("http://127.0.0.1:5001/services", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (Array.isArray(servicesResponse.data)) {
+        const selectedService = servicesResponse.data.find(
+          (service: Service) => service.ServiceId === serviceId
+        );
+        setServiceInfo(selectedService || null); // Almacenar el servicio específico o null si no se encuentra
       }
     } catch (error) {
-      console.error("Error fetching applications:", error);
+      console.error("Error fetching applications or service info:", error);
     }
   };
-  // Función para cerrar el modal
+
   const handleCloseModal = () => {
     setOpenModal(false);
     setApplicationsForService([]);
+    setServiceInfo(null); // Resetear la información del servicio
   };
 
   // Función para aceptar una solicitud
   const handleAcceptApplication = async (userId: number) => {
     if (!selectedServiceId) return;
-
+  
     try {
       const token = Cookies.get("accessToken");
-      await axios.put(
+  
+      // Realizar la solicitud y configurar la respuesta como `blob`
+      const response = await axios.put(
         `http://127.0.0.1:5001/service/${selectedServiceId}/assign`,
         { taker_id: userId },
         {
@@ -155,15 +173,30 @@ const HomePage: React.FC = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          responseType: "blob", // Importante para recibir el archivo como blob
         }
       );
-      alert("Application accepted successfully!");
-
+  
+      // Crear un objeto `blob` para el archivo PDF
+      const blob = new Blob([response.data], { type: "application/pdf" });
+  
+      // Crear un enlace de descarga temporal
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `application_${userId}.pdf`; // Nombre del archivo
+  
+      // Añadir el enlace al documento y simular el clic para descargar
+      document.body.appendChild(link);
+      link.click();
+  
+      // Limpiar el enlace después de descargar
+      document.body.removeChild(link);
+  
+      alert("Application accepted and file donwload successfully!");
+      
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
-        prev.map((app) =>
-          app.UserId === userId ? { ...app, Accepted: true } : app
-        )
+        prev.map((app) => (app.UserId === userId ? { ...app, Accepted: true } : app))
       );
     } catch (error) {
       console.error("Error accepting application:", error);
@@ -197,6 +230,31 @@ const HomePage: React.FC = () => {
     } catch (error) {
       console.error("Error cancel application:", error);
       alert("Failed to cancel application.");
+    }
+  };
+  const fetchAplicationToService = async (serviceId: number) => {
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.put(
+        `http://127.0.0.1:5001/service/${serviceId}/apply`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      if (response.status === 200) {
+        alert("Application submitted successfully!");
+      } 
+      else {
+        console.error(response.data.msg);
+      }
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert("You have already applied for this service.");
     }
   };
 
@@ -264,7 +322,7 @@ const HomePage: React.FC = () => {
                         variant="body1"
                         sx={{ fontWeight: "bold", color: "#14171A" }}
                       >
-                        Amelie Shiba
+                        {service.publisher}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#657786" }}>
                         {new Date(service.publishDate).toLocaleDateString()}
@@ -350,7 +408,38 @@ const HomePage: React.FC = () => {
                         No images available
                       </Typography>
                     )}
+                    
                   </Box>
+                  {service.PublisherId !== UserId && 
+                  !service.completed &&  (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        mt: 1,
+                        backgroundColor: "#e53935", 
+                        color: "#fff",
+                        "&:hover": {
+                          backgroundColor: "#d32f2f", 
+                        },
+                        borderRadius: 2,
+                        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                        fontWeight: "bold",
+                        padding: "8px 16px",
+                        textTransform: "none",
+                      }}
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          "Are you sure you want to apply for this service?"
+                        );
+                        if (confirmed) {
+                          fetchAplicationToService(service.ServiceId);
+                        }
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  )}
                 </Box>
               ))
             )}
@@ -513,7 +602,7 @@ const HomePage: React.FC = () => {
                     variant="body2"
                     sx={{ color: application.Accepted ? "#4caf50" : "#e0245e" }}
                   >
-                    User ID: {application.UserId} -{" "}
+                    User: {serviceInfo?.publisher} -{" "}
                     {application.Accepted ? "Approved" : "Pending Approval"}
                   </Typography>
                   {!application.Accepted ? (
