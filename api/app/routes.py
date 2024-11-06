@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, send_file
 from app import app, db, bcrypt, utils
 from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -675,7 +675,8 @@ def assign_service(service_id):
     
     db.session.commit()
 
-    return jsonify({"msg": "Service assigned successfully"}), 200
+    pdf_path = 'pdf/PET_CARE_AGREEMENT.pdf'
+    return send_file(pdf_path, as_attachment=True, download_name='Pet_Care_Agreement_Template.pdf')
 
 @app.route('/service/<int:service_id>/unassign', methods=['PUT'])
 @jwt_required()
