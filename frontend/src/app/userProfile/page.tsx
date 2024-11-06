@@ -23,6 +23,7 @@ import MenuAppBar from "../components/appBar";
 export default function UserProfile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
   const [userType, setUserType] = useState("petOwner");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -56,7 +57,7 @@ export default function UserProfile() {
       if (response.status === 200) {
         setName(userData.name);
         setEmail(userData.email);
-
+        setRating(userData.rating);
         const roleResponse = await axios.get(
           `http://127.0.0.1:5001/roles?id=${roleId}`,
           {
@@ -200,7 +201,10 @@ export default function UserProfile() {
       setErrorMessage(getErrorMessage(error));
     }
   };
-
+  useEffect(() => {
+    console.log("Current Rating:", rating);
+  }, [rating]);
+  
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setProfilePicture(event.target.files[0]);
@@ -254,19 +258,15 @@ export default function UserProfile() {
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: '1.7rem',
-                justifyContent: 'center',
-                padding: 2.5
-              }}>
-                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
-                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
-                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
-                <StarIcon sx={{ color: "gold", fontSize: "inherit" }} />
-                <StarIcon sx={{ color: "gray", fontSize: "inherit" }} />
-              </Box>
+             <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '1.7rem', justifyContent: 'center', padding: 2.5 }}>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <StarIcon
+                      key={index}
+                      sx={{ color: index < (rating || 0) ? "gold" : "gray", fontSize: "inherit" }}
+                    />
+                  ))}
+                </Box>
+
               {isEditing && (
                 <>
                   <input
