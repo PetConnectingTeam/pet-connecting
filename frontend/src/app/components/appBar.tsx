@@ -70,7 +70,7 @@ const SearchIconWrapper = styled("div")({
   justifyContent: "center",
 });
 
-const StyledInputBase = styled(InputBase)(({}) => ({
+const StyledInputBase = styled(InputBase)(({ }) => ({
   color: "inherit",
   paddingLeft: "40px",
   paddingRight: "10px",
@@ -136,7 +136,15 @@ export default function NavigationBar() {
     }
   };
 
-  const handleSearchChange = async () => {};
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      router.push(`/home?animal_type=${searchTerm}`);
+    }
+  };
 
   const handleClearSearch = () => {
     setSearchTerm("");
@@ -360,6 +368,7 @@ export default function NavigationBar() {
           <StyledInputBase
             value={searchTerm}
             onChange={handleSearchChange}
+            onKeyPress={handleSearchKeyPress}
             placeholder="Search for Pet Care Services"
             inputProps={{ "aria-label": "search" }}
           />

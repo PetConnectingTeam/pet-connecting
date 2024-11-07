@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useSearchParams } from 'next/navigation';
 
 interface Service {
   PublisherId: number;
@@ -57,15 +58,23 @@ const HomePage: React.FC = () => {
 
   const UserId = Number(Cookies.get("user_id"));
 
+  const searchParams = useSearchParams();
+  const animal_type = searchParams.get('animal_type');
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const token = Cookies.get("accessToken");
-        const response = await axios.get("http://127.0.0.1:5001/services", {
+        const url = animal_type
+          ? `http://127.0.0.1:5001/services?animal_type=${animal_type}`
+          : `http://127.0.0.1:5001/services`;
+
+        const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+
         if (Array.isArray(response.data)) {
           setServices(response.data);
         }
@@ -99,7 +108,7 @@ const HomePage: React.FC = () => {
 
     fetchServices();
     fetchAplications();
-  }, []);
+  }, [animal_type]);
 
   // Filtrar servicios por aceptar y servicios solicitados
   const servicesToAccept = services.filter((service) =>
