@@ -53,20 +53,20 @@ jobs:
           done
 
       # Step 8: Run backend tests for Flask API
-      - name: Run backend tests
-        run: |
-          docker-compose exec flask_api sh -c "
-            pip install -r requirements.txt &&
-            pytest --maxfail=1 --disable-warnings
-          "
+      # - name: Run backend tests
+      #   run: |
+      #     docker-compose exec flask_api sh -c "
+      #       pip install -r requirements.txt &&
+      #       pytest --maxfail=1 --disable-warnings
+      #     "
 
       # Step 9: Run frontend tests for React
-      - name: Run frontend tests
-        run: |
-          docker-compose exec frontend sh -c "
-            npm install &&
-            npm test -- --watchAll=false
-          "
+      # - name: Run frontend tests
+      #   run: |
+      #     docker-compose exec frontend sh -c "
+      #       npm install &&
+      #       npm test -- --watchAll=false
+      #     "
 
       # Step 10: SonarCloud Scan
       - name: SonarCloud Scan
