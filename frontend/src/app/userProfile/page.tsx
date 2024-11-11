@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
-import StarIcon from '@mui/icons-material/Star'
+import StarIcon from "@mui/icons-material/Star";
 import {
   Avatar,
   Button,
@@ -20,7 +20,9 @@ import {
 import axios from "axios";
 import MenuAppBar from "../components/appBar";
 
-export default function UserProfile() {
+const UserProfile: React.FC<{ params: { userID: string } }> = ({
+  params,
+}): JSX.Element => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -87,8 +89,8 @@ export default function UserProfile() {
       console.error("Error fetching user or role data:", error);
       setErrorMessage(
         error?.response?.data?.msg ||
-        error?.message ||
-        "An unknown error occurred"
+          error?.message ||
+          "An unknown error occurred"
       );
     }
   }, [userId, roleId, accessToken]);
@@ -204,7 +206,7 @@ export default function UserProfile() {
   useEffect(() => {
     console.log("Current Rating:", rating);
   }, [rating]);
-  
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setProfilePicture(event.target.files[0]);
@@ -258,14 +260,25 @@ export default function UserProfile() {
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
-             <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '1.7rem', justifyContent: 'center', padding: 2.5 }}>
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <StarIcon
-                      key={index}
-                      sx={{ color: index < (rating || 0) ? "gold" : "gray", fontSize: "inherit" }}
-                    />
-                  ))}
-                </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "1.7rem",
+                  justifyContent: "center",
+                  padding: 2.5,
+                }}
+              >
+                {Array.from({ length: 5 }, (_, index) => (
+                  <StarIcon
+                    key={index}
+                    sx={{
+                      color: index < (rating || 0) ? "gold" : "gray",
+                      fontSize: "inherit",
+                    }}
+                  />
+                ))}
+              </Box>
 
               {isEditing && (
                 <>
@@ -411,4 +424,6 @@ export default function UserProfile() {
       </Box>
     </>
   );
-}
+};
+
+export default UserProfile;
