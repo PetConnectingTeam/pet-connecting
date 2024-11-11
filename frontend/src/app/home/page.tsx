@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useSearchParams } from 'next/navigation';
 
 interface Service {
   PublisherId: number;
@@ -42,11 +41,20 @@ interface PhotoState {
   PetID: number;
   Photo: string;
 }
+interface User {
+  email: string;
+  id: number;
+  image_mimetype: string | null;
+  name: string;
+  profile_image_base64: string | null;
+  rating: number;
+}
 
 const HomePage: React.FC = () => {
   const [aplications, setAplications] = useState<Aplication[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<User[]>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
@@ -58,25 +66,36 @@ const HomePage: React.FC = () => {
 
   const UserId = Number(Cookies.get("user_id"));
 
-  const searchParams = useSearchParams();
-  const animal_type = searchParams.get('animal_type');
-
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const token = Cookies.get("accessToken");
-        const url = animal_type
-          ? `http://127.0.0.1:5001/services?animal_type=${animal_type}`
-          : `http://127.0.0.1:5001/services`;
-
-        const response = await axios.get(url, {
+        const response = await axios.get("http://127.0.0.1:5001/services", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (Array.isArray(response.data)) {
           setServices(response.data);
+        }
+        // Obtener usuarios
+        const usersResponse = await axios.get("http://127.0.0.1:5001/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (Array.isArray(usersResponse.data)) {
+          const usersMap = usersResponse.data.reduce((acc, user) => {
+            acc[user.id] = {
+              email: user.email,
+              id: user.id,
+              image_mimetype: user.image_mimetype,
+              name: user.name,
+              profile_image_base64: user.profile_image_base64,
+              rating: user.rating,
+            };
+            return acc;
+          }, {} as { [key: number]: User });
+          setUsers(usersMap);
         }
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -108,7 +127,7 @@ const HomePage: React.FC = () => {
 
     fetchServices();
     fetchAplications();
-  }, [animal_type]);
+  }, []);
 
   // Filtrar servicios por aceptar y servicios solicitados
   const servicesToAccept = services.filter((service) =>
@@ -201,7 +220,7 @@ const HomePage: React.FC = () => {
       // Limpiar el enlace después de descargar
       document.body.removeChild(link);
   
-      alert("Application accepted and file donwload successfully!");
+      alert("Application accepted and contract donwload successfully!");
       
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
@@ -297,7 +316,8 @@ const HomePage: React.FC = () => {
             {services.length === 0 ? (
               <Typography variant="h6">No se encontraron servicios.</Typography>
             ) : (
-              services.map((service) => (
+              services.map((service) => 
+                (
                 <Box
                   key={service.ServiceId}
                   sx={{
@@ -316,8 +336,10 @@ const HomePage: React.FC = () => {
                       marginBottom: 2,
                     }}
                   >
+                    {users.map((user) => 
+                      (
                     <img
-                      src="profile_picture_url"
+                      src={`data:${user.image_mimetype};base64,${user.profile_image_base64}`}
                       alt="Profile"
                       style={{
                         width: "40px",
@@ -326,6 +348,7 @@ const HomePage: React.FC = () => {
                         marginRight: "10px",
                       }}
                     />
+                      ))}
                     <Box>
                       <Typography
                         variant="body1"
