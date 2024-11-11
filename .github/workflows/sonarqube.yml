@@ -80,15 +80,15 @@ jobs:
           
           # Run SonarScanner with the required parameters
           sonar-scanner \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.projectKey=*** \
+            -Dsonar.organization=*** \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.token=*** \
             -Dsonar.python.version=3.9 \
             -Dsonar.sources=api,frontend \
-            -Dsonar.tests=api,frontend \
+            -Dsonar.tests=api/tests,frontend/tests \
             -Dsonar.language=js,py \
-            -Dsonar.exclusions=**/__tests__/** \
+            -Dsonar.exclusions=**/__tests__/**,**/requirements.txt \
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info \
             -Dsonar.python.coverage.reportPaths=api/coverage.xml
           
