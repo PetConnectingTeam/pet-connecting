@@ -3,3 +3,4 @@ __pycache__
 db/mysql_data
 .env
 .history
+.vscode
