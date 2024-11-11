@@ -27,6 +27,8 @@ interface Service {
   serviceDateIni: string;
   photos: PhotoState[];
   publisher: string;
+  profilePhotoMimeType: string | undefined;
+  profilePhotoBase64: string | undefined;
 }
 
 interface Aplication {
@@ -78,24 +80,30 @@ const HomePage: React.FC = () => {
         if (Array.isArray(response.data)) {
           setServices(response.data);
         }
+
         // Obtener usuarios
         const usersResponse = await axios.get("http://127.0.0.1:5001/users", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (Array.isArray(usersResponse.data)) {
-          const usersMap = usersResponse.data.reduce((acc, user) => {
-            acc[user.id] = {
-              email: user.email,
-              id: user.id,
-              image_mimetype: user.image_mimetype,
-              name: user.name,
-              profile_image_base64: user.profile_image_base64,
-              rating: user.rating,
-            };
-            return acc;
-          }, {} as { [key: number]: User });
-          setUsers(usersMap);
+          response.data.forEach((service: Service) => {
+            const user = usersResponse.data.find(
+              (user: User) => user.id === service.PublisherId
+            );
+
+            setServices((prev) =>
+              prev.map((prevService) =>
+                prevService.ServiceId === service.ServiceId
+                  ? {
+                      ...prevService,
+                      profilePhotoMimeType: user?.image_mimetype,
+                      profilePhotoBase64: user?.profile_image_base64,
+                    }
+                  : prevService
+              )
+            );
+          });
         }
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -147,7 +155,7 @@ const HomePage: React.FC = () => {
     setOpenModal(true);
     try {
       const token = Cookies.get("accessToken");
-  
+
       // Obtener las aplicaciones para el servicio
       const applicationResponse = await axios.get(
         `http://127.0.0.1:5001/service/${serviceId}/applications`,
@@ -160,14 +168,17 @@ const HomePage: React.FC = () => {
       if (Array.isArray(applicationResponse.data)) {
         setApplicationsForService(applicationResponse.data);
       }
-  
+
       // Obtener todos los servicios y encontrar el que coincide con `serviceId`
-      const servicesResponse = await axios.get("http://127.0.0.1:5001/services", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
+      const servicesResponse = await axios.get(
+        "http://127.0.0.1:5001/services",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (Array.isArray(servicesResponse.data)) {
         const selectedService = servicesResponse.data.find(
           (service: Service) => service.ServiceId === serviceId
@@ -188,10 +199,10 @@ const HomePage: React.FC = () => {
   // Función para aceptar una solicitud
   const handleAcceptApplication = async (userId: number) => {
     if (!selectedServiceId) return;
-  
+
     try {
       const token = Cookies.get("accessToken");
-  
+
       // Realizar la solicitud y configurar la respuesta como `blob`
       const response = await axios.put(
         `http://127.0.0.1:5001/service/${selectedServiceId}/assign`,
@@ -204,27 +215,29 @@ const HomePage: React.FC = () => {
           responseType: "blob", // Importante para recibir el archivo como blob
         }
       );
-  
+
       // Crear un objeto `blob` para el archivo PDF
       const blob = new Blob([response.data], { type: "application/pdf" });
-  
+
       // Crear un enlace de descarga temporal
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
       link.download = `application_${userId}.pdf`; // Nombre del archivo
-  
+
       // Añadir el enlace al documento y simular el clic para descargar
       document.body.appendChild(link);
       link.click();
-  
+
       // Limpiar el enlace después de descargar
       document.body.removeChild(link);
-  
+
       alert("Application accepted and contract donwload successfully!");
-      
+
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
-        prev.map((app) => (app.UserId === userId ? { ...app, Accepted: true } : app))
+        prev.map((app) =>
+          app.UserId === userId ? { ...app, Accepted: true } : app
+        )
       );
     } catch (error) {
       console.error("Error accepting application:", error);
@@ -273,11 +286,10 @@ const HomePage: React.FC = () => {
           },
         }
       );
-      
+
       if (response.status === 200) {
         alert("Application submitted successfully!");
-      } 
-      else {
+      } else {
         console.error(response.data.msg);
       }
     } catch (error) {
@@ -316,8 +328,7 @@ const HomePage: React.FC = () => {
             {services.length === 0 ? (
               <Typography variant="h6">No se encontraron servicios.</Typography>
             ) : (
-              services.map((service) => 
-                (
+              services.map((service) => (
                 <Box
                   key={service.ServiceId}
                   sx={{
@@ -336,10 +347,9 @@ const HomePage: React.FC = () => {
                       marginBottom: 2,
                     }}
                   >
-                    {users.map((user) => 
-                      (
                     <img
-                      src={`data:${user.image_mimetype};base64,${user.profile_image_base64}`}
+                      key={service.PublisherId}
+                      src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
                       alt="Profile"
                       style={{
                         width: "40px",
@@ -348,7 +358,6 @@ const HomePage: React.FC = () => {
                         marginRight: "10px",
                       }}
                     />
-                      ))}
                     <Box>
                       <Typography
                         variant="body1"
@@ -440,19 +449,17 @@ const HomePage: React.FC = () => {
                         No images available
                       </Typography>
                     )}
-                    
                   </Box>
-                  {service.PublisherId !== UserId && 
-                  !service.completed &&  (
+                  {service.PublisherId !== UserId && !service.completed && (
                     <Button
                       variant="contained"
                       color="primary"
                       sx={{
                         mt: 1,
-                        backgroundColor: "#e53935", 
+                        backgroundColor: "#e53935",
                         color: "#fff",
                         "&:hover": {
-                          backgroundColor: "#d32f2f", 
+                          backgroundColor: "#d32f2f",
                         },
                         borderRadius: 2,
                         boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
