@@ -80,10 +80,10 @@ jobs:
           
           # Run SonarScanner with the required parameters
           sonar-scanner \
-            -Dsonar.projectKey=*** \
-            -Dsonar.organization=*** \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=*** \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.python.version=3.9 \
             -Dsonar.sources=api,frontend \
             -Dsonar.tests=api/tests,frontend/tests \
