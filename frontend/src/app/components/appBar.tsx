@@ -11,7 +11,6 @@ import {
   Avatar,
   Box,
   styled,
-  Badge,
   Menu,
   MenuItem,
   Button,
@@ -24,20 +23,68 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
+  useMediaQuery,
+  useTheme,
+  ClickAwayListener,
+  Switch,
 } from "@mui/material";
 import {
   Search as SearchIcon,
   Close as CloseIcon,
-  Chat as ChatIcon,
-  Settings as SettingsIcon,
   PhotoLibrary as PhotoLibraryIcon,
   Pets as PetsIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
-
-// Define types for pet list and events
+import { FormControlLabel } from "@mui/material";
+const LanguageSwitch = styled(Switch)(({ theme }) => ({
+  width: 60,
+  height: 34,
+  padding: 0,
+  display: "flex",
+  "& .MuiSwitch-switchBase": {
+    padding: 1,
+    "&.Mui-checked": {
+      transform: "translateX(26px)",
+      color: "#fff",
+      "& + .MuiSwitch-track": {
+        opacity: 1,
+        backgroundColor: "#aab4be",
+      },
+    },
+  },
+  "& .MuiSwitch-thumb": {
+    backgroundColor: "#001e3c", // Dark color for the thumb
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+  },
+  "& .MuiSwitch-track": {
+    opacity: 1,
+    backgroundColor: "#aab4be", // Light grey for the background
+    borderRadius: 17,
+    position: "relative",
+  },
+  "& .MuiSwitch-track:before": {
+    content: '"EN"', // Text on the left (default/off state)
+    position: "absolute",
+    left: 8,
+    top: "50%",
+    transform: "translateY(-50%)",
+    fontSize: 12,
+    color: theme.palette.text.primary,
+  },
+  "& .MuiSwitch-track:after": {
+    content: '"ES"', // Text on the right (checked/on state)
+    position: "absolute",
+    right: 8,
+    top: "50%",
+    transform: "translateY(-50%)",
+    fontSize: 12,
+    color: theme.palette.text.primary,
+  },
+}));
 interface Pet {
   ID: number;
   Name: string;
@@ -51,41 +98,31 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 }));
 
 const SearchWrapper = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: "20px",
+  display: "flex",
+  alignItems: "center",
   backgroundColor: theme.palette.grey[200],
-  marginRight: theme.spacing(2),
-  width: "100%",
-  maxWidth: "400px",
+  borderRadius: "20px",
+  padding: "5px 10px",
+  cursor: "pointer",
+  transition: "width 0.3s ease",
   "&:hover": {
     backgroundColor: theme.palette.grey[300],
   },
 }));
 
-const SearchIconWrapper = styled("div")({
-  padding: "10px",
-  position: "absolute",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
-
-const StyledInputBase = styled(InputBase)(({ }) => ({
-  color: "inherit",
-  paddingLeft: "40px",
-  paddingRight: "10px",
-  borderRadius: "20px",
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  flex: 1,
   width: "100%",
-  "& .MuiInputBase-input": {
-    borderRadius: "20px",
-    padding: "10px 10px",
-    color: "red",
-  },
+  transition: "width 0.3s ease",
 }));
 
-const ActionButton = styled(IconButton)(({ theme }) => ({
-  marginLeft: theme.spacing(1),
-  borderRadius: "20px",
+const CircularButton = styled(Button)(({ theme }) => ({
+  borderRadius: "50%",
+  width: 32,
+  height: 32,
+  padding: 0,
+  minWidth: 0,
   backgroundColor: theme.palette.grey[100],
   "&:hover": {
     backgroundColor: theme.palette.grey[400],
@@ -93,9 +130,12 @@ const ActionButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export default function NavigationBar() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // True on mobile screens
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false); // Controls visibility of search input on mobile
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
     null
   );
@@ -112,9 +152,6 @@ export default function NavigationBar() {
   const fetchPetList = async () => {
     const token = Cookies.get("accessToken");
     const userId = Cookies.get("user_id");
-
-    console.log("accessToken:", token);
-    console.log("User ID:", userId);
 
     if (!userId || !token) {
       console.error("User ID or Auth Token is not available in cookies");
@@ -136,18 +173,29 @@ export default function NavigationBar() {
     }
   };
 
+  const handleSearchIconClick = () => {
+    if (isMobile) {
+      // Toggle search input visibility on mobile
+      setSearchOpen((prev) => !prev);
+    }
+  };
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+  const handleSearchKeyPress = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Enter") {
       router.push(`/home?animal_type=${searchTerm}`);
+      if (isMobile) setSearchOpen(false); // Close the search bar after submitting on mobile
     }
   };
 
   const handleClearSearch = () => {
     setSearchTerm("");
+    if (isMobile) setSearchOpen(false);
   };
 
   const handleChatClick = () => {
@@ -235,9 +283,6 @@ export default function NavigationBar() {
     const token = Cookies.get("accessToken");
     const userId = Cookies.get("user_id");
 
-    console.log("accessToken:", token);
-    console.log("User ID:", userId);
-
     if (!userId || !token) {
       console.error("User ID or Auth Token is not available");
       return;
@@ -256,7 +301,6 @@ export default function NavigationBar() {
     }
 
     try {
-      // Format dates properly
       const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return `${date.getDate().toString().padStart(2, "0")}/${(
@@ -272,10 +316,8 @@ export default function NavigationBar() {
         serviceDateFin: formatDate(endDate),
         address: location,
         cost: cost,
-        pets: selectedPets.map(String), // Ensure all pet IDs are strings
+        pets: selectedPets.map(String),
       };
-
-      console.log("Submitting service data:", serviceData);
 
       const response = await axios.post(
         "http://127.0.0.1:5001/service",
@@ -288,11 +330,7 @@ export default function NavigationBar() {
         }
       );
 
-      console.log("API Response:", response);
-
       if (response.status === 200 || response.status === 201) {
-        console.log("Service created successfully");
-        // Clear form fields
         setDescription("");
         setLocation("");
         setCost("");
@@ -303,10 +341,6 @@ export default function NavigationBar() {
       }
     } catch (error) {
       console.error("Error creating service:", error);
-      if (axios.isAxiosError(error)) {
-        console.error("Response data:", error.response?.data);
-        console.error("Status code:", error.response?.status);
-      }
     }
   };
 
@@ -345,228 +379,245 @@ export default function NavigationBar() {
   }, []);
 
   return (
-    <StyledAppBar position="fixed">
-      <Toolbar>
-        <Typography
-          variant="h6"
-          component="div"
+    <>
+      <StyledAppBar position="fixed">
+        <Toolbar
           sx={{
-            flexGrow: 0,
-            color: "black",
-            fontWeight: "bold",
-            marginRight: 2,
+            display: "flex",
+            justifyContent: isMobile && searchOpen ? "center" : "space-between",
           }}
-          onClick={() => router.push("/home")}
         >
-          Find Pet Care
-        </Typography>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Link href="/home" passHref>
+              <Typography
+                variant={isMobile ? "body2" : "h6"}
+                sx={{
+                  display: isMobile ? "block" : "inline-block",
+                  flexGrow: 0,
+                  color: "black",
+                  fontWeight: "bold",
+                  mr: isMobile ? 1 : 2,
+                  fontSize: isMobile ? "0.8rem" : "1.25rem",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Find Pet Care
+              </Typography>
+            </Link>
+          </Box>
 
-        <SearchWrapper>
-          <SearchIconWrapper>
-            <SearchIcon sx={{ color: "action.active" }} />
-          </SearchIconWrapper>
-          <StyledInputBase
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onKeyPress={handleSearchKeyPress}
-            placeholder="Search for Pet Care Services"
-            inputProps={{ "aria-label": "search" }}
-          />
-          {searchTerm && (
-            <IconButton
-              onClick={handleClearSearch}
+          {/* Search Icon and Input */}
+          <ClickAwayListener
+            onClickAway={() => isMobile && setSearchOpen(false)}
+          >
+            <SearchWrapper
+              onClick={handleSearchIconClick}
+              sx={{ width: isMobile && !searchOpen ? "auto" : "50%" }}
+            >
+              <SearchIcon sx={{ color: "action.active" }} />
+              {(!isMobile || searchOpen) && (
+                <StyledInputBase
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onKeyPress={handleSearchKeyPress}
+                  placeholder="Search for Pet Care Services"
+                  autoFocus={!isMobile || searchOpen}
+                  inputProps={{ "aria-label": "search" }}
+                />
+              )}
+              {searchOpen && isMobile && (
+                <IconButton onClick={handleClearSearch}>
+                  <CloseIcon />
+                </IconButton>
+              )}
+            </SearchWrapper>
+          </ClickAwayListener>
+
+          {!isMobile || !searchOpen ? (
+            <Box
               sx={{
-                position: "absolute",
-                right: 8,
-                top: "50%",
-                transform: "translateY(-50%)",
+                display: "flex",
+                alignItems: "center",
+                gap: isMobile ? 1 : 2,
               }}
             >
-              <CloseIcon />
-            </IconButton>
-          )}
-        </SearchWrapper>
-        <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Button
-            size="small"
-            onClick={handlePetsButton}
-            aria-controls={open ? "demo-positioned-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-          >
-            <PetsIcon fontSize="small" />
-            <Typography
-              variant="body2"
-              sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
-            >
-              Pets list
-            </Typography>
-          </Button>
-          <Menu
-            id="demo-positioned-menu"
-            aria-labelledby="demo-positioned-button"
-            anchorEl={petAnchorEl}
-            open={open}
-            onClose={handleClosePetMenu}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-          >
-            {petsData?.map((pet) => (
-              <MenuItem key={pet.id} onClick={handleClosePetMenu}>
-                <Link href={`/petsProfile/${pet.id}`}>{pet.name}</Link>
-              </MenuItem>
-            ))}
-          </Menu>
+              <CircularButton
+                size="small"
+                onClick={handlePetsButton}
+                aria-controls={open ? "demo-positioned-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+              >
+                <PetsIcon fontSize="small" />
+              </CircularButton>
+              <Menu
+                id="demo-positioned-menu"
+                aria-labelledby="demo-positioned-button"
+                anchorEl={petAnchorEl}
+                open={open}
+                onClose={handleClosePetMenu}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+              >
+                {petsData?.map((pet) => (
+                  <MenuItem key={pet.id} onClick={handleClosePetMenu}>
+                    <Link href={`/petsProfile/${pet.id}`}>{pet.name}</Link>
+                  </MenuItem>
+                ))}
+              </Menu>
 
-          <ActionButton size="small" onClick={handleChatClick}>
-            <Badge color="error" overlap="circular" variant="dot">
-              <ChatIcon fontSize="small" />
-            </Badge>
-          </ActionButton>
-          <ActionButton size="small" onClick={handlePawClick}>
-            <PetsIcon fontSize="small" />
-          </ActionButton>
+              <CircularButton size="small" onClick={handlePawClick}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 221 228"
+                  preserveAspectRatio="xMidYMid meet"
+                  fill="gray"
+                >
+                  <g
+                    transform="translate(0.000000,228.000000) scale(0.100000,-0.100000)"
+                    fill="gray"
+                    stroke="none"
+                  >
+                    <path d="M1320 2054 l0 -205 126 -60 c69 -32 128 -59 129 -59 2 0 5 19 7 43 l3 42 108 3 109 3 39 86 c22 47 39 86 37 87 -9 6 -388 186 -465 222 l-93 43 0 -205z" />
+                    <path d="M510 1870 c-38 -38 -22 -65 70 -119 l65 -37 5 -333 5 -333 28 -24 c31 -26 62 -30 102 -12 46 21 55 54 55 195 l0 128 91 -153 c77 -131 96 -156 126 -169 41 -17 83 -5 108 31 29 41 18 78 -65 217 -44 73 -80 136 -80 141 0 4 79 8 175 8 l175 0 0 -178 0 -179 26 -24 c36 -34 95 -33 132 4 l27 27 3 178 c3 120 7 179 15 184 8 5 12 49 12 135 l0 128 -145 72 -145 72 -318 1 -317 0 -53 30 c-63 35 -71 36 -97 10z" />
+                    <path d="M82 1715 c-62 -27 -63 -39 -60 -493 4 -519 -15 -460 228 -707 142 -144 180 -188 189 -220 6 -22 11 -93 11 -157 l0 -118 210 0 210 0 0 238 c0 253 -8 311 -53 377 -42 62 -452 465 -484 476 -81 26 -161 -68 -122 -144 6 -12 87 -99 180 -193 93 -94 169 -175 169 -180 0 -15 -22 -34 -40 -34 -21 0 -366 348 -379 383 -27 71 -5 154 55 207 l34 29 0 241 0 240 -27 30 c-34 36 -76 45 -121 25z" />
+                    <path d="M2044 1720 c-12 -4 -31 -21 -43 -36 -20 -26 -21 -37 -21 -268 l0 -242 30 -22 c65 -49 88 -148 51 -220 -11 -20 -96 -113 -189 -206 -171 -170 -191 -183 -216 -144 -9 15 14 43 161 190 94 95 176 183 182 195 39 77 -41 170 -123 143 -50 -16 -478 -451 -508 -515 -21 -47 -23 -65 -26 -312 l-3 -263 210 0 211 0 0 118 c0 64 5 135 11 157 9 32 47 76 189 220 153 156 180 188 201 240 l24 60 0 420 c0 389 -1 422 -18 447 -10 14 -32 31 -49 37 -36 13 -45 13 -74 1z" />
+                  </g>
+                </svg>
+              </CircularButton>
 
-          <Typography
-            variant="body2"
-            sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
-          >
-            Pet Care
-          </Typography>
-          <Avatar
-            src={profileImageUrl ?? "/placeholder.svg"}
-            sx={{ width: 32, height: 32 }}
-            onMouseEnter={handleProfileHover}
-          />
-          <Menu
-            anchorEl={profileAnchorEl}
-            open={Boolean(profileAnchorEl)}
-            onClose={handleProfileClose}
-          >
-            <MenuItem onClick={() => router.push("/settings")}>
-              <SettingsIcon fontSize="small" sx={{ marginRight: 1 }} /> Settings
-            </MenuItem>
-            <MenuItem onClick={() => router.push("/profile-pictures")}>
-              <PhotoLibraryIcon fontSize="small" sx={{ marginRight: 1 }} />{" "}
-              Profile Pictures
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Toolbar>
-
-      {/* Dialog Popup */}
-      <Dialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        aria-labelledby="service-dialog-title"
-        aria-describedby="service-dialog-description"
-      >
-        <DialogTitle id="service-dialog-title">Pet Care Services</DialogTitle>
-        <DialogContent id="service-dialog-description">
-          <FormControl fullWidth margin="dense" variant="outlined">
-            <InputLabel id="pet-select-label">Select Pets</InputLabel>
-            <Select
-              labelId="pet-select-label"
-              multiple
-              value={selectedPets}
-              onChange={handlePetChange}
-              label="Select Pets"
-            >
-              {petList.map((pet) => (
-                <MenuItem key={pet.ID} value={pet.ID.toString()}>
-                  {pet.Name}
+              <Avatar
+                src={profileImageUrl ?? "/placeholder.svg"}
+                sx={{ width: 32, height: 32 }}
+                onMouseEnter={handleProfileHover}
+              />
+              <Menu
+                anchorEl={profileAnchorEl}
+                open={Boolean(profileAnchorEl)}
+                onClose={handleProfileClose}
+              >
+                {/* Language Switch */}
+                <MenuItem>
+                  {" "}
+                  <FormControlLabel
+                    control={<LanguageSwitch defaultChecked />}
+                    label={
+                      <Box display="flex" alignItems="center">
+                        <Typography variant="body2" sx={{ ml: 1 }}>
+                          Language
+                        </Typography>
+                      </Box>
+                    }
+                  />
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              </Menu>
+            </Box>
+          ) : null}
+        </Toolbar>
 
-          <TextField
-            margin="dense"
-            label="Description"
-            fullWidth
-            variant="outlined"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Location"
-            fullWidth
-            variant="outlined"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Cost"
-            fullWidth
-            variant="outlined"
-            type="number"
-            value={cost}
-            onChange={(e) => setCost(e.target.value)}
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Start Date & Time"
-            fullWidth
-            variant="outlined"
-            type="datetime-local"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            required
-          />
-          <TextField
-            margin="dense"
-            label="End Date & Time"
-            fullWidth
-            variant="outlined"
-            type="datetime-local"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            required
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button
-            onClick={handleSubmitService}
-            variant="contained"
-            sx={{
-              backgroundColor: "#FF4D4F",
-              color: "white",
-              "&:hover": {
+        <Dialog open={dialogOpen} onClose={handleDialogClose}>
+          <DialogTitle>Pet Care Services</DialogTitle>
+          <DialogContent>
+            <FormControl fullWidth margin="dense" variant="outlined">
+              <InputLabel id="pet-select-label">Select Pets</InputLabel>
+              <Select
+                labelId="pet-select-label"
+                multiple
+                value={selectedPets}
+                onChange={handlePetChange}
+                label="Select Pets"
+              >
+                {petList.map((pet) => (
+                  <MenuItem key={pet.ID} value={pet.ID.toString()}>
+                    {pet.Name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              margin="dense"
+              label="Description"
+              fullWidth
+              variant="outlined"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+            <TextField
+              margin="dense"
+              label="Location"
+              fullWidth
+              variant="outlined"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+            />
+            <TextField
+              margin="dense"
+              label="Cost"
+              fullWidth
+              variant="outlined"
+              type="number"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              required
+            />
+            <TextField
+              margin="dense"
+              label="Start Date & Time"
+              fullWidth
+              variant="outlined"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            <TextField
+              margin="dense"
+              label="End Date & Time"
+              fullWidth
+              variant="outlined"
+              type="datetime-local"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Cancel</Button>
+            <Button
+              onClick={handleSubmitService}
+              variant="contained"
+              sx={{
                 backgroundColor: "#FF4D4F",
-              },
-            }}
-            disabled={
-              !description ||
-              !location ||
-              !cost ||
-              !startDate ||
-              !endDate ||
-              selectedPets.length === 0
-            }
-          >
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </StyledAppBar>
+                color: "white",
+                "&:hover": { backgroundColor: "#FF4D4F" },
+              }}
+              disabled={
+                !description ||
+                !location ||
+                !cost ||
+                !startDate ||
+                !endDate ||
+                selectedPets.length === 0
+              }
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </StyledAppBar>
+    </>
   );
 }
