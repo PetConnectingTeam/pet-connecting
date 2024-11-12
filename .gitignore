@@ -3,5 +3,5 @@ __pycache__
 db/mysql_data
 .env
 .history
-.node_modules
+node_modules
 .vscode

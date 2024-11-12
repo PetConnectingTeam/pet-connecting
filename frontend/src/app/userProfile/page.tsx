@@ -1,7 +1,9 @@
 "use client";
+import { i18n } from "i18next";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
 import StarIcon from '@mui/icons-material/Star'
+import { useTranslation } from 'react-i18next';
 import {
   Avatar,
   Button,
@@ -21,6 +23,7 @@ import axios from "axios";
 import MenuAppBar from "../components/appBar";
 
 export default function UserProfile() {
+  const { t, i18n } = useTranslation(); 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -335,7 +338,7 @@ export default function UserProfile() {
                 />
 
                 <FormControl component="fieldset" margin="normal">
-                  <FormLabel component="legend">User Type</FormLabel>
+                  <FormLabel component="legend">{t("user_type")}</FormLabel>
                   <RadioGroup row value={userType}>
                     <FormControlLabel
                       value="petOwner"
