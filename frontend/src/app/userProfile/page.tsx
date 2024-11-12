@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
-import StarIcon from '@mui/icons-material/Star'
+import StarIcon from "@mui/icons-material/Star";
 import {
   Avatar,
   Button,
@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import MenuAppBar from "../components/appBar";
+import BottomBar from "../components/BottomBar";
 
 export default function UserProfile() {
   const [name, setName] = useState("");
@@ -87,8 +88,8 @@ export default function UserProfile() {
       console.error("Error fetching user or role data:", error);
       setErrorMessage(
         error?.response?.data?.msg ||
-        error?.message ||
-        "An unknown error occurred"
+          error?.message ||
+          "An unknown error occurred"
       );
     }
   }, [userId, roleId, accessToken]);
@@ -204,7 +205,7 @@ export default function UserProfile() {
   useEffect(() => {
     console.log("Current Rating:", rating);
   }, [rating]);
-  
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setProfilePicture(event.target.files[0]);
@@ -227,18 +228,25 @@ export default function UserProfile() {
         <MenuAppBar />
         <Container
           maxWidth={false}
-          sx={{ backgroundColor: "white", height: "100vh" }}
+          sx={{
+            backgroundColor: "white",
+            height: "100vh",
+            padding: { xs: 2, md: 4 },
+            paddingTop: { xs: 6, md: 8 },
+            paddingBottom: { xs: 2, md: 4 },
+          }}
         >
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
               alignItems: "flex-start",
-              gap: 4,
+              gap: { xs: 2, md: 4 },
               backgroundColor: "white",
               width: "100%",
               height: "100%",
-              paddingTop: 7,
+              paddingTop: { xs: 2, md: 7 },
+              paddingBottom: { xs: 2, md: 4 },
             }}
           >
             <Box
@@ -247,7 +255,7 @@ export default function UserProfile() {
                 flexDirection: "column",
                 alignItems: "center",
                 width: { xs: "100%", md: "200px" },
-                paddingTop: 10,
+                paddingTop: { xs: 2, md: 10 },
               }}
             >
               <Avatar
@@ -256,16 +264,32 @@ export default function UserProfile() {
                     ? URL.createObjectURL(profilePicture)
                     : profileImageUrl ?? "/placeholder.svg"
                 }
-                sx={{ width: 200, height: 200, mb: 2 }}
+                sx={{
+                  width: { xs: 100, md: 200 },
+                  height: { xs: 100, md: 200 },
+                  mb: 1,
+                }}
               />
-             <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '1.7rem', justifyContent: 'center', padding: 2.5 }}>
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <StarIcon
-                      key={index}
-                      sx={{ color: index < (rating || 0) ? "gold" : "gray", fontSize: "inherit" }}
-                    />
-                  ))}
-                </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: { xs: "1.2rem", md: "1.7rem" },
+                  justifyContent: "center",
+                  padding: 2.5,
+                  mb: 1,
+                }}
+              >
+                {Array.from({ length: 5 }, (_, index) => (
+                  <StarIcon
+                    key={index}
+                    sx={{
+                      color: index < (rating || 0) ? "gold" : "gray",
+                      fontSize: "inherit",
+                    }}
+                  />
+                ))}
+              </Box>
 
               {isEditing && (
                 <>
@@ -292,7 +316,7 @@ export default function UserProfile() {
                 </>
               )}
             </Box>
-            <Box sx={{ flexGrow: 1, paddingTop: 10 }}>
+            <Box sx={{ flexGrow: 1, paddingTop: { xs: 2, md: 10 } }}>
               <div>
                 <TextField
                   fullWidth
@@ -304,7 +328,9 @@ export default function UserProfile() {
                   margin="normal"
                   disabled={!isEditing}
                   sx={{
+                    mt: 0.5,
                     "& .MuiOutlinedInput-root": {
+                      fontSize: { xs: "0.875rem", md: "1rem" },
                       color: isEditing ? "black" : "gray",
                     },
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -326,6 +352,7 @@ export default function UserProfile() {
                   disabled={!isEditing}
                   sx={{
                     "& .MuiOutlinedInput-root": {
+                      fontSize: { xs: "0.875rem", md: "1rem" },
                       color: isEditing ? "black" : "gray",
                     },
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -408,6 +435,7 @@ export default function UserProfile() {
             </Alert>
           )}
         </Snackbar>
+        <BottomBar />
       </Box>
     </>
   );
