@@ -86,7 +86,6 @@ jobs:
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.python.version=3.9 \
             -Dsonar.sources=api,frontend \
-            -Dsonar.tests=api/tests,frontend/tests \
             -Dsonar.language=js,py \
             -Dsonar.exclusions=**/__tests__/**,**/requirements.txt \
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info \
