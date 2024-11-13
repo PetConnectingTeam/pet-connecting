@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import HelpIcon from '@mui/icons-material/Help';
-import LogoutIcon from '@mui/icons-material/Logout';
+import HelpIcon from "@mui/icons-material/Help";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import {
   Drawer,
@@ -31,6 +31,7 @@ import {
 } from "@mui/material";
 import { Home, Pets } from "@mui/icons-material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const drawerWidth = 240;
 
@@ -42,10 +43,10 @@ const tips = [
   "Regular vet checkups are essential for long-term health.",
   "Avoid feeding pets table scraps to prevent digestive issues.",
   "Keep your pet hydrated by providing fresh water daily.",
-"Groom your pet regularly to reduce shedding and prevent matting.",
-"Introduce new toys and activities to stimulate your pet's mind.",
-"Protect your pet from extreme weather by keeping them cool in summer and warm in winter.",
-"Teach basic commands to improve your pet's behavior and safety."
+  "Groom your pet regularly to reduce shedding and prevent matting.",
+  "Introduce new toys and activities to stimulate your pet's mind.",
+  "Protect your pet from extreme weather by keeping them cool in summer and warm in winter.",
+  "Teach basic commands to improve your pet's behavior and safety.",
 ];
 
 interface PetFormData {
@@ -82,6 +83,7 @@ export default function Component() {
   const [isFormValid, setIsFormValid] = useState(false);
   const [newPetId, setNewPetId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null); // State for selected image file
+  const router = useRouter();
 
   useEffect(() => {
     const randomTip = tips[Math.floor(Math.random() * tips.length)];
@@ -160,9 +162,11 @@ export default function Component() {
     setNewPetId(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name as string]: value,
     }));
@@ -171,7 +175,7 @@ export default function Component() {
   const handlePetTypeSelect = (petType: string) => {
     setCustomPetInputVisible(false);
     setSelectedPet(petType);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       animal_type: petType.toLowerCase(),
     }));
@@ -182,10 +186,12 @@ export default function Component() {
     setSelectedPet("custom");
   };
 
-  const handleCustomPetNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomPetNameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
     setCustomPetName(value);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       animal_type: value.toLowerCase(),
     }));
@@ -195,24 +201,28 @@ export default function Component() {
     try {
       const token = Cookies.get("accessToken");
       const userId = Cookies.get("user_id");
-  
+
       if (!userId || !token) {
-        setError('User not authenticated. Please log in.');
+        setError("User not authenticated. Please log in.");
         return;
       }
-  
-      const response = await axios.post(`http://127.0.0.1:5001/pets?user_id=${userId}`, formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-  
+
+      const response = await axios.post(
+        `http://127.0.0.1:5001/pets?user_id=${userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       console.log("Pet creation response:", response.data); // Log response to inspect its structure
-  
+
       if (response.status === 200 || response.status === 201) {
         setSuccess(true);
-  
+
         // Assuming the backend returns the new pet ID in the response data
         if (response.data && response.data.id) {
           setNewPetId(response.data.id); // Set newPetId directly if available in response
@@ -221,18 +231,18 @@ export default function Component() {
           // If pet ID isn't directly in the response, fetch it with a follow-up request
           await fetchNewPetId();
         }
-  
+
         setTimeout(() => {
           setOpen(false);
           setImageUploadOpen(true); // Open image upload dialog after successful pet submission
         }, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to post pet');
+      setError(err instanceof Error ? err.message : "Failed to post pet");
       console.error("Error in pet creation:", err);
     }
   };
-  
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedImage(e.target.files[0]);
@@ -241,19 +251,29 @@ export default function Component() {
   const fetchNewPetId = async () => {
     try {
       const token = Cookies.get("accessToken");
-  
-      const petIdResponse = await axios.get(`http://127.0.0.1:5001/pets?name=${formData.name}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-  
-      if (petIdResponse.status === 200 && petIdResponse.data && petIdResponse.data[0]) {
+
+      const petIdResponse = await axios.get(
+        `http://127.0.0.1:5001/pets?name=${formData.name}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (
+        petIdResponse.status === 200 &&
+        petIdResponse.data &&
+        petIdResponse.data[0]
+      ) {
         const petId = petIdResponse.data[0].id;
         setNewPetId(petId);
         console.log("New Pet ID from follow-up request:", petId);
       } else {
-        console.error("No pet ID found in follow-up request response:", petIdResponse);
+        console.error(
+          "No pet ID found in follow-up request response:",
+          petIdResponse
+        );
         setError("Failed to retrieve pet ID after creation.");
       }
     } catch (error) {
@@ -261,29 +281,32 @@ export default function Component() {
       setError("Failed to retrieve pet ID.");
     }
   };
-  
-  
+
   const handleImageSubmit = async () => {
     if (!newPetId || !selectedImage) {
       setError("Pet ID or image file is missing.");
       return;
     }
-  
+
     try {
       const token = Cookies.get("accessToken");
-  
+
       const formData = new FormData();
       formData.append("file", selectedImage); // Try different keys like "file", "image", etc.
-  
+
       console.log("Starting image upload...");
       console.log("Form Data (file):", formData.get("file")); // Check if the file is attached
-  
-      const response = await axios.post(`http://127.0.0.1:5001/pets/${newPetId}/photos`, formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-  
+
+      const response = await axios.post(
+        `http://127.0.0.1:5001/pets/${newPetId}/photos`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (response.status === 200 || response.status === 201) {
         console.log("Image uploaded successfully");
         setImageUploadOpen(false);
@@ -295,11 +318,9 @@ export default function Component() {
       }
     } catch (err) {
       console.error("Error in image upload:", err);
-      setError(err instanceof Error ? err.message : 'Failed to upload image');
+      setError(err instanceof Error ? err.message : "Failed to upload image");
     }
   };
-  
-
 
   return (
     <Box>
@@ -319,7 +340,10 @@ export default function Component() {
       >
         <List>
           <ListItem>
-            <Link href="../home" style={{ textDecoration: "none", color: "inherit" }}>
+            <Link
+              href="../home"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <ListItemButton>
                 <ListItemIcon>
                   <Home />
@@ -329,14 +353,19 @@ export default function Component() {
             </Link>
           </ListItem>
           <ListItem>
-            <Link href="/userProfile" style={{ textDecoration: "none", color: "inherit" }}>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Avatar src={profileImageUrl || "/placeholder.svg?height=40&width=40"} sx={{ width: 24, height: 24 }} />
-                </ListItemIcon>
-                <ListItemText primary="Profile" />
-              </ListItemButton>
-            </Link>
+            <ListItemButton
+              onClick={() =>
+                router.push(`/userProfile/${Cookies.get("user_id")}`)
+              }
+            >
+              <ListItemIcon>
+                <Avatar
+                  src={profileImageUrl || "/placeholder.svg?height=40&width=40"}
+                  sx={{ width: 24, height: 24 }}
+                />
+              </ListItemIcon>
+              <ListItemText primary="Profile" />
+            </ListItemButton>
           </ListItem>
           <ListItem>
             <ListItemButton onClick={handleClickOpen}>
@@ -348,7 +377,15 @@ export default function Component() {
           </ListItem>
           <Divider />
 
-          <Box sx={{ padding: 2, backgroundColor: "#f9f9f9", borderRadius: 1, margin: 2 ,color:"#ff4d4f"}}>
+          <Box
+            sx={{
+              padding: 2,
+              backgroundColor: "#f9f9f9",
+              borderRadius: 1,
+              margin: 2,
+              color: "#ff4d4f",
+            }}
+          >
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               Pet Care Tip
             </Typography>
@@ -358,7 +395,10 @@ export default function Component() {
           <Divider />
 
           <ListItem>
-            <Link href="/help" style={{ textDecoration: "none", color: "inherit" }}>
+            <Link
+              href="/help"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <ListItemButton>
                 <ListItemIcon>
                   <HelpIcon />
@@ -383,11 +423,25 @@ export default function Component() {
       </Drawer>
 
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-        <DialogTitle style={{ backgroundColor: "#ff4d4f", color: "white" }}>Post a Pet 😻</DialogTitle>
+        <DialogTitle style={{ backgroundColor: "#ff4d4f", color: "white" }}>
+          Post a Pet 😻
+        </DialogTitle>
         <DialogContent dividers>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 2 }}>Pet posted successfully!</Alert>}
-          {newPetId && <Alert severity="info" sx={{ mb: 2 }}>New Pet ID: {newPetId}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Pet posted successfully!
+            </Alert>
+          )}
+          {newPetId && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              New Pet ID: {newPetId}
+            </Alert>
+          )}
           <form>
             <TextField
               label="Pet Name"
@@ -399,14 +453,21 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <Box display="flex" justifyContent="space-around" sx={{ my: 2 }}>
-              {[{ name: "Dog", icon: "🐶" }, { name: "Cat", icon: "🐱" }, { name: "Bird", icon: "🐦" }].map((pet, index) => (
+              {[
+                { name: "Dog", icon: "🐶" },
+                { name: "Cat", icon: "🐱" },
+                { name: "Bird", icon: "🐦" },
+              ].map((pet, index) => (
                 <Box
                   key={index}
                   onClick={() => handlePetTypeSelect(pet.name)}
                   sx={{
                     cursor: "pointer",
                     padding: 1,
-                    border: selectedPet === pet.name ? "2px solid green" : "2px solid transparent",
+                    border:
+                      selectedPet === pet.name
+                        ? "2px solid green"
+                        : "2px solid transparent",
                     borderRadius: 1,
                     textAlign: "center",
                   }}
@@ -420,7 +481,10 @@ export default function Component() {
                 sx={{
                   cursor: "pointer",
                   padding: 1,
-                  border: selectedPet === "custom" ? "2px solid green" : "2px solid transparent",
+                  border:
+                    selectedPet === "custom"
+                      ? "2px solid green"
+                      : "2px solid transparent",
                   borderRadius: 1,
                   textAlign: "center",
                 }}
@@ -474,7 +538,14 @@ export default function Component() {
                 label="Size"
                 name="size"
                 value={formData.size}
-                onChange={(event) => handleInputChange(event as React.ChangeEvent<{ name?: string; value: unknown }>)}
+                onChange={(event) =>
+                  handleInputChange(
+                    event as React.ChangeEvent<{
+                      name?: string;
+                      value: unknown;
+                    }>
+                  )
+                }
               >
                 <MenuItem value="small">Small</MenuItem>
                 <MenuItem value="medium">Medium</MenuItem>
@@ -504,17 +575,29 @@ export default function Component() {
           </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} style={{ backgroundColor: "#ff4d4f", color: "white" }}>
+          <Button
+            onClick={handleClose}
+            style={{ backgroundColor: "#ff4d4f", color: "white" }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} style={{ backgroundColor: "#ff4d4f", color: "white" }} disabled={!isFormValid}>
+          <Button
+            onClick={handleSubmit}
+            style={{ backgroundColor: "#ff4d4f", color: "white" }}
+            disabled={!isFormValid}
+          >
             Submit
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Image upload dialog */}
-      <Dialog open={imageUploadOpen} onClose={() => setImageUploadOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={imageUploadOpen}
+        onClose={() => setImageUploadOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>Upload Pet Image</DialogTitle>
         <DialogContent>
           <TextField
@@ -525,10 +608,17 @@ export default function Component() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setImageUploadOpen(false)} style={{ color: "#ff4d4f" }}>
+          <Button
+            onClick={() => setImageUploadOpen(false)}
+            style={{ color: "#ff4d4f" }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleImageSubmit} style={{ backgroundColor: "#ff4d4f", color: "white" }} disabled={!selectedImage}>
+          <Button
+            onClick={handleImageSubmit}
+            style={{ backgroundColor: "#ff4d4f", color: "white" }}
+            disabled={!selectedImage}
+          >
             Upload
           </Button>
         </DialogActions>

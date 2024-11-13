@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
-import StarIcon from '@mui/icons-material/Star'
+import StarIcon from "@mui/icons-material/Star";
 import {
   Avatar,
   Button,
@@ -18,9 +18,11 @@ import {
   Alert,
 } from "@mui/material";
 import axios from "axios";
-import MenuAppBar from "../components/appBar";
+import MenuAppBar from "../../components/appBar";
 
-export default function UserProfile() {
+const UserProfile: React.FC<{ params: { userId: string } }> = ({
+  params,
+}): JSX.Element => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -31,10 +33,16 @@ export default function UserProfile() {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [clientLoaded, setClientLoaded] = useState(false);
 
   const accessToken = Cookies.get("accessToken");
-  const userId = Cookies.get("user_id");
+  const { userId } = params;
   const roleId = Cookies.get("role_id");
+  const currentUserId = Cookies.get("user_id");
+
+  useEffect(() => {
+    setClientLoaded(true);
+  }, []);
 
   const getErrorMessage = (error: any) => {
     return (
@@ -87,11 +95,11 @@ export default function UserProfile() {
       console.error("Error fetching user or role data:", error);
       setErrorMessage(
         error?.response?.data?.msg ||
-        error?.message ||
-        "An unknown error occurred"
+          error?.message ||
+          "An unknown error occurred"
       );
     }
-  }, [userId, roleId, accessToken]);
+  }, []);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -114,7 +122,8 @@ export default function UserProfile() {
 
     fetchUserInfo();
     fetchUserData();
-  }, [fetchUserData, userId, accessToken]);
+  }, []);
+  // }, [fetchUserData, userID, accessToken]);
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,8 +212,8 @@ export default function UserProfile() {
   };
   useEffect(() => {
     console.log("Current Rating:", rating);
-  }, [rating]);
-  
+  }, []);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setProfilePicture(event.target.files[0]);
@@ -258,14 +267,25 @@ export default function UserProfile() {
                 }
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
-             <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '1.7rem', justifyContent: 'center', padding: 2.5 }}>
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <StarIcon
-                      key={index}
-                      sx={{ color: index < (rating || 0) ? "gold" : "gray", fontSize: "inherit" }}
-                    />
-                  ))}
-                </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "1.7rem",
+                  justifyContent: "center",
+                  padding: 2.5,
+                }}
+              >
+                {Array.from({ length: 5 }, (_, index) => (
+                  <StarIcon
+                    key={index}
+                    sx={{
+                      color: index < (rating || 0) ? "gold" : "gray",
+                      fontSize: "inherit",
+                    }}
+                  />
+                ))}
+              </Box>
 
               {isEditing && (
                 <>
@@ -292,6 +312,7 @@ export default function UserProfile() {
                 </>
               )}
             </Box>
+
             <Box sx={{ flexGrow: 1, paddingTop: 10 }}>
               <div>
                 <TextField
@@ -334,62 +355,66 @@ export default function UserProfile() {
                   }}
                 />
 
-                <FormControl component="fieldset" margin="normal">
-                  <FormLabel component="legend">User Type</FormLabel>
-                  <RadioGroup row value={userType}>
-                    <FormControlLabel
-                      value="petOwner"
-                      control={<Radio />}
-                      label="Pet Owner"
-                      disabled
-                    />
-                    <FormControlLabel
-                      value="basic"
-                      control={<Radio />}
-                      label="Basic User"
-                      disabled
-                    />
-                    <FormControlLabel
-                      value="premium"
-                      control={<Radio />}
-                      label="Premium User"
-                      disabled
-                    />
-                  </RadioGroup>
-                </FormControl>
+                {clientLoaded && currentUserId === userId && (
+                  <FormControl component="fieldset" margin="normal">
+                    <FormLabel component="legend">User Type</FormLabel>
+                    <RadioGroup row value={userType}>
+                      <FormControlLabel
+                        value="petOwner"
+                        control={<Radio />}
+                        label="Pet Owner"
+                        disabled
+                      />
+                      <FormControlLabel
+                        value="basic"
+                        control={<Radio />}
+                        label="Basic User"
+                        disabled
+                      />
+                      <FormControlLabel
+                        value="premium"
+                        control={<Radio />}
+                        label="Premium User"
+                        disabled
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                )}
               </div>
 
-              {isEditing ? (
-                <Button
-                  sx={{
-                    backgroundColor: "#ff4d4f",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#ff7875",
-                    },
-                    mt: 2,
-                  }}
-                  variant="contained"
-                  onClick={handleSaveChanges}
-                >
-                  Save Changes
-                </Button>
-              ) : (
-                <Button
-                  sx={{
-                    backgroundColor: "#ff4d4f",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#ff7875",
-                    },
-                    mt: 2,
-                  }}
-                  variant="contained"
-                  onClick={handleEditProfile}
-                >
-                  Edit Profile
-                </Button>
-              )}
+              {clientLoaded &&
+                currentUserId === userId &&
+                (isEditing ? (
+                  <Button
+                    sx={{
+                      backgroundColor: "#ff4d4f",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#ff7875",
+                      },
+                      mt: 2,
+                    }}
+                    variant="contained"
+                    onClick={handleSaveChanges}
+                  >
+                    Save Changes
+                  </Button>
+                ) : (
+                  <Button
+                    sx={{
+                      backgroundColor: "#ff4d4f",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#ff7875",
+                      },
+                      mt: 2,
+                    }}
+                    variant="contained"
+                    onClick={handleEditProfile}
+                  >
+                    Edit Profile
+                  </Button>
+                ))}
             </Box>
           </Box>
         </Container>
@@ -411,4 +436,6 @@ export default function UserProfile() {
       </Box>
     </>
   );
-}
+};
+
+export default UserProfile;
