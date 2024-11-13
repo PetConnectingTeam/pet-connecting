@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface Service {
   PublisherId: number;
@@ -59,7 +60,9 @@ const HomePage: React.FC = () => {
   const UserId = Number(Cookies.get("user_id"));
 
   const searchParams = useSearchParams();
-  const animal_type = searchParams.get('animal_type');
+  const animal_type = searchParams.get("animal_type");
+
+  const t = useTranslations("Home");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -128,7 +131,7 @@ const HomePage: React.FC = () => {
     setOpenModal(true);
     try {
       const token = Cookies.get("accessToken");
-  
+
       // Obtener las aplicaciones para el servicio
       const applicationResponse = await axios.get(
         `http://127.0.0.1:5001/service/${serviceId}/applications`,
@@ -141,14 +144,17 @@ const HomePage: React.FC = () => {
       if (Array.isArray(applicationResponse.data)) {
         setApplicationsForService(applicationResponse.data);
       }
-  
+
       // Obtener todos los servicios y encontrar el que coincide con `serviceId`
-      const servicesResponse = await axios.get("http://127.0.0.1:5001/services", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
+      const servicesResponse = await axios.get(
+        "http://127.0.0.1:5001/services",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (Array.isArray(servicesResponse.data)) {
         const selectedService = servicesResponse.data.find(
           (service: Service) => service.ServiceId === serviceId
@@ -169,10 +175,10 @@ const HomePage: React.FC = () => {
   // Función para aceptar una solicitud
   const handleAcceptApplication = async (userId: number) => {
     if (!selectedServiceId) return;
-  
+
     try {
       const token = Cookies.get("accessToken");
-  
+
       // Realizar la solicitud y configurar la respuesta como `blob`
       const response = await axios.put(
         `http://127.0.0.1:5001/service/${selectedServiceId}/assign`,
@@ -185,27 +191,29 @@ const HomePage: React.FC = () => {
           responseType: "blob", // Importante para recibir el archivo como blob
         }
       );
-  
+
       // Crear un objeto `blob` para el archivo PDF
       const blob = new Blob([response.data], { type: "application/pdf" });
-  
+
       // Crear un enlace de descarga temporal
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
       link.download = `application_${userId}.pdf`; // Nombre del archivo
-  
+
       // Añadir el enlace al documento y simular el clic para descargar
       document.body.appendChild(link);
       link.click();
-  
+
       // Limpiar el enlace después de descargar
       document.body.removeChild(link);
-  
+
       alert("Application accepted and file donwload successfully!");
-      
+
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
-        prev.map((app) => (app.UserId === userId ? { ...app, Accepted: true } : app))
+        prev.map((app) =>
+          app.UserId === userId ? { ...app, Accepted: true } : app
+        )
       );
     } catch (error) {
       console.error("Error accepting application:", error);
@@ -254,11 +262,10 @@ const HomePage: React.FC = () => {
           },
         }
       );
-      
+
       if (response.status === 200) {
         alert("Application submitted successfully!");
-      } 
-      else {
+      } else {
         console.error(response.data.msg);
       }
     } catch (error) {
@@ -417,19 +424,17 @@ const HomePage: React.FC = () => {
                         No images available
                       </Typography>
                     )}
-                    
                   </Box>
-                  {service.PublisherId !== UserId && 
-                  !service.completed &&  (
+                  {service.PublisherId !== UserId && !service.completed && (
                     <Button
                       variant="contained"
                       color="primary"
                       sx={{
                         mt: 1,
-                        backgroundColor: "#e53935", 
+                        backgroundColor: "#e53935",
                         color: "#fff",
                         "&:hover": {
-                          backgroundColor: "#d32f2f", 
+                          backgroundColor: "#d32f2f",
                         },
                         borderRadius: 2,
                         boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -446,7 +451,7 @@ const HomePage: React.FC = () => {
                         }
                       }}
                     >
-                      Apply
+                      {t("apply_button")}
                     </Button>
                   )}
                 </Box>
