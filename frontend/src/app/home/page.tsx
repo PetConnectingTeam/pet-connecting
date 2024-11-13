@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useSearchParams } from "next/navigation";
 
 interface Service {
   PublisherId: number;
@@ -67,6 +68,9 @@ const HomePage: React.FC = () => {
   >([]);
 
   const UserId = Number(Cookies.get("user_id"));
+
+  const searchParams = useSearchParams();
+  const animal_type = searchParams.get("animal_type");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -231,7 +235,7 @@ const HomePage: React.FC = () => {
       // Limpiar el enlace después de descargar
       document.body.removeChild(link);
 
-      alert("Application accepted and contract donwload successfully!");
+      alert("Application accepted and file donwload successfully!");
 
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
@@ -347,17 +351,23 @@ const HomePage: React.FC = () => {
                       marginBottom: 2,
                     }}
                   >
-                    <img
-                      key={service.PublisherId}
-                      src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
-                      alt="Profile"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "50%",
-                        marginRight: "10px",
-                      }}
-                    />
+                    <a
+                      href={`/userProfile/${service.PublisherId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        key={service.PublisherId}
+                        src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
+                        alt="Profile"
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          marginRight: "10px",
+                        }}
+                      />
+                    </a>
                     <Box>
                       <Typography
                         variant="body1"
