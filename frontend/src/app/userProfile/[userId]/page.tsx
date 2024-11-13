@@ -18,10 +18,11 @@ import {
   Alert,
 } from "@mui/material";
 import axios from "axios";
-import MenuAppBar from "../components/appBar";
-import BottomBar from "../components/BottomBar";
+import MenuAppBar from "../../components/appBar";
 
-export default function UserProfile() {
+const UserProfile: React.FC<{ params: { userId: string } }> = ({
+  params,
+}): JSX.Element => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -32,10 +33,16 @@ export default function UserProfile() {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [clientLoaded, setClientLoaded] = useState(false);
 
   const accessToken = Cookies.get("accessToken");
-  const userId = Cookies.get("user_id");
+  const { userId } = params;
   const roleId = Cookies.get("role_id");
+  const currentUserId = Cookies.get("user_id");
+
+  useEffect(() => {
+    setClientLoaded(true);
+  }, []);
 
   const getErrorMessage = (error: any) => {
     return (
@@ -92,7 +99,7 @@ export default function UserProfile() {
           "An unknown error occurred"
       );
     }
-  }, [userId, roleId, accessToken]);
+  }, []);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -115,7 +122,8 @@ export default function UserProfile() {
 
     fetchUserInfo();
     fetchUserData();
-  }, [fetchUserData, userId, accessToken]);
+  }, []);
+  // }, [fetchUserData, userID, accessToken]);
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +212,7 @@ export default function UserProfile() {
   };
   useEffect(() => {
     console.log("Current Rating:", rating);
-  }, [rating]);
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -228,25 +236,18 @@ export default function UserProfile() {
         <MenuAppBar />
         <Container
           maxWidth={false}
-          sx={{
-            backgroundColor: "white",
-            height: "100vh",
-            padding: { xs: 2, md: 4 },
-            paddingTop: { xs: 6, md: 8 },
-            paddingBottom: { xs: 2, md: 4 },
-          }}
+          sx={{ backgroundColor: "white", height: "100vh" }}
         >
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
               alignItems: "flex-start",
-              gap: { xs: 2, md: 4 },
+              gap: 4,
               backgroundColor: "white",
               width: "100%",
               height: "100%",
-              paddingTop: { xs: 2, md: 7 },
-              paddingBottom: { xs: 2, md: 4 },
+              paddingTop: 7,
             }}
           >
             <Box
@@ -255,7 +256,7 @@ export default function UserProfile() {
                 flexDirection: "column",
                 alignItems: "center",
                 width: { xs: "100%", md: "200px" },
-                paddingTop: { xs: 2, md: 10 },
+                paddingTop: 10,
               }}
             >
               <Avatar
@@ -264,20 +265,15 @@ export default function UserProfile() {
                     ? URL.createObjectURL(profilePicture)
                     : profileImageUrl ?? "/placeholder.svg"
                 }
-                sx={{
-                  width: { xs: 100, md: 200 },
-                  height: { xs: 100, md: 200 },
-                  mb: 1,
-                }}
+                sx={{ width: 200, height: 200, mb: 2 }}
               />
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  fontSize: { xs: "1.2rem", md: "1.7rem" },
+                  fontSize: "1.7rem",
                   justifyContent: "center",
                   padding: 2.5,
-                  mb: 1,
                 }}
               >
                 {Array.from({ length: 5 }, (_, index) => (
@@ -316,7 +312,8 @@ export default function UserProfile() {
                 </>
               )}
             </Box>
-            <Box sx={{ flexGrow: 1, paddingTop: { xs: 2, md: 10 } }}>
+
+            <Box sx={{ flexGrow: 1, paddingTop: 10 }}>
               <div>
                 <TextField
                   fullWidth
@@ -328,9 +325,7 @@ export default function UserProfile() {
                   margin="normal"
                   disabled={!isEditing}
                   sx={{
-                    mt: 0.5,
                     "& .MuiOutlinedInput-root": {
-                      fontSize: { xs: "0.875rem", md: "1rem" },
                       color: isEditing ? "black" : "gray",
                     },
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -352,7 +347,6 @@ export default function UserProfile() {
                   disabled={!isEditing}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      fontSize: { xs: "0.875rem", md: "1rem" },
                       color: isEditing ? "black" : "gray",
                     },
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -361,62 +355,66 @@ export default function UserProfile() {
                   }}
                 />
 
-                <FormControl component="fieldset" margin="normal">
-                  <FormLabel component="legend">User Type</FormLabel>
-                  <RadioGroup row value={userType}>
-                    <FormControlLabel
-                      value="petOwner"
-                      control={<Radio />}
-                      label="Pet Owner"
-                      disabled
-                    />
-                    <FormControlLabel
-                      value="basic"
-                      control={<Radio />}
-                      label="Basic User"
-                      disabled
-                    />
-                    <FormControlLabel
-                      value="premium"
-                      control={<Radio />}
-                      label="Premium User"
-                      disabled
-                    />
-                  </RadioGroup>
-                </FormControl>
+                {clientLoaded && currentUserId === userId && (
+                  <FormControl component="fieldset" margin="normal">
+                    <FormLabel component="legend">User Type</FormLabel>
+                    <RadioGroup row value={userType}>
+                      <FormControlLabel
+                        value="petOwner"
+                        control={<Radio />}
+                        label="Pet Owner"
+                        disabled
+                      />
+                      <FormControlLabel
+                        value="basic"
+                        control={<Radio />}
+                        label="Basic User"
+                        disabled
+                      />
+                      <FormControlLabel
+                        value="premium"
+                        control={<Radio />}
+                        label="Premium User"
+                        disabled
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                )}
               </div>
 
-              {isEditing ? (
-                <Button
-                  sx={{
-                    backgroundColor: "#ff4d4f",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#ff7875",
-                    },
-                    mt: 2,
-                  }}
-                  variant="contained"
-                  onClick={handleSaveChanges}
-                >
-                  Save Changes
-                </Button>
-              ) : (
-                <Button
-                  sx={{
-                    backgroundColor: "#ff4d4f",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#ff7875",
-                    },
-                    mt: 2,
-                  }}
-                  variant="contained"
-                  onClick={handleEditProfile}
-                >
-                  Edit Profile
-                </Button>
-              )}
+              {clientLoaded &&
+                currentUserId === userId &&
+                (isEditing ? (
+                  <Button
+                    sx={{
+                      backgroundColor: "#ff4d4f",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#ff7875",
+                      },
+                      mt: 2,
+                    }}
+                    variant="contained"
+                    onClick={handleSaveChanges}
+                  >
+                    Save Changes
+                  </Button>
+                ) : (
+                  <Button
+                    sx={{
+                      backgroundColor: "#ff4d4f",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#ff7875",
+                      },
+                      mt: 2,
+                    }}
+                    variant="contained"
+                    onClick={handleEditProfile}
+                  >
+                    Edit Profile
+                  </Button>
+                ))}
             </Box>
           </Box>
         </Container>
@@ -435,8 +433,9 @@ export default function UserProfile() {
             </Alert>
           )}
         </Snackbar>
-        <BottomBar />
       </Box>
     </>
   );
-}
+};
+
+export default UserProfile;

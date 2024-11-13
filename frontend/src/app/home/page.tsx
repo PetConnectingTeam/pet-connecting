@@ -28,6 +28,8 @@ interface Service {
   serviceDateIni: string;
   photos: PhotoState[];
   publisher: string;
+  profilePhotoMimeType: string | undefined;
+  profilePhotoBase64: string | undefined;
 }
 
 interface Aplication {
@@ -42,11 +44,20 @@ interface PhotoState {
   PetID: number;
   Photo: string;
 }
+interface User {
+  email: string;
+  id: number;
+  image_mimetype: string | null;
+  name: string;
+  profile_image_base64: string | null;
+  rating: number;
+}
 
 const HomePage: React.FC = () => {
   const [aplications, setAplications] = useState<Aplication[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<User[]>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
@@ -65,18 +76,38 @@ const HomePage: React.FC = () => {
     const fetchServices = async () => {
       try {
         const token = Cookies.get("accessToken");
-        const url = animal_type
-          ? `http://127.0.0.1:5001/services?animal_type=${animal_type}`
-          : `http://127.0.0.1:5001/services`;
-
-        const response = await axios.get(url, {
+        const response = await axios.get("http://127.0.0.1:5001/services", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (Array.isArray(response.data)) {
           setServices(response.data);
+        }
+
+        // Obtener usuarios
+        const usersResponse = await axios.get("http://127.0.0.1:5001/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (Array.isArray(usersResponse.data)) {
+          response.data.forEach((service: Service) => {
+            const user = usersResponse.data.find(
+              (user: User) => user.id === service.PublisherId
+            );
+
+            setServices((prev) =>
+              prev.map((prevService) =>
+                prevService.ServiceId === service.ServiceId
+                  ? {
+                      ...prevService,
+                      profilePhotoMimeType: user?.image_mimetype,
+                      profilePhotoBase64: user?.profile_image_base64,
+                    }
+                  : prevService
+              )
+            );
+          });
         }
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -108,7 +139,7 @@ const HomePage: React.FC = () => {
 
     fetchServices();
     fetchAplications();
-  }, [animal_type]);
+  }, []);
 
   // Filtrar servicios por aceptar y servicios solicitados
   const servicesToAccept = services.filter((service) =>
@@ -320,16 +351,23 @@ const HomePage: React.FC = () => {
                       marginBottom: 2,
                     }}
                   >
-                    <img
-                      src="profile_picture_url"
-                      alt="Profile"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "50%",
-                        marginRight: "10px",
-                      }}
-                    />
+                    <a
+                      href={`/userProfile/${service.PublisherId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        key={service.PublisherId}
+                        src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
+                        alt="Profile"
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          marginRight: "10px",
+                        }}
+                      />
+                    </a>
                     <Box>
                       <Typography
                         variant="body1"

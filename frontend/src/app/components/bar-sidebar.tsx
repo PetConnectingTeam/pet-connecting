@@ -33,6 +33,8 @@ import {
 } from "@mui/material";
 import { Home, Pets } from "@mui/icons-material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 const drawerWidth = 240;
 
 const tips = [
@@ -85,6 +87,7 @@ export default function Component() {
   const [isFormValid, setIsFormValid] = useState(false);
   const [newPetId, setNewPetId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null); // State for selected image file
+  const router = useRouter();
 
   useEffect(() => {
     const randomTip = tips[Math.floor(Math.random() * tips.length)];
