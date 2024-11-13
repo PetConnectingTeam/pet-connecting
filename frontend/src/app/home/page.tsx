@@ -18,6 +18,7 @@ import {
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 interface Service {
   PublisherId: number;
@@ -477,11 +478,7 @@ const HomePage: React.FC = () => {
                                   border: "1px solid #ddd",
                                 }}
                               >
-                                <a
-                                  href={`/petsProfile/${photo.PetID}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
+                                <Link href={`/petsProfile/${photo.PetID}`}>
                                   <img
                                     src={`data:${photo.MimeType};base64,${photo.Photo}`}
                                     alt={`Pet Image ${index + 1}`}
@@ -491,7 +488,7 @@ const HomePage: React.FC = () => {
                                       objectFit: "cover",
                                     }}
                                   />
-                                </a>
+                                </Link>
                               </Box>
                             ))
                           ) : (
