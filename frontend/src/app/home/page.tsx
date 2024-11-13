@@ -438,7 +438,7 @@ const HomePage: React.FC = () => {
                           }}
                         >
                           <a
-                            href={`/pets/${photo.PetID}`}
+                            href={`/petsProfile/${photo.PetID}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >

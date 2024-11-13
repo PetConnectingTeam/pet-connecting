@@ -31,7 +31,7 @@ import {
   Alert,
   useMediaQuery,
 } from "@mui/material";
-import { Home, Pets } from "@mui/icons-material";
+import { Home } from "@mui/icons-material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -357,22 +357,21 @@ export default function Component() {
               </Link>
             </ListItem>
             <ListItem>
-              <Link
-                href="/userProfile"
-                style={{ textDecoration: "none", color: "inherit" }}
+              <ListItemButton
+                onClick={() =>
+                  router.push(`/userProfile/${Cookies.get("user_id")}`)
+                }
               >
-                <ListItemButton>
-                  <ListItemIcon>
-                    <Avatar
-                      src={
-                        profileImageUrl || "/placeholder.svg?height=40&width=40"
-                      }
-                      sx={{ width: 24, height: 24 }}
-                    />
-                  </ListItemIcon>
-                  <ListItemText primary="Profile" />
-                </ListItemButton>
-              </Link>
+                <ListItemIcon>
+                  <Avatar
+                    src={
+                      profileImageUrl || "/placeholder.svg?height=40&width=40"
+                    }
+                    sx={{ width: 24, height: 24 }}
+                  />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
             </ListItem>
             <ListItem>
               <ListItemButton onClick={handleClickOpen}>
