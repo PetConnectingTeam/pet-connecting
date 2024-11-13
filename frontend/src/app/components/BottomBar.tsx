@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import ChatIcon from '@mui/icons-material/Chat';
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -222,6 +223,12 @@ const BottomBar: React.FC = () => {
           component="a"
           href="/home"
           icon={<HomeIcon />}
+        />
+        <BottomNavigationAction
+          label="Chat"
+          component="a"
+          href="/home"
+          icon={<ChatIcon />}
         />
       </BottomNavigation>
 
