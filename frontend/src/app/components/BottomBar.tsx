@@ -23,6 +23,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const BottomBar: React.FC = () => {
   const theme = useTheme();
@@ -72,6 +73,7 @@ const BottomBar: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const isValid =
@@ -234,7 +236,7 @@ const BottomBar: React.FC = () => {
           label="Profile"
           icon={<AccountCircleIcon />}
           component="a"
-          href="/userProfile"
+          onClick={() => router.push(`/userProfile/${Cookies.get("user_id")}`)}
         />
         <BottomNavigationAction
           label="Search"
