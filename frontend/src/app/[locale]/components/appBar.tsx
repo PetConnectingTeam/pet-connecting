@@ -36,6 +36,7 @@ import {
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import LanguageChanger from "./language-switcher";
 
 // Define types for pet list and events
 interface Pet {
@@ -70,7 +71,7 @@ const SearchIconWrapper = styled("div")({
   justifyContent: "center",
 });
 
-const StyledInputBase = styled(InputBase)(({ }) => ({
+const StyledInputBase = styled(InputBase)(({}) => ({
   color: "inherit",
   paddingLeft: "40px",
   paddingRight: "10px",
@@ -140,8 +141,10 @@ export default function NavigationBar() {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+  const handleSearchKeyPress = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Enter") {
       router.push(`/home?animal_type=${searchTerm}`);
     }
   };
@@ -386,6 +389,9 @@ export default function NavigationBar() {
             </IconButton>
           )}
         </SearchWrapper>
+
+        <LanguageChanger />
+
         <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button

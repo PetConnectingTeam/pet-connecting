@@ -25,7 +25,7 @@ import Cookies from "js-cookie";
 import { useEffect } from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TweetBox from "../../components/tweet-box";
-import NotFoundPage from "@/app/components/not-found";
+import NotFoundPage from "@/app/[locale]/components/not-found";
 
 const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
   params,
