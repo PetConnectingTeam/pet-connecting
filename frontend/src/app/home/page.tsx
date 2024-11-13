@@ -14,11 +14,11 @@ import {
   Tab,
   useMediaQuery,
   useTheme,
+  Link,
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 interface Service {
   PublisherId: number;
@@ -49,6 +49,7 @@ interface PhotoState {
   PetID: number;
   Photo: string;
 }
+
 interface User {
   email: string;
   id: number;
@@ -65,7 +66,6 @@ const HomePage: React.FC = () => {
   const [aplications, setAplications] = useState<Aplication[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [users, setUsers] = useState<User[]>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
@@ -74,6 +74,7 @@ const HomePage: React.FC = () => {
   const [applicationsForService, setApplicationsForService] = useState<
     Aplication[]
   >([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const UserId = Number(Cookies.get("user_id"));
 
@@ -84,16 +85,20 @@ const HomePage: React.FC = () => {
     const fetchServices = async () => {
       try {
         const token = Cookies.get("accessToken");
-        const response = await axios.get("http://127.0.0.1:5001/services", {
+        const url = animal_type
+          ? `http://127.0.0.1:5001/services?animal_type=${animal_type}`
+          : `http://127.0.0.1:5001/services`;
+
+        const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+
         if (Array.isArray(response.data)) {
           setServices(response.data);
         }
 
-        // Obtener usuarios
         const usersResponse = await axios.get("http://127.0.0.1:5001/users", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -321,7 +326,7 @@ const HomePage: React.FC = () => {
         alignItems: "center",
         minHeight: "100vh",
         bgcolor: "#f5f8fa",
-        padding: 2,
+        paddingTop: 5,
       }}
     >
       {isMobile ? (
@@ -386,16 +391,19 @@ const HomePage: React.FC = () => {
                             marginBottom: 2,
                           }}
                         >
-                          <img
-                            src="profile_picture_url"
-                            alt="Profile"
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
-                              marginRight: "10px",
-                            }}
-                          />
+                          <Link href={`/userProfile/${service.PublisherId}`}>
+                            <img
+                              key={service.PublisherId}
+                              src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
+                              alt="Profile"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                marginRight: "10px",
+                              }}
+                            />
+                          </Link>
                           <Box>
                             <Typography
                               variant="body1"
@@ -705,23 +713,16 @@ const HomePage: React.FC = () => {
                           marginBottom: 2,
                         }}
                       >
-                        <a
-                          href={`/userProfile/${service.PublisherId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            key={service.PublisherId}
-                            src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
-                            alt="Profile"
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
-                              marginRight: "10px",
-                            }}
-                          />
-                        </a>
+                        <img
+                          src="profile_picture_url"
+                          alt="Profile"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            marginRight: "10px",
+                          }}
+                        />
                         <Box>
                           <Typography
                             variant="body1"
