@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import ChatIcon from '@mui/icons-material/Chat';
+import ChatIcon from "@mui/icons-material/Chat";
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  Typography,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import HomeIcon from "@mui/icons-material/Home";
@@ -23,23 +24,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-interface PetFormData {
-  name: string;
-  animal_type: string;
-  breed: string;
-  description: string;
-  allergies: string;
-  weight: number;
-  size: string;
-  age: number;
-}
-
 const BottomBar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [formOpen, setFormOpen] = useState(false);
-  const [imageUploadOpen, setImageUploadOpen] = useState(false);
-  const [formData, setFormData] = useState<PetFormData>({
+
+  const [selectedPet, setSelectedPet] = useState<string | null>(null);
+  const [customPetName, setCustomPetName] = useState("");
+  const [customPetInputVisible, setCustomPetInputVisible] = useState(false);
+  const [formData, setFormData] = useState({
     name: "",
     animal_type: "",
     breed: "",
@@ -49,6 +41,32 @@ const BottomBar: React.FC = () => {
     size: "small",
     age: 0,
   });
+
+  const handlePetTypeSelect = (petType: string) => {
+    setCustomPetInputVisible(false);
+    setSelectedPet(petType);
+    setFormData((prev) => ({
+      ...prev,
+      animal_type: petType.toLowerCase(),
+    }));
+  };
+  const handleCustomPetNameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setCustomPetName(value);
+    setFormData((prev) => ({
+      ...prev,
+      animal_type: value.toLowerCase(),
+    }));
+  };
+  const handleCustomPetIconClick = () => {
+    setCustomPetInputVisible(true);
+    setSelectedPet("custom");
+  };
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [imageUploadOpen, setImageUploadOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [newPetId, setNewPetId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -275,16 +293,47 @@ const BottomBar: React.FC = () => {
             onChange={handleInputChange}
             size="small"
           />
-          <TextField
-            label="Animal Type"
-            fullWidth
-            margin="dense"
-            variant="outlined"
-            name="animal_type"
-            value={formData.animal_type}
-            onChange={handleInputChange}
-            size="small"
-          />
+          <Box display="flex" justifyContent="space-around" sx={{ my: 2 }}>
+            {[
+              { name: "Dog", icon: "🐶" },
+              { name: "Cat", icon: "🐱" },
+              { name: "Bird", icon: "🐦" },
+            ].map((pet, index) => (
+              <Box
+                key={index}
+                onClick={() => handlePetTypeSelect(pet.name)}
+                sx={{
+                  cursor: "pointer",
+                  padding: 1,
+                  border:
+                    selectedPet === pet.name
+                      ? "2px solid green"
+                      : "2px solid transparent",
+                  borderRadius: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h4">{pet.icon}</Typography>
+                <Typography variant="caption">{pet.name}</Typography>
+              </Box>
+            ))}
+            <Box
+              onClick={handleCustomPetIconClick}
+              sx={{
+                cursor: "pointer",
+                padding: 1,
+                border:
+                  selectedPet === "custom"
+                    ? "2px solid green"
+                    : "2px solid transparent",
+                borderRadius: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="h4">🐾</Typography>
+              <Typography variant="caption">Custom</Typography>
+            </Box>
+          </Box>
           <TextField
             label="Breed"
             fullWidth
