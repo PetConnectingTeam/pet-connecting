@@ -10,6 +10,10 @@ import {
   Divider,
   Button,
   Modal,
+  Tabs,
+  Tab,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -44,6 +48,9 @@ interface PhotoState {
 }
 
 const HomePage: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [tabIndex, setTabIndex] = useState(0);
   const [aplications, setAplications] = useState<Aplication[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -124,12 +131,12 @@ const HomePage: React.FC = () => {
   );
 
   const handleOpenModal = async (serviceId: number) => {
+    console.log("Opening modal for service:", serviceId);
     setSelectedServiceId(serviceId);
     setOpenModal(true);
     try {
       const token = Cookies.get("accessToken");
 
-      // Obtener las aplicaciones para el servicio
       const applicationResponse = await axios.get(
         `http://127.0.0.1:5001/service/${serviceId}/applications`,
         {
@@ -142,7 +149,6 @@ const HomePage: React.FC = () => {
         setApplicationsForService(applicationResponse.data);
       }
 
-      // Obtener todos los servicios y encontrar el que coincide con `serviceId`
       const servicesResponse = await axios.get(
         "http://127.0.0.1:5001/services",
         {
@@ -156,7 +162,7 @@ const HomePage: React.FC = () => {
         const selectedService = servicesResponse.data.find(
           (service: Service) => service.ServiceId === serviceId
         );
-        setServiceInfo(selectedService || null); // Almacenar el servicio específico o null si no se encuentra
+        setServiceInfo(selectedService || null);
       }
     } catch (error) {
       console.error("Error fetching applications or service info:", error);
@@ -271,295 +277,717 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
+  };
+
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
-        alignItems: "flex-start",
+        flexDirection: "column",
+        alignItems: "center",
         minHeight: "100vh",
-        bgcolor: "#f5f5f5",
+        bgcolor: "#f5f8fa",
         padding: 2,
       }}
     >
-      <Container sx={{ flex: 1, marginRight: 2 }}>
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <Stack
-            spacing={3}
-            paddingTop={5}
+      {isMobile ? (
+        <Box sx={{ width: "100%" }}>
+          <Tabs
+            value={tabIndex}
+            onChange={handleTabChange}
+            centered
             sx={{
-              flexDirection: "column",
-              alignItems: "center",
-              "& > :not(style)": {
-                width: "100%",
-                maxWidth: "700px",
+              "& .MuiTabs-indicator": {
+                backgroundColor: "ff4d4f",
+              },
+              "& .Mui-selected": {
+                color: "#ff4d4f",
+              },
+              "& .MuiTab-root": {
+                color: "ff4d4f",
               },
             }}
           >
-            {services.length === 0 ? (
-              <Typography variant="h6">No se encontraron servicios.</Typography>
-            ) : (
-              services.map((service) => (
-                <Box
-                  key={service.ServiceId}
+            <Tab label="Services" sx={{ color: "gray" }} />
+            <Tab label="Your Applications" sx={{ color: "gray" }} />
+          </Tabs>
+          {tabIndex === 0 && (
+            <Container sx={{ marginTop: 2 }}>
+              {loading ? (
+                <CircularProgress />
+              ) : (
+                <Stack
+                  spacing={3}
+                  paddingTop={5}
                   sx={{
-                    padding: 2,
-                    bgcolor: "#f5f8fa",
-                    borderRadius: 2,
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e1e8ed",
-                    width: "100%",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    "& > :not(style)": {
+                      width: "100%",
+                      maxWidth: "700px",
+                    },
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: 2,
-                    }}
-                  >
-                    <img
-                      src="profile_picture_url"
-                      alt="Profile"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "50%",
-                        marginRight: "10px",
+                  {services.length === 0 ? (
+                    <Typography variant="h6">
+                      No se encontraron servicios.
+                    </Typography>
+                  ) : (
+                    services.map((service) => (
+                      <Box
+                        key={service.ServiceId}
+                        sx={{
+                          padding: 2,
+                          bgcolor: "#f5f8fa",
+                          borderRadius: 2,
+                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                          border: "1px solid #e1e8ed",
+                          width: "100%",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 2,
+                          }}
+                        >
+                          <img
+                            src="profile_picture_url"
+                            alt="Profile"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              marginRight: "10px",
+                            }}
+                          />
+                          <Box>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: "bold", color: "#14171A" }}
+                            >
+                              {service.publisher}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "#657786" }}
+                            >
+                              {new Date(
+                                service.publishDate
+                              ).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            color: "#14171A",
+                            fontWeight: "bold",
+                            marginBottom: 2,
+                          }}
+                        >
+                          {service.description}
+                        </Typography>
+                        <Box sx={{ marginBottom: 2 }}>
+                          <Typography variant="body2" sx={{ color: "#657786" }}>
+                            📍 {service.address}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#657786" }}>
+                            💸 {service.cost} Points
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#657786" }}>
+                            🗓{" "}
+                            {new Date(
+                              service.serviceDateIni
+                            ).toLocaleDateString()}{" "}
+                            -{" "}
+                            {new Date(
+                              service.serviceDateEnd
+                            ).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#657786" }}>
+                            🐾 Pets: {service.pets.join(", ")}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: "bold",
+                              color: service.completed ? "#17bf63" : "#e0245e",
+                            }}
+                          >
+                            {service.completed
+                              ? "✅ Completado"
+                              : "⏳ Pendiente"}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            overflowX: "auto",
+                            gap: 1,
+                            padding: 1,
+                          }}
+                        >
+                          {service.photos.length > 0 ? (
+                            service.photos.map((photo, index) => (
+                              <Box
+                                key={index}
+                                sx={{
+                                  minWidth: "100px",
+                                  height: "100px",
+                                  borderRadius: "8px",
+                                  overflow: "hidden",
+                                  flexShrink: 0,
+                                  border: "1px solid #ddd",
+                                }}
+                              >
+                                <a
+                                  href={`/petsProfile/${photo.PetID}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <img
+                                    src={`data:${photo.MimeType};base64,${photo.Photo}`}
+                                    alt={`Pet Image ${index + 1}`}
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </a>
+                              </Box>
+                            ))
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "#657786" }}
+                            >
+                              No images available
+                            </Typography>
+                          )}
+                        </Box>
+                        {service.PublisherId !== UserId &&
+                          !service.completed && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              sx={{
+                                mt: 1,
+                                backgroundColor: "#e53935",
+                                color: "#fff",
+                                "&:hover": {
+                                  backgroundColor: "#d32f2f",
+                                },
+                                borderRadius: 2,
+                                boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                                fontWeight: "bold",
+                                padding: "8px 16px",
+                                textTransform: "none",
+                              }}
+                              onClick={() => {
+                                const confirmed = window.confirm(
+                                  "Are you sure you want to apply for this service?"
+                                );
+                                if (confirmed) {
+                                  fetchAplicationToService(service.ServiceId);
+                                }
+                              }}
+                            >
+                              Apply
+                            </Button>
+                          )}
+                      </Box>
+                    ))
+                  )}
+                </Stack>
+              )}
+            </Container>
+          )}
+          {tabIndex === 1 && (
+            <Box sx={{ width: "100%", marginTop: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+              >
+                Services where you applied
+              </Typography>
+              <Stack spacing={2}>
+                {servicesToAccept.length > 0 ? (
+                  servicesToAccept.map((service) => {
+                    const application = aplications.find(
+                      (aplication) =>
+                        aplication.ServiceId === service.ServiceId &&
+                        aplication.UserId === UserId
+                    );
+
+                    return (
+                      <Box
+                        key={service.ServiceId}
+                        sx={{
+                          padding: 2,
+                          bgcolor: application?.Accepted
+                            ? "#b1fcb2"
+                            : "#ffebee",
+                          borderRadius: 2,
+                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                          border: "1px solid #e1e8ed",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: "bold", color: "#14171A" }}
+                        >
+                          {service.description}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#657786" }}>
+                          🐾 Pets:{" "}
+                          {Array.isArray(service.pets)
+                            ? service.pets.join(", ")
+                            : "N/A"}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: application?.Accepted
+                              ? "#4caf50"
+                              : "#e0245e",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {application?.Accepted
+                            ? "Approved"
+                            : "Application pending approval"}
+                        </Typography>
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Typography variant="body2" sx={{ color: "#657786" }}>
+                    No hay servicios por aceptar.
+                  </Typography>
+                )}
+              </Stack>
+              <Divider sx={{ my: 3 }} />
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+              >
+                Services published
+              </Typography>
+              <Stack spacing={2}>
+                {servicesRequested.length > 0 ? (
+                  servicesRequested.map((service) => (
+                    <Box
+                      key={service.ServiceId}
+                      sx={{
+                        padding: 2,
+                        bgcolor: "#fff",
+                        borderRadius: 2,
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e1e8ed",
                       }}
-                    />
-                    <Box>
+                    >
                       <Typography
-                        variant="body1"
+                        variant="body2"
                         sx={{ fontWeight: "bold", color: "#14171A" }}
                       >
-                        {service.publisher}
+                        {service.description}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#657786" }}>
-                        {new Date(service.publishDate).toLocaleDateString()}
+                        🐾 Pets: {service.pets.join(", ")}
+                      </Typography>
+                      {!service.completed && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleOpenModal(service.ServiceId)}
+                          sx={{
+                            mt: 1,
+                            backgroundColor: "#e53935",
+                            color: "#fff",
+                            "&:hover": {
+                              backgroundColor: "#d32f2f",
+                            },
+                            borderRadius: 2,
+                            boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                            fontWeight: "bold",
+                            padding: "8px 16px",
+                            textTransform: "none",
+                          }}
+                        >
+                          View Applications
+                        </Button>
+                      )}
+                    </Box>
+                  ))
+                ) : (
+                  <Typography variant="body2" sx={{ color: "#657786" }}>
+                    No has solicitado ningún servicio.
+                  </Typography>
+                )}
+              </Stack>
+            </Box>
+          )}
+        </Box>
+      ) : (
+        <Box sx={{ display: "flex", flexDirection: "row", width: "100%" }}>
+          <Container sx={{ flex: 1, marginRight: 2 }}>
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <Stack
+                spacing={3}
+                paddingTop={5}
+                sx={{
+                  flexDirection: "column",
+                  alignItems: "center",
+                  "& > :not(style)": {
+                    width: "100%",
+                    maxWidth: "700px",
+                  },
+                }}
+              >
+                {services.length === 0 ? (
+                  <Typography variant="h6">
+                    No se encontraron servicios.
+                  </Typography>
+                ) : (
+                  services.map((service) => (
+                    <Box
+                      key={service.ServiceId}
+                      sx={{
+                        padding: 2,
+                        bgcolor: "#f5f8fa",
+                        borderRadius: 2,
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e1e8ed",
+                        width: "100%",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: 2,
+                        }}
+                      >
+                        <img
+                          src="profile_picture_url"
+                          alt="Profile"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            marginRight: "10px",
+                          }}
+                        />
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: "bold", color: "#14171A" }}
+                          >
+                            {service.publisher}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#657786" }}>
+                            {new Date(service.publishDate).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: "#14171A",
+                          fontWeight: "bold",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {service.description}
+                      </Typography>
+                      <Box sx={{ marginBottom: 2 }}>
+                        <Typography variant="body2" sx={{ color: "#657786" }}>
+                          📍 {service.address}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#657786" }}>
+                          💸 {service.cost} Points
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#657786" }}>
+                          🗓{" "}
+                          {new Date(
+                            service.serviceDateIni
+                          ).toLocaleDateString()}{" "}
+                          -{" "}
+                          {new Date(
+                            service.serviceDateEnd
+                          ).toLocaleDateString()}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#657786" }}>
+                          🐾 Pets: {service.pets.join(", ")}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: "bold",
+                            color: service.completed ? "#17bf63" : "#e0245e",
+                          }}
+                        >
+                          {service.completed ? "✅ Completado" : "⏳ Pendiente"}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          overflowX: "auto",
+                          gap: 1,
+                          padding: 1,
+                        }}
+                      >
+                        {service.photos.length > 0 ? (
+                          service.photos.map((photo, index) => (
+                            <Box
+                              key={index}
+                              sx={{
+                                minWidth: "100px",
+                                height: "100px",
+                                borderRadius: "8px",
+                                overflow: "hidden",
+                                flexShrink: 0,
+                                border: "1px solid #ddd",
+                              }}
+                            >
+                              <a
+                                href={`/petsProfile/${photo.PetID}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <img
+                                  src={`data:${photo.MimeType};base64,${photo.Photo}`}
+                                  alt={`Pet Image ${index + 1}`}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              </a>
+                            </Box>
+                          ))
+                        ) : (
+                          <Typography variant="body2" sx={{ color: "#657786" }}>
+                            No images available
+                          </Typography>
+                        )}
+                      </Box>
+                      {service.PublisherId !== UserId && !service.completed && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            mt: 1,
+                            backgroundColor: "#e53935",
+                            color: "#fff",
+                            "&:hover": {
+                              backgroundColor: "#d32f2f",
+                            },
+                            borderRadius: 2,
+                            boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                            fontWeight: "bold",
+                            padding: "8px 16px",
+                            textTransform: "none",
+                          }}
+                          onClick={() => {
+                            const confirmed = window.confirm(
+                              "Are you sure you want to apply for this service?"
+                            );
+                            if (confirmed) {
+                              fetchAplicationToService(service.ServiceId);
+                            }
+                          }}
+                        >
+                          Apply
+                        </Button>
+                      )}
+                    </Box>
+                  ))
+                )}
+              </Stack>
+            )}
+          </Container>
+          <Box sx={{ width: "300px", marginLeft: 3 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+            >
+              Services where you applied
+            </Typography>
+            <Stack spacing={2}>
+              {servicesToAccept.length > 0 ? (
+                servicesToAccept.map((service) => {
+                  const application = aplications.find(
+                    (aplication) =>
+                      aplication.ServiceId === service.ServiceId &&
+                      aplication.UserId === UserId
+                  );
+
+                  return (
+                    <Box
+                      key={service.ServiceId}
+                      sx={{
+                        padding: 2,
+                        bgcolor: application?.Accepted ? "#b1fcb2" : "#ffebee",
+                        borderRadius: 2,
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e1e8ed",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: "bold", color: "#14171A" }}
+                      >
+                        {service.description}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#657786" }}>
+                        🐾 Pets:{" "}
+                        {Array.isArray(service.pets)
+                          ? service.pets.join(", ")
+                          : "N/A"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: application?.Accepted ? "#4caf50" : "#e0245e",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {application?.Accepted
+                          ? "Approved"
+                          : "Application pending approval"}
                       </Typography>
                     </Box>
-                  </Box>
-
-                  <Typography
-                    variant="body1"
+                  );
+                })
+              ) : (
+                <Typography variant="body2" sx={{ color: "#657786" }}>
+                  No hay servicios por aceptar.
+                </Typography>
+              )}
+            </Stack>
+            <Divider sx={{ my: 3 }} />
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+            >
+              Services published
+            </Typography>
+            <Stack spacing={2}>
+              {servicesRequested.length > 0 ? (
+                servicesRequested.map((service) => (
+                  <Box
+                    key={service.ServiceId}
                     sx={{
-                      color: "#14171A",
-                      fontWeight: "bold",
-                      marginBottom: 2,
+                      padding: 2,
+                      bgcolor: "#fff",
+                      borderRadius: 2,
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e1e8ed",
                     }}
                   >
-                    {service.description}
-                  </Typography>
-                  <Box sx={{ marginBottom: 2 }}>
-                    <Typography variant="body2" sx={{ color: "#657786" }}>
-                      📍 {service.address}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: "#657786" }}>
-                      💸 {service.cost} Points
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: "#657786" }}>
-                      🗓 {new Date(service.serviceDateIni).toLocaleDateString()}{" "}
-                      - {new Date(service.serviceDateEnd).toLocaleDateString()}
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", color: "#14171A" }}
+                    >
+                      {service.description}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "#657786" }}>
                       🐾 Pets: {service.pets.join(", ")}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: "bold",
-                        color: service.completed ? "#17bf63" : "#e0245e",
-                      }}
-                    >
-                      {service.completed ? "✅ Completado" : "⏳ Pendiente"}
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      overflowX: "auto",
-                      gap: 1,
-                      padding: 1,
-                    }}
-                  >
-                    {service.photos.length > 0 ? (
-                      service.photos.map((photo, index) => (
-                        <Box
-                          key={index}
-                          sx={{
-                            minWidth: "100px",
-                            height: "100px",
-                            borderRadius: "8px",
-                            overflow: "hidden",
-                            flexShrink: 0,
-                            border: "1px solid #ddd",
-                          }}
-                        >
-                          <a
-                            href={`/pets/${photo.PetID}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <img
-                              src={`data:${photo.MimeType};base64,${photo.Photo}`}
-                              alt={`Pet Image ${index + 1}`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </a>
-                        </Box>
-                      ))
-                    ) : (
-                      <Typography variant="body2" sx={{ color: "#657786" }}>
-                        No images available
-                      </Typography>
+                    {!service.completed && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleOpenModal(service.ServiceId)}
+                        sx={{
+                          mt: 1,
+                          backgroundColor: "#e53935",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#d32f2f",
+                          },
+                          borderRadius: 2,
+                          boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                          fontWeight: "bold",
+                          padding: "8px 16px",
+                          textTransform: "none",
+                        }}
+                      >
+                        View Applications
+                      </Button>
                     )}
                   </Box>
-                  {service.PublisherId !== UserId && !service.completed && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        mt: 1,
-                        backgroundColor: "#e53935",
-                        color: "#fff",
-                        "&:hover": {
-                          backgroundColor: "#d32f2f",
-                        },
-                        borderRadius: 2,
-                        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
-                        fontWeight: "bold",
-                        padding: "8px 16px",
-                        textTransform: "none",
-                      }}
-                      onClick={() => {
-                        const confirmed = window.confirm(
-                          "Are you sure you want to apply for this service?"
-                        );
-                        if (confirmed) {
-                          fetchAplicationToService(service.ServiceId);
-                        }
-                      }}
-                    >
-                      Apply
-                    </Button>
-                  )}
-                </Box>
-              ))
-            )}
-          </Stack>
-        )}
-      </Container>
+                ))
+              ) : (
+                <Typography variant="body2" sx={{ color: "#657786" }}>
+                  No has solicitado ningún servicio.
+                </Typography>
+              )}
+            </Stack>
+          </Box>
+        </Box>
+      )}
 
-      <Box sx={{ width: "300px", marginLeft: 3 }}>
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+      {/* Modal for viewing applications */}
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
         >
-          Services where you applied
-        </Typography>
-        <Stack spacing={2}>
-          {servicesToAccept.length > 0 ? (
-            servicesToAccept.map((service) => {
-              const application = aplications.find(
-                (aplication) =>
-                  aplication.ServiceId === service.ServiceId &&
-                  aplication.UserId === UserId
-              );
-
-              return (
-                <Box
-                  key={service.ServiceId}
-                  sx={{
-                    padding: 2,
-                    bgcolor: application?.Accepted ? "#b1fcb2" : "#ffebee",
-                    borderRadius: 2,
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e1e8ed",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: "bold", color: "#14171A" }}
-                  >
-                    {service.description}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "#657786" }}>
-                    🐾 Pets:{" "}
-                    {Array.isArray(service.pets)
-                      ? service.pets.join(", ")
-                      : "N/A"}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: application?.Accepted ? "#4caf50" : "#e0245e",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {application?.Accepted
-                      ? "Approved"
-                      : "Application pending approval"}
-                  </Typography>
-                </Box>
-              );
-            })
-          ) : (
-            <Typography variant="body2" sx={{ color: "#657786" }}>
-              No hay servicios por aceptar.
-            </Typography>
-          )}
-        </Stack>
-        <Divider sx={{ my: 3 }} />
-
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
-        >
-          Services published
-        </Typography>
-        <Stack spacing={2}>
-          {servicesRequested.length > 0 ? (
-            servicesRequested.map((service) => (
+          <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
+            Applications for Service {selectedServiceId}
+          </Typography>
+          {applicationsForService.length > 0 ? (
+            applicationsForService.map((application) => (
               <Box
-                key={service.ServiceId}
+                key={application.UserId}
                 sx={{
-                  padding: 2,
-                  bgcolor: "#fff",
-                  borderRadius: 2,
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                  border: "1px solid #e1e8ed",
+                  mb: 1,
+                  p: 2,
+                  bgcolor: application.Accepted ? "#e8f5e9" : "#ffebee",
+                  borderRadius: 1,
                 }}
               >
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: "bold", color: "#14171A" }}
+                  sx={{ color: application.Accepted ? "#4caf50" : "#e0245e" }}
                 >
-                  {service.description}
+                  User: {serviceInfo?.publisher} -{" "}
+                  {application.Accepted ? "Approved" : "Pending Approval"}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#657786" }}>
-                  🐾 Pets: {service.pets.join(", ")}
-                </Typography>
-
-                {/* Botón para ver aplicaciones */}
-                {!service.completed && (
+                {!application.Accepted ? (
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => handleOpenModal(service.ServiceId)}
                     sx={{
                       mt: 1,
-                      backgroundColor: "#e53935", // Rojo
-                      color: "##ff4d4f",
+                      backgroundColor: "#e53935",
+                      color: "#fff",
                       "&:hover": {
-                        backgroundColor: "#d32f2f", // Un rojo más oscuro en hover
+                        backgroundColor: "#d32f2f",
                       },
                       borderRadius: 2,
                       boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -567,118 +995,43 @@ const HomePage: React.FC = () => {
                       padding: "8px 16px",
                       textTransform: "none",
                     }}
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        "Are you sure you want to accept this application?"
+                      );
+                      if (confirmed) {
+                        handleAcceptApplication(application.UserId);
+                      }
+                    }}
                   >
-                    View Applications
+                    Accept
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 1 }}
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        "Are you sure you want to reject this application?"
+                      );
+                      if (confirmed) {
+                        handleUnAcceptApplication(application.UserId);
+                      }
+                    }}
+                  >
+                    Reject
                   </Button>
                 )}
               </Box>
             ))
           ) : (
             <Typography variant="body2" sx={{ color: "#657786" }}>
-              No has solicitado ningún servicio.
+              No applications available.
             </Typography>
           )}
-        </Stack>
-
-        {/* Modal para mostrar las aplicaciones */}
-        <Modal open={openModal} onClose={handleCloseModal}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
-              Applications for Service {selectedServiceId}
-            </Typography>
-            {applicationsForService.length > 0 ? (
-              applicationsForService.map((application) => (
-                <Box
-                  key={application.UserId}
-                  sx={{
-                    mb: 1,
-                    p: 2,
-                    bgcolor: application.Accepted ? "#e8f5e9" : "#ffebee",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ color: application.Accepted ? "#4caf50" : "#e0245e" }}
-                  >
-                    User: {serviceInfo?.publisher} -{" "}
-                    {application.Accepted ? "Approved" : "Pending Approval"}
-                  </Typography>
-                  {!application.Accepted ? (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        mt: 1,
-                        backgroundColor: "#e53935", // Rojo
-                        color: "##ff4d4f",
-                        "&:hover": {
-                          backgroundColor: "#d32f2f", // Un rojo más oscuro en hover
-                        },
-                        borderRadius: 2,
-                        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
-                        fontWeight: "bold",
-                        padding: "8px 16px",
-                        textTransform: "none",
-                      }}
-                      onClick={() => {
-                        const confirmed = window.confirm(
-                          "Are you sure you want to accept this application?"
-                        );
-                        if (confirmed) {
-                          handleAcceptApplication(application.UserId);
-                        }
-                      }}
-                    >
-                      Accept
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{ mt: 1 }}
-                      onClick={() => {
-                        const confirmed = window.confirm(
-                          "Are you sure you want to cancel this application?"
-                        );
-                        if (confirmed) {
-                          handleUnAcceptApplication(application.UserId);
-                        }
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </Box>
-              ))
-            ) : (
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                No applications available for this service.
-              </Typography>
-            )}
-            <Button
-              onClick={handleCloseModal}
-              sx={{ mt: 2 }}
-              variant="contained"
-              color="secondary"
-            >
-              Close
-            </Button>
-          </Box>
-        </Modal>
-      </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 };
