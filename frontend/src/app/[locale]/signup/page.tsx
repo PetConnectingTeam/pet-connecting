@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const SignUp: React.FC = () => {
   const [name, setName] = React.useState<string>("");
@@ -19,6 +20,7 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
   const router = useRouter();
+  const t = useTranslations("SignUp");
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
@@ -68,23 +70,23 @@ const SignUp: React.FC = () => {
             align="center"
             sx={{ fontWeight: "bold", mb: 3 }}
           >
-            Create a New Account
+            {t("create_new_account")}
           </Typography>
           <Box component="form" noValidate autoComplete="off">
             <TextField
               fullWidth
-              label="Name"
+              label={t("name")}
               variant="outlined"
               margin="normal"
-              placeholder="Enter your name"
+              placeholder={t("enter_your_name")}
               onChange={handleNameChange}
             />
             <TextField
               fullWidth
-              label="Surname"
+              label={t("surname")}
               variant="outlined"
               margin="normal"
-              placeholder="Enter your surname"
+              placeholder={t("enter_your_surname")}
               onChange={handleSurnameChange}
             />
             <TextField
@@ -93,16 +95,16 @@ const SignUp: React.FC = () => {
               variant="outlined"
               margin="normal"
               type="email"
-              placeholder="Enter your email"
+              placeholder={t("enter_your_email")}
               onChange={handleEmailChange}
             />
             <TextField
               fullWidth
-              label="Password"
+              label={t("password")}
               variant="outlined"
               margin="normal"
               type="password"
-              placeholder="Create a password"
+              placeholder={t("enter_your_password")}
               onChange={handlePasswordChange}
             />
             <Button
@@ -117,7 +119,7 @@ const SignUp: React.FC = () => {
               }}
               onClick={handleSignUpButton}
             >
-              Sign Up
+              {t("sign_up")}
             </Button>
           </Box>
         </CardContent>

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
 import StarIcon from "@mui/icons-material/Star";
-import { useTranslation } from "react-i18next";
+import { useTranslations } from "next-intl";
 import {
   Avatar,
   Button,
@@ -21,6 +21,7 @@ import {
 import axios from "axios";
 import MenuAppBar from "../components/appBar";
 
+
 export default function UserProfile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,12 +37,13 @@ export default function UserProfile() {
   const accessToken = Cookies.get("accessToken");
   const userId = Cookies.get("user_id");
   const roleId = Cookies.get("role_id");
+  const t = useTranslations("userProfile");
 
   const getErrorMessage = (error: any) => {
     return (
       error?.response?.data?.msg ||
       error?.message ||
-      "An unknown error occurred"
+      t("unknown_error")
     );
   };
 
@@ -89,7 +91,7 @@ export default function UserProfile() {
       setErrorMessage(
         error?.response?.data?.msg ||
           error?.message ||
-          "An unknown error occurred"
+          t("unknown_error")
       );
     }
   }, [userId, roleId, accessToken]);
@@ -152,7 +154,7 @@ export default function UserProfile() {
       if (response.status === 200) {
         setIsEditing(false);
         setErrorMessage(null);
-        setSuccessMessage("Profile updated successfully");
+        setSuccessMessage(t("profile_updated_success"));
 
         Cookies.set("role_id", roleId.toString());
 
@@ -162,7 +164,7 @@ export default function UserProfile() {
 
         await fetchUserData();
       } else {
-        throw new Error("Failed to update profile");
+        throw new Error(t("fialed_update_profile"));
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -189,13 +191,13 @@ export default function UserProfile() {
       );
 
       if (response.status === 200) {
-        setSuccessMessage("Profile picture updated successfully");
+        setSuccessMessage(t("profile_updated_success"));
         setTimeout(() => {
           setSuccessMessage(null);
         }, 3000);
         await fetchUserData();
       } else {
-        throw new Error("Failed to update profile picture");
+        throw new Error(t("fialed_update_profile"));
       }
     } catch (error: any) {
       console.error("Error updating profile picture:", error);
@@ -299,7 +301,7 @@ export default function UserProfile() {
                     variant="contained"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    Change Picture
+                    {t("change_picture")}
                   </Button>
                 </>
               )}
@@ -308,7 +310,7 @@ export default function UserProfile() {
               <div>
                 <TextField
                   fullWidth
-                  label="Name"
+                  label={t("name")}
                   id="Name"
                   variant="outlined"
                   value={name}
@@ -347,24 +349,24 @@ export default function UserProfile() {
                 />
 
                 <FormControl component="fieldset" margin="normal">
-                  <FormLabel component="legend">User Role</FormLabel>
+                  <FormLabel component="legend">{t("user_role")}</FormLabel>
                   <RadioGroup row value={userType}>
                     <FormControlLabel
                       value="petOwner"
                       control={<Radio />}
-                      label="Pet Owner"
+                      label={t("pet_owner")}
                       disabled
                     />
                     <FormControlLabel
                       value="basic"
                       control={<Radio />}
-                      label="Basic User"
+                      label={t("basic_user")}
                       disabled
                     />
                     <FormControlLabel
                       value="premium"
                       control={<Radio />}
-                      label="Premium User"
+                      label={t("premium_user")}
                       disabled
                     />
                   </RadioGroup>
@@ -384,7 +386,7 @@ export default function UserProfile() {
                   variant="contained"
                   onClick={handleSaveChanges}
                 >
-                  Save Changes
+                  {t("save_changes")}
                 </Button>
               ) : (
                 <Button
@@ -399,7 +401,7 @@ export default function UserProfile() {
                   variant="contained"
                   onClick={handleEditProfile}
                 >
-                  Edit Profile
+                  {t("edit_profile")}
                 </Button>
               )}
             </Box>

@@ -16,12 +16,14 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import logo from "../../../../public/logo.png";
+import { useTranslations } from "next-intl";
+
 
 const SignInSide: React.FC = () => {
   const [email, setEmail] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
   const router = useRouter();
-
+  const t = useTranslations("Sigin");
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
@@ -100,7 +102,7 @@ const SignInSide: React.FC = () => {
             align="center"
             sx={{ mb: 3, fontWeight: "bold" }}
           >
-            Welcome Back
+            {t("welcom_back")}
           </Typography>
           <Box component="form" noValidate sx={{ mt: 1 }}>
             <TextField
@@ -112,7 +114,7 @@ const SignInSide: React.FC = () => {
               name="email"
               autoComplete="email"
               autoFocus
-              placeholder="Enter your email"
+              placeholder={t("enter_your_email")}
               onChange={handleEmailChange}
             />
             <TextField
@@ -120,11 +122,11 @@ const SignInSide: React.FC = () => {
               required
               fullWidth
               name="password"
-              label="Password"
+              label= {t("password")}
               type="password"
               id="password"
               autoComplete="current-password"
-              placeholder="Enter your password"
+              placeholder={t("enter_your_password")}
               onChange={handlePasswordChange}
             />
             <Box
@@ -136,7 +138,7 @@ const SignInSide: React.FC = () => {
               }}
             >
               <Link href="#" variant="body2" sx={{ color: "#ff3b30" }}>
-                Forgot password?
+              {t("forgot_password")}
               </Link>
               <Button
                 type="button"
@@ -149,16 +151,16 @@ const SignInSide: React.FC = () => {
                 }}
                 onClick={handleSignInButton}
               >
-                Login
+                {t("login")}
               </Button>
             </Box>
           </Box>
         </CardContent>
       </Card>
       <Typography variant="body2" sx={{ mt: 2 }}>
-        Don&apos;t have an account?{" "}
+        {t("dont_have_account")}{" "}
         <Link href="/signup" sx={{ color: "#ff3b30" }}>
-          Create account
+        {t("create_account")}
         </Link>
       </Typography>
     </Box>

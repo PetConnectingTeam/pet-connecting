@@ -26,6 +26,7 @@ import { useEffect } from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TweetBox from "../../components/tweet-box";
 import NotFoundPage from "@/app/[locale]/components/not-found";
+import { useTranslations } from "next-intl";
 
 const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
   params,
@@ -47,7 +48,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
   >([]);
   const [notFound, setNotFound] = React.useState<boolean>(false);
   const [imagesUploaded, setImagesUploaded] = React.useState<File[]>([]);
-
+  const t = useTranslations("petsProfile");
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -237,7 +238,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                   {userName}
                 </Typography>
                 <Typography variant="subtitle1" component="div">
-                  {petName} Owner
+                  {petName} {t("owner")}
                 </Typography>
               </Box>
 
@@ -283,7 +284,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                           fontWeight: "bold",
                         }}
                       >
-                        Pet Details
+                        {t("pet_details")}
                       </Typography>
 
                       <IconButton aria-label="delete">
@@ -295,14 +296,14 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                       <ListItem>
                         <ListItemText>
                           <Typography variant="body1">
-                            Name: {petName}
+                          {t("name")} {petName}
                           </Typography>
                         </ListItemText>
                       </ListItem>
                       <ListItem>
                         <ListItemText>
                           <Typography variant="body1">
-                            Type: {petType}
+                          {t("type")} {petType}
                           </Typography>
                         </ListItemText>
                       </ListItem>
@@ -329,7 +330,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                           fontWeight: "bold",
                         }}
                       >
-                        Gallery
+                        {t("gallery")}
                       </Typography>
                       <Button
                         variant="contained"
@@ -340,7 +341,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                           "&:hover": { backgroundColor: "#1565c0" },
                         }}
                       >
-                        Upload
+                        {t("upload")}
                         <input
                           type="file"
                           multiple
@@ -354,7 +355,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                         onClick={handleImageSubmit}
                         disabled={imagesUploaded.length === 0}
                       >
-                        Submit
+                        {t("submit")}
                       </Button>
                     </Stack>
 
