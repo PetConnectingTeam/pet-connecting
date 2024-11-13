@@ -1,8 +1,13 @@
 import React from "react";
-//import "./i18n";
+import { useTranslations } from "next-intl";
 
 function App() {
-  return <div className="App"></div>;
+  const t = useTranslations("HomePage");
+  return (
+    <div className="App">
+      <h1>{t("title")}</h1>
+    </div>
+  );
 }
 
 export default App;
