@@ -351,7 +351,7 @@ const HomePage: React.FC = () => {
             <Tab label="Your Applications" sx={{ color: "gray" }} />
           </Tabs>
           {tabIndex === 0 && (
-            <Container sx={{ marginTop: 2 }}>
+            <Container sx={{ marginTop: 2 , }}>
               {loading ? (
                 <CircularProgress />
               ) : (
@@ -546,7 +546,7 @@ const HomePage: React.FC = () => {
             </Container>
           )}
           {tabIndex === 1 && (
-            <Box sx={{ width: "100%", marginTop: 2 }}>
+            <Box sx={{ width: "100%", marginTop: 2,paddingLeft:4,paddingRight:4 }}>
               <Typography
                 variant="h6"
                 sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
