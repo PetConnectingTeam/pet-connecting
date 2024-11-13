@@ -5,6 +5,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
+import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
 
 import {
   Drawer,
@@ -28,8 +29,9 @@ import {
   InputLabel,
   FormControl,
   Alert,
+  useMediaQuery,
 } from "@mui/material";
-import { Home, Pets } from "@mui/icons-material";
+import { Home } from "@mui/icons-material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -61,6 +63,8 @@ interface PetFormData {
 }
 
 export default function Component() {
+  const isMobile = useMediaQuery("(max-width:600px)");
+
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [currentTip, setCurrentTip] = useState("");
   const [open, setOpen] = useState(false);
@@ -292,11 +296,10 @@ export default function Component() {
       const token = Cookies.get("accessToken");
 
       const formData = new FormData();
-      formData.append("file", selectedImage); // Try different keys like "file", "image", etc.
+      formData.append("file", selectedImage);
 
       console.log("Starting image upload...");
-      console.log("Form Data (file):", formData.get("file")); // Check if the file is attached
-
+      console.log("Form Data (file):", formData.get("file"));
       const response = await axios.post(
         `http://127.0.0.1:5001/pets/${newPetId}/photos`,
         formData,
@@ -324,104 +327,127 @@ export default function Component() {
 
   return (
     <Box>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
+      {!isMobile && (
+        <Drawer
+          sx={{
             width: drawerWidth,
-            boxSizing: "border-box",
-            backgroundColor: "#f0f0f0",
-            height: `calc(100% - 60px)`,
-            marginTop: 8,
-          },
-        }}
-        variant="permanent"
-      >
-        <List>
-          <ListItem>
-            <Link
-              href="../home"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <ListItemButton>
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              backgroundColor: "#f0f0f0",
+              height: `calc(100% - 60px)`,
+              marginTop: 8,
+            },
+          }}
+          variant="permanent"
+        >
+          <List>
+            <ListItem>
+              <Link
+                href="../home"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    <Home />
+                  </ListItemIcon>
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+            <ListItem>
+              <ListItemButton
+                onClick={() =>
+                  router.push(`/userProfile/${Cookies.get("user_id")}`)
+                }
+              >
                 <ListItemIcon>
-                  <Home />
+                  <Avatar
+                    src={
+                      profileImageUrl || "/placeholder.svg?height=40&width=40"
+                    }
+                    sx={{ width: 24, height: 24 }}
+                  />
                 </ListItemIcon>
-                <ListItemText primary="Home" />
+                <ListItemText primary="Profile" />
               </ListItemButton>
-            </Link>
-          </ListItem>
-          <ListItem>
-            <ListItemButton
-              onClick={() =>
-                router.push(`/userProfile/${Cookies.get("user_id")}`)
-              }
+            </ListItem>
+            <ListItem>
+              <ListItemButton onClick={handleClickOpen}>
+                <ListItemIcon>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-dog"
+                  >
+                    <path d="M11.25 16.25h1.5L12 17z" />
+                    <path d="M16 14v.5" />
+                    <path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444a11.702 11.702 0 0 0-.493-3.309" />
+                    <path d="M8 14v.5" />
+                    <path d="M8.5 8.5c-.384 1.05-1.083 2.028-2.344 2.5-1.931.722-3.576-.297-3.656-1-.113-.994 1.177-6.53 4-7 1.923-.321 3.651.845 3.651 2.235A7.497 7.497 0 0 1 14 5.277c0-1.39 1.844-2.598 3.767-2.277 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.855-1.45-2.239-2.5" />
+                  </svg>
+                </ListItemIcon>
+                <ListItemText primary="Post A Pet" />
+              </ListItemButton>
+            </ListItem>
+            <Divider />
+
+            <Box
+              sx={{
+                padding: 2,
+                backgroundColor: "#f9f9f9",
+                borderRadius: 1,
+                margin: 2,
+                color: "#ff4d4f",
+              }}
             >
-              <ListItemIcon>
-                <Avatar
-                  src={profileImageUrl || "/placeholder.svg?height=40&width=40"}
-                  sx={{ width: 24, height: 24 }}
-                />
-              </ListItemIcon>
-              <ListItemText primary="Profile" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton onClick={handleClickOpen}>
-              <ListItemIcon>
-                <Pets />
-              </ListItemIcon>
-              <ListItemText primary="Post A Pet" />
-            </ListItemButton>
-          </ListItem>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Pet Care Tip
+              </Typography>
+              <Typography variant="body2">{currentTip}</Typography>
+            </Box>
+
+            <Divider />
+
+            <ListItem>
+              <Link
+                href="/help"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    <HelpIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Help & Support" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link
+                href=""
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    <LogoutIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Log Out" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+          </List>
+
           <Divider />
-
-          <Box
-            sx={{
-              padding: 2,
-              backgroundColor: "#f9f9f9",
-              borderRadius: 1,
-              margin: 2,
-              color: "#ff4d4f",
-            }}
-          >
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              Pet Care Tip
-            </Typography>
-            <Typography variant="body2">{currentTip}</Typography>
-          </Box>
-
-          <Divider />
-
-          <ListItem>
-            <Link
-              href="/help"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <ListItemButton>
-                <ListItemIcon>
-                  <HelpIcon />
-                </ListItemIcon>
-                <ListItemText primary="Help & Support" />
-              </ListItemButton>
-            </Link>
-          </ListItem>
-          <ListItem>
-            <Link href="" style={{ textDecoration: "none", color: "inherit" }}>
-              <ListItemButton>
-                <ListItemIcon>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText primary="Log Out" />
-              </ListItemButton>
-            </Link>
-          </ListItem>
-        </List>
-
-        <Divider />
-      </Drawer>
-
+        </Drawer>
+      )}
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
         <DialogTitle style={{ backgroundColor: "#ff4d4f", color: "white" }}>
           Post a Pet 😻
