@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <CssBaseline />
 
-      <Box sx={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1300 }}>
+      <Box sx={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1300 ,}}>
         <NavigationBar />
       </Box>
 
@@ -24,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           minHeight: "100vh",
           pt: "64px",
           pb: "56px",
+          paddingTop:"40px",
           overflow: "auto",
         }}
       >
