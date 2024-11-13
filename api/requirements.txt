@@ -9,3 +9,4 @@ Flask-CORS
 requests
 Flask-SocketIO
 eventlet
+pytest
