@@ -25,7 +25,11 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
-const BottomBar: React.FC = () => {
+interface BottomBarProps {
+  toggleChat: () => void;
+}
+
+const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -239,16 +243,15 @@ const BottomBar: React.FC = () => {
           onClick={() => router.push(`/userProfile/${Cookies.get("user_id")}`)}
         />
         <BottomNavigationAction
-          label="Search"
+          label="Home"
           component="a"
           href="/home"
           icon={<HomeIcon />}
         />
         <BottomNavigationAction
           label="Chat"
-          component="a"
-          href="/home"
           icon={<ChatIcon />}
+          onClick={toggleChat}
         />
       </BottomNavigation>
 
