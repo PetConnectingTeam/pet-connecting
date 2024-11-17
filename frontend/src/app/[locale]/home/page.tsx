@@ -729,16 +729,18 @@ const HomePage: React.FC = () => {
                           marginBottom: 2,
                         }}
                       >
-                        <img
-                          src="profile_picture_url"
-                          alt="Profile"
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            marginRight: "10px",
-                          }}
-                        />
+                        <Link href={`/userProfile/${service.PublisherId}`}>
+                          <img
+                            src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
+                            alt="Profile"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              marginRight: "10px",
+                            }}
+                          />
+                        </Link>
                         <Box>
                           <Typography
                             variant="body1"
@@ -814,11 +816,7 @@ const HomePage: React.FC = () => {
                                 border: "1px solid #ddd",
                               }}
                             >
-                              <a
-                                href={`/petsProfile/${photo.PetID}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
+                              <Link href={`/petsProfile/${photo.PetID}`}>
                                 <img
                                   src={`data:${photo.MimeType};base64,${photo.Photo}`}
                                   alt={`Pet Image ${index + 1}`}
@@ -828,7 +826,7 @@ const HomePage: React.FC = () => {
                                     objectFit: "cover",
                                   }}
                                 />
-                              </a>
+                              </Link>
                             </Box>
                           ))
                         ) : (
@@ -1010,7 +1008,7 @@ const HomePage: React.FC = () => {
           }}
         >
           <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
-            {t("applications_for_service  ")} {selectedServiceId}
+            {t("applications_for_service")} {selectedServiceId}
           </Typography>
           {applicationsForService.length > 0 ? (
             applicationsForService.map((application) => (

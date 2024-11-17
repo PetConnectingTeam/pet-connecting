@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
   Avatar,
-  Divider,
   List,
   ListItem,
   ListItemAvatar,
@@ -13,16 +12,17 @@ import {
   CardHeader,
   CardContent,
   IconButton,
-  TextField
-} from '@mui/material';
-import { Close as CloseIcon, Send as SendIcon } from '@mui/icons-material';
-import Cookies from 'js-cookie';
+  TextField,
+} from "@mui/material";
+import { Close as CloseIcon, Send as SendIcon } from "@mui/icons-material";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 interface User {
   id: string;
   name: string;
-  profile_image_base64?: string;  // Add this field for base64 images
-  image_mimetype?: string;        // Add this field for image type
+  profile_image_base64?: string; // Add this field for base64 images
+  image_mimetype?: string; // Add this field for image type
 }
 
 // Helper function to construct image source from base64 and mimetype
@@ -31,28 +31,30 @@ const getImageSrc = (user: User): string => {
     return `data:${user.image_mimetype};base64,${user.profile_image_base64}`;
   }
   // Return a default avatar image if no profile image is available
-  return '/default-avatar.png';  // Make sure to have a default avatar image in your public folder
+  return "/default-avatar.png"; // Make sure to have a default avatar image in your public folder
 };
 
 const ChatBox = ({ user, onClose }: { user: User; onClose: () => void }) => {
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(`Sending message to ${user.name}: ${message}`);
-    setMessage('');
+    setMessage("");
   };
 
   return (
-    <Card sx={{
-      position: 'fixed',
-      bottom: 16,
-      right: 316,
-      width: 300,
-      height: 400,
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
+    <Card
+      sx={{
+        position: "fixed",
+        bottom: 16,
+        right: 316,
+        width: 300,
+        height: 400,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <CardHeader
         avatar={<Avatar src={getImageSrc(user)} alt={user.name} />}
         title={user.name}
@@ -62,12 +64,16 @@ const ChatBox = ({ user, onClose }: { user: User; onClose: () => void }) => {
           </IconButton>
         }
       />
-      <CardContent sx={{ flexGrow: 1, overflowY: 'auto' }}>
+      <CardContent sx={{ flexGrow: 1, overflowY: "auto" }}>
         <Typography variant="body2" color="text.secondary" align="center">
           No messages yet
         </Typography>
       </CardContent>
-      <Box component="form" onSubmit={handleSendMessage} sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+      <Box
+        component="form"
+        onSubmit={handleSendMessage}
+        sx={{ p: 2, borderTop: 1, borderColor: "divider" }}
+      >
         <TextField
           fullWidth
           size="small"
@@ -93,7 +99,7 @@ const Sidebar = () => {
   const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const userId = Cookies.get('user_id');
+    const userId = Cookies.get("user_id");
     if (userId) {
       setLoggedInUserId(userId);
     }
@@ -102,22 +108,28 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5001/users');
-        if (!response.ok) {
-          throw new Error('Failed to fetch users');
+        const response = await axios.get("http://127.0.0.1:5001/users", {
+          headers: { Authorization: `Bearer ${Cookies.get("accessToken")}` },
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch users: ${response.statusText}`);
         }
-        const data = await response.json();
-        console.log('Fetched users:', data);
+        const data = await response.data;
+        console.log("Fetched users:", data);
 
         if (loggedInUserId) {
-          const filteredUsers = data.filter((user: User) =>
-            String(user.id) !== String(loggedInUserId)
+          const filteredUsers = data.filter(
+            (user: User) => String(user.id) !== String(loggedInUserId)
           );
-          console.log('Filtered users (excluding logged-in user):', filteredUsers);
+          console.log(
+            "Filtered users (excluding logged-in user):",
+            filteredUsers
+          );
           setUsers(filteredUsers);
         }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
       }
     };
 
@@ -136,17 +148,19 @@ const Sidebar = () => {
 
   return (
     <>
-      <Box sx={{
-        width: 300,
-        bgcolor: 'grey.300',
-        p: 3,
-        position: 'fixed',
-        right: 0,
-        top: '65px',
-        height: 'calc(100vh - 65px)',
-        overflowY: 'auto',
-        paddingBottom: 3
-      }}>
+      <Box
+        sx={{
+          width: 300,
+          bgcolor: "grey.300",
+          p: 3,
+          position: "fixed",
+          right: 0,
+          top: "65px",
+          height: "calc(100vh - 65px)",
+          overflowY: "auto",
+          paddingBottom: 3,
+        }}
+      >
         <Box mb={3}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Pet Owner Chats
@@ -164,12 +178,11 @@ const Sidebar = () => {
             ))}
           </List>
         </Box>
-
-
-      
       </Box>
 
-      {selectedUser && <ChatBox user={selectedUser} onClose={handleCloseChat} />}
+      {selectedUser && (
+        <ChatBox user={selectedUser} onClose={handleCloseChat} />
+      )}
     </>
   );
 };
