@@ -78,13 +78,13 @@ const SignInSide: React.FC = () => {
       }}
     >
       <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-        <Image src={logo} height={50} width={50} alt="PetCareConnect" />
+        <Image src={logo} height={50} width={50} alt="PetConnecting" />
         <Typography
           variant="h4"
           component="h1"
           sx={{ fontWeight: "bold", color: "#000000", marginLeft: 2 }}
         >
-          PetCareConnect
+          PetConnecting
         </Typography>
       </Box>
       <Card

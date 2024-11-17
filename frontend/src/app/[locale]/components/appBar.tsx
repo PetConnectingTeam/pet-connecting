@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import { useTranslations } from "next-intl";
 import {
   AppBar,
   Toolbar,
@@ -94,6 +95,7 @@ const ActionButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export default function NavigationBar() {
+  const t = useTranslations("AppBar");
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -361,7 +363,7 @@ export default function NavigationBar() {
           }}
           onClick={() => router.push("/home")}
         >
-          Find Pet Care
+          PetConnecting
         </Typography>
 
         <SearchWrapper>
@@ -372,7 +374,7 @@ export default function NavigationBar() {
             value={searchTerm}
             onChange={handleSearchChange}
             onKeyPress={handleSearchKeyPress}
-            placeholder="Search for Pet Care Services"
+            placeholder={t("search_for_pet_care_services")}
             inputProps={{ "aria-label": "search" }}
           />
           {searchTerm && (
@@ -406,7 +408,7 @@ export default function NavigationBar() {
               variant="body2"
               sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
             >
-              Pets list
+              {t("pets_list")}
             </Typography>
           </Button>
           <Menu
@@ -444,7 +446,7 @@ export default function NavigationBar() {
             variant="body2"
             sx={{ color: "black", marginLeft: 1, marginRight: 1 }}
           >
-            Pet Care
+            {t("pet_care")}
           </Typography>
           <Avatar
             src={profileImageUrl ?? "/placeholder.svg"}
@@ -461,7 +463,7 @@ export default function NavigationBar() {
             </MenuItem>
             <MenuItem onClick={() => router.push("/profile-pictures")}>
               <PhotoLibraryIcon fontSize="small" sx={{ marginRight: 1 }} />{" "}
-              Profile Pictures
+              {t("profile_pictures")}
             </MenuItem>
           </Menu>
         </Box>
@@ -474,16 +476,16 @@ export default function NavigationBar() {
         aria-labelledby="service-dialog-title"
         aria-describedby="service-dialog-description"
       >
-        <DialogTitle id="service-dialog-title">Pet Care Services</DialogTitle>
+        <DialogTitle id="service-dialog-title">{t("pet_care_services")}</DialogTitle>
         <DialogContent id="service-dialog-description">
           <FormControl fullWidth margin="dense" variant="outlined">
-            <InputLabel id="pet-select-label">Select Pets</InputLabel>
+            <InputLabel id="pet-select-label">{t("select_pets")}</InputLabel>
             <Select
               labelId="pet-select-label"
               multiple
               value={selectedPets}
               onChange={handlePetChange}
-              label="Select Pets"
+              label={t("select_pets")}
             >
               {petList.map((pet) => (
                 <MenuItem key={pet.ID} value={pet.ID.toString()}>
@@ -495,7 +497,7 @@ export default function NavigationBar() {
 
           <TextField
             margin="dense"
-            label="Description"
+            label={t("description")}
             fullWidth
             variant="outlined"
             value={description}
@@ -504,7 +506,7 @@ export default function NavigationBar() {
           />
           <TextField
             margin="dense"
-            label="Location"
+            label={t("location")}
             fullWidth
             variant="outlined"
             value={location}
@@ -513,7 +515,7 @@ export default function NavigationBar() {
           />
           <TextField
             margin="dense"
-            label="Cost"
+            label={t("cost")}
             fullWidth
             variant="outlined"
             type="number"
@@ -523,7 +525,7 @@ export default function NavigationBar() {
           />
           <TextField
             margin="dense"
-            label="Start Date & Time"
+            label={t("start_date_time")}
             fullWidth
             variant="outlined"
             type="datetime-local"
@@ -536,7 +538,7 @@ export default function NavigationBar() {
           />
           <TextField
             margin="dense"
-            label="End Date & Time"
+            label={t("end_date_time")}
             fullWidth
             variant="outlined"
             type="datetime-local"
@@ -549,7 +551,7 @@ export default function NavigationBar() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose}>Cancel</Button>
+          <Button onClick={handleDialogClose}>{t("cancel")}</Button>
           <Button
             onClick={handleSubmitService}
             variant="contained"
@@ -569,7 +571,7 @@ export default function NavigationBar() {
               selectedPets.length === 0
             }
           >
-            Submit
+            {t("submit")}
           </Button>
         </DialogActions>
       </Dialog>

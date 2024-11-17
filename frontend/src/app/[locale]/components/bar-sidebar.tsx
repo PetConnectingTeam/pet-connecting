@@ -5,7 +5,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import HelpIcon from '@mui/icons-material/Help';
 import LogoutIcon from '@mui/icons-material/Logout';
-
+import { useTranslations } from "next-intl";
 import {
   Drawer,
   List,
@@ -33,20 +33,6 @@ import { Home, Pets } from "@mui/icons-material";
 import Link from "next/link";
 
 const drawerWidth = 240;
-
-const tips = [
-  "Dogs need daily exercise. Try a 30-minute walk!",
-  "Cats benefit from interactive toys to keep them active.",
-  "Remember to brush your pet's teeth regularly.",
-  "Ensure your pet has a comfortable, quiet place to sleep.",
-  "Regular vet checkups are essential for long-term health.",
-  "Avoid feeding pets table scraps to prevent digestive issues.",
-  "Keep your pet hydrated by providing fresh water daily.",
-"Groom your pet regularly to reduce shedding and prevent matting.",
-"Introduce new toys and activities to stimulate your pet's mind.",
-"Protect your pet from extreme weather by keeping them cool in summer and warm in winter.",
-"Teach basic commands to improve your pet's behavior and safety."
-];
 
 interface PetFormData {
   name: string;
@@ -82,7 +68,20 @@ export default function Component() {
   const [isFormValid, setIsFormValid] = useState(false);
   const [newPetId, setNewPetId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null); // State for selected image file
-
+  const t = useTranslations("Sidebar");
+  const tips = [
+    t("tip_1"),
+    t("tip_2"),
+    t("tip_3"),
+    t("tip_4"),
+    t("tip_5"),
+    t("tip_6"),
+    t("tip_7"),
+    t("tip_8"),
+    t("tip_9"),
+    t("tip_10"),
+    t("tip_11"),
+  ];
   useEffect(() => {
     const randomTip = tips[Math.floor(Math.random() * tips.length)];
     setCurrentTip(randomTip);
@@ -324,7 +323,7 @@ export default function Component() {
                 <ListItemIcon>
                   <Home />
                 </ListItemIcon>
-                <ListItemText primary="Home" />
+                <ListItemText primary={t("home")} />
               </ListItemButton>
             </Link>
           </ListItem>
@@ -334,7 +333,7 @@ export default function Component() {
                 <ListItemIcon>
                   <Avatar src={profileImageUrl || "/placeholder.svg?height=40&width=40"} sx={{ width: 24, height: 24 }} />
                 </ListItemIcon>
-                <ListItemText primary="Profile" />
+                <ListItemText primary={t("profile")} />
               </ListItemButton>
             </Link>
           </ListItem>
@@ -343,14 +342,14 @@ export default function Component() {
               <ListItemIcon>
                 <Pets />
               </ListItemIcon>
-              <ListItemText primary="Post A Pet" />
+              <ListItemText primary={t("post_a_pet")} />
             </ListItemButton>
           </ListItem>
           <Divider />
 
           <Box sx={{ padding: 2, backgroundColor: "#f9f9f9", borderRadius: 1, margin: 2 ,color:"#ff4d4f"}}>
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              Pet Care Tip
+              {t("pet_care_tip")}
             </Typography>
             <Typography variant="body2">{currentTip}</Typography>
           </Box>
@@ -363,7 +362,7 @@ export default function Component() {
                 <ListItemIcon>
                   <HelpIcon />
                 </ListItemIcon>
-                <ListItemText primary="Help & Support" />
+                <ListItemText primary={t("help_support")} />
               </ListItemButton>
             </Link>
           </ListItem>
@@ -373,7 +372,7 @@ export default function Component() {
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>
-                <ListItemText primary="Log Out" />
+                <ListItemText primary={t("log_out")} />
               </ListItemButton>
             </Link>
           </ListItem>
@@ -383,14 +382,14 @@ export default function Component() {
       </Drawer>
 
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-        <DialogTitle style={{ backgroundColor: "#ff4d4f", color: "white" }}>Post a Pet 😻</DialogTitle>
+        <DialogTitle style={{ backgroundColor: "#ff4d4f", color: "white" }}>{t("post_a_pet")} 😻</DialogTitle>
         <DialogContent dividers>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 2 }}>Pet posted successfully!</Alert>}
-          {newPetId && <Alert severity="info" sx={{ mb: 2 }}>New Pet ID: {newPetId}</Alert>}
+          {success && <Alert severity="success" sx={{ mb: 2 }}>{t("pet_posted_successfully")}</Alert>}
+          {newPetId && <Alert severity="info" sx={{ mb: 2 }}>{t("new_pet_id")}: {newPetId}</Alert>}
           <form>
             <TextField
-              label="Pet Name"
+              label={t("pet_name")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -399,7 +398,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <Box display="flex" justifyContent="space-around" sx={{ my: 2 }}>
-              {[{ name: "Dog", icon: "🐶" }, { name: "Cat", icon: "🐱" }, { name: "Bird", icon: "🐦" }].map((pet, index) => (
+              {[{ name: t("dog"), icon: "🐶" }, { name: t("cat"), icon: "🐱" }, { name: t("bird"), icon: "🐦" }].map((pet, index) => (
                 <Box
                   key={index}
                   onClick={() => handlePetTypeSelect(pet.name)}
@@ -431,7 +430,7 @@ export default function Component() {
             </Box>
             {customPetInputVisible && (
               <TextField
-                label="Custom Pet Type"
+                label={t("custom_pet_type")}
                 fullWidth
                 margin="dense"
                 variant="outlined"
@@ -440,7 +439,7 @@ export default function Component() {
               />
             )}
             <TextField
-              label="Breed"
+              label={t("breed")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -449,7 +448,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <TextField
-              label="Age"
+              label={t("age")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -459,7 +458,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <TextField
-              label="Weight"
+              label={t("weight")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -471,18 +470,18 @@ export default function Component() {
             <FormControl fullWidth margin="dense" variant="outlined">
               <InputLabel>Size</InputLabel>
               <Select
-                label="Size"
+                label={t("size")}
                 name="size"
                 value={formData.size}
                 onChange={(event) => handleInputChange(event as React.ChangeEvent<{ name?: string; value: unknown }>)}
               >
-                <MenuItem value="small">Small</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="large">Large</MenuItem>
+                <MenuItem value="small">{t("small")}</MenuItem>
+                <MenuItem value="medium">{t("medium")}</MenuItem>
+                <MenuItem value="large">{t("large")}</MenuItem>
               </Select>
             </FormControl>
             <TextField
-              label="Allergies"
+              label={t("allergies")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -491,7 +490,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <TextField
-              label="Description"
+              label={t("description")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -505,17 +504,17 @@ export default function Component() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} style={{ backgroundColor: "#ff4d4f", color: "white" }}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSubmit} style={{ backgroundColor: "#ff4d4f", color: "white" }} disabled={!isFormValid}>
-            Submit
+            {t("submit")}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Image upload dialog */}
       <Dialog open={imageUploadOpen} onClose={() => setImageUploadOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Upload Pet Image</DialogTitle>
+        <DialogTitle>{t("upload_pet_image")}</DialogTitle>
         <DialogContent>
           <TextField
             type="file"
@@ -526,10 +525,10 @@ export default function Component() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setImageUploadOpen(false)} style={{ color: "#ff4d4f" }}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleImageSubmit} style={{ backgroundColor: "#ff4d4f", color: "white" }} disabled={!selectedImage}>
-            Upload
+            {t("uplaod")}
           </Button>
         </DialogActions>
       </Dialog>

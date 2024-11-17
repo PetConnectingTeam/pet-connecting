@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   TextField,
@@ -15,6 +16,7 @@ interface TweetBoxProps {
 
 const TweetBox: React.FC<TweetBoxProps> = ({ profilePicture }): JSX.Element => {
   const [tweetContent, setTweetContent] = useState("");
+  const t = useTranslations("tweetBox");
 
   const handleTweetSubmit = () => {
     setTweetContent("");
@@ -26,7 +28,7 @@ const TweetBox: React.FC<TweetBoxProps> = ({ profilePicture }): JSX.Element => {
         <Avatar src={profilePicture} />
         <TextField
           variant="outlined"
-          placeholder="What’s new with your pet?"
+          placeholder={t("whats_New_Whit_pet")}
           multiline
           fullWidth
           value={tweetContent}
@@ -57,7 +59,7 @@ const TweetBox: React.FC<TweetBoxProps> = ({ profilePicture }): JSX.Element => {
           onClick={handleTweetSubmit}
           disabled={tweetContent.length === 0}
         >
-          Share
+          {t("share")}
         </Button>
       </Stack>
     </Box>

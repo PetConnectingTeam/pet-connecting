@@ -207,7 +207,7 @@ const HomePage: React.FC = () => {
       // Limpiar el enlace después de descargar
       document.body.removeChild(link);
 
-      alert("Application accepted and file donwload successfully!");
+      alert(t("application_accepted"));
 
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
@@ -217,7 +217,7 @@ const HomePage: React.FC = () => {
       );
     } catch (error) {
       console.error("Error accepting application:", error);
-      alert("Failed to accept application.");
+      alert(t("application_failed"));
     }
   };
   // Función para cancelar una solicitud
@@ -236,7 +236,7 @@ const HomePage: React.FC = () => {
           },
         }
       );
-      alert("Application unaccepted successfully!");
+      alert(t("application_unaccepted"));
 
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
       setApplicationsForService((prev) =>
@@ -246,7 +246,7 @@ const HomePage: React.FC = () => {
       );
     } catch (error) {
       console.error("Error cancel application:", error);
-      alert("Failed to cancel application.");
+      alert(t("cancel_failed"));
     }
   };
   const fetchAplicationToService = async (serviceId: number) => {
@@ -264,13 +264,13 @@ const HomePage: React.FC = () => {
       );
 
       if (response.status === 200) {
-        alert("Application submitted successfully!");
+        alert(t("application_submitted"));
       } else {
         console.error(response.data.msg);
       }
     } catch (error) {
       console.error("Error submitting application:", error);
-      alert("You have already applied for this service.");
+      alert(t("service_already_applied"));
     }
   };
 
@@ -302,7 +302,7 @@ const HomePage: React.FC = () => {
             }}
           >
             {services.length === 0 ? (
-              <Typography variant="h6">No se encontraron servicios.</Typography>
+              <Typography variant="h6">{t("services_not_found")}</Typography>
             ) : (
               services.map((service) => (
                 <Box
@@ -377,7 +377,7 @@ const HomePage: React.FC = () => {
                         color: service.completed ? "#17bf63" : "#e0245e",
                       }}
                     >
-                      {service.completed ? "✅ Completado" : "⏳ Pendiente"}
+                      {service.completed ? t("completed") : t("pending")}
                     </Typography>
                   </Box>
 
@@ -421,7 +421,7 @@ const HomePage: React.FC = () => {
                       ))
                     ) : (
                       <Typography variant="body2" sx={{ color: "#657786" }}>
-                        No images available
+                        {t("no_images_available")}
                       </Typography>
                     )}
                   </Box>
@@ -466,7 +466,7 @@ const HomePage: React.FC = () => {
           variant="h6"
           sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
         >
-          Services where you applied
+          {t("applied_services")}
         </Typography>
         <Stack spacing={2}>
           {servicesToAccept.length > 0 ? (
@@ -495,7 +495,7 @@ const HomePage: React.FC = () => {
                     {service.description}
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#657786" }}>
-                    🐾 Pets:{" "}
+                    {t("pets")}{" "}
                     {Array.isArray(service.pets)
                       ? service.pets.join(", ")
                       : "N/A"}
@@ -516,7 +516,7 @@ const HomePage: React.FC = () => {
             })
           ) : (
             <Typography variant="body2" sx={{ color: "#657786" }}>
-              No hay servicios por aceptar.
+              {t("no_services_to_accept")}
             </Typography>
           )}
         </Stack>
@@ -526,7 +526,7 @@ const HomePage: React.FC = () => {
           variant="h6"
           sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
         >
-          Services published
+          {t("services_published")}
         </Typography>
         <Stack spacing={2}>
           {servicesRequested.length > 0 ? (
@@ -548,7 +548,7 @@ const HomePage: React.FC = () => {
                   {service.description}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#657786" }}>
-                  🐾 Pets: {service.pets.join(", ")}
+                  {t("pets")}: {service.pets.join(", ")}
                 </Typography>
 
                 {/* Botón para ver aplicaciones */}
@@ -571,14 +571,14 @@ const HomePage: React.FC = () => {
                       textTransform: "none",
                     }}
                   >
-                    View Applications
+                    {t("view_applications")}
                   </Button>
                 )}
               </Box>
             ))
           ) : (
             <Typography variant="body2" sx={{ color: "#657786" }}>
-              No has solicitado ningún servicio.
+              {t("no_services_requested")}
             </Typography>
           )}
         </Stack>
@@ -599,7 +599,7 @@ const HomePage: React.FC = () => {
             }}
           >
             <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
-              Applications for Service {selectedServiceId}
+              {t("applications_for_service  ")} {selectedServiceId}
             </Typography>
             {applicationsForService.length > 0 ? (
               applicationsForService.map((application) => (
@@ -616,7 +616,7 @@ const HomePage: React.FC = () => {
                     variant="body2"
                     sx={{ color: application.Accepted ? "#4caf50" : "#e0245e" }}
                   >
-                    User: {serviceInfo?.publisher} -{" "}
+                    {t("user")}: {serviceInfo?.publisher} -{" "}
                     {application.Accepted ? "Approved" : "Pending Approval"}
                   </Typography>
                   {!application.Accepted ? (
@@ -645,7 +645,7 @@ const HomePage: React.FC = () => {
                         }
                       }}
                     >
-                      Accept
+                      {t("accept")}
                     </Button>
                   ) : (
                     <Button
@@ -661,14 +661,14 @@ const HomePage: React.FC = () => {
                         }
                       }}
                     >
-                      Cancel
+                      {t("cancel")}
                     </Button>
                   )}
                 </Box>
               ))
             ) : (
               <Typography variant="body2" sx={{ mt: 2 }}>
-                No applications available for this service.
+                {t("no_applications_found")}
               </Typography>
             )}
             <Button
@@ -677,7 +677,7 @@ const HomePage: React.FC = () => {
               variant="contained"
               color="secondary"
             >
-              Close
+              {t("close")}
             </Button>
           </Box>
         </Modal>
