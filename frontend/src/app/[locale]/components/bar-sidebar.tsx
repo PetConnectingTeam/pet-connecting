@@ -5,7 +5,6 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
-import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
 import { useTranslations } from "next-intl";
 
 import {
@@ -37,20 +36,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const drawerWidth = 240;
-
-const tips = [
-  "Dogs need daily exercise. Try a 30-minute walk!",
-  "Cats benefit from interactive toys to keep them active.",
-  "Remember to brush your pet's teeth regularly.",
-  "Ensure your pet has a comfortable, quiet place to sleep.",
-  "Regular vet checkups are essential for long-term health.",
-  "Avoid feeding pets table scraps to prevent digestive issues.",
-  "Keep your pet hydrated by providing fresh water daily.",
-  "Groom your pet regularly to reduce shedding and prevent matting.",
-  "Introduce new toys and activities to stimulate your pet's mind.",
-  "Protect your pet from extreme weather by keeping them cool in summer and warm in winter.",
-  "Teach basic commands to improve your pet's behavior and safety.",
-];
 
 interface PetFormData {
   name: string;

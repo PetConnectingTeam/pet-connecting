@@ -151,7 +151,7 @@ const Sidebar = () => {
       <Box
         sx={{
           width: 300,
-          bgcolor: "grey.300",
+          backgroundColor: "#f0f0f0",
           p: 3,
           position: "fixed",
           right: 0,
@@ -162,7 +162,12 @@ const Sidebar = () => {
         }}
       >
         <Box mb={3}>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            gutterBottom
+            color="#000000"
+          >
             Pet Owner Chats
           </Typography>
           <List>
@@ -172,7 +177,7 @@ const Sidebar = () => {
                   <ListItemAvatar>
                     <Avatar src={getImageSrc(user)} alt={user.name} />
                   </ListItemAvatar>
-                  <ListItemText primary={user.name} />
+                  <ListItemText sx={{ color: "#000000" }} primary={user.name} />
                 </ListItemButton>
               </ListItem>
             ))}

@@ -34,7 +34,10 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [selectedPet, setSelectedPet] = useState<string | null>(null);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [customPetName, setCustomPetName] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [customPetInputVisible, setCustomPetInputVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -55,6 +58,8 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
       animal_type: petType.toLowerCase(),
     }));
   };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCustomPetNameChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {

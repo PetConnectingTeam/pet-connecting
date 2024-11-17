@@ -93,8 +93,12 @@ function App() {
         item
         xs={12}
         md={6}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-        backgroundColor="#ffffff"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+        }}
       >
         <Box sx={{ maxWidth: "400px", width: "100%", p: 4 }}>
           <Typography

@@ -32,7 +32,6 @@ import {
 import {
   Search as SearchIcon,
   Close as CloseIcon,
-  PhotoLibrary as PhotoLibraryIcon,
   Pets as PetsIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
@@ -198,10 +197,6 @@ export default function NavigationBar() {
   const handleClearSearch = () => {
     setSearchTerm("");
     if (isMobile) setSearchOpen(false);
-  };
-
-  const handleChatClick = () => {
-    router.push("/messages");
   };
 
   const handlePawClick = () => {

@@ -75,7 +75,6 @@ const HomePage: React.FC = () => {
   const [applicationsForService, setApplicationsForService] = useState<
     Aplication[]
   >([]);
-  const [users, setUsers] = useState<User[]>([]);
 
   const UserId = Number(Cookies.get("user_id"));
 

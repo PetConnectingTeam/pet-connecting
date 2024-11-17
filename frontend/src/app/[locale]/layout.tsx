@@ -20,6 +20,32 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Pet Connecting",
   description: "A social network for pets and their owners",
+  generator: "Next.js",
+  manifest: "/manifest.json",
+  keywords: [
+    "nextjs",
+    "next14",
+    "next-intl",
+    "geist-ui",
+    "mui",
+    "typescript",
+    "pet",
+    "social",
+    "network",
+    "chat",
+  ],
+  authors: [
+    {
+      name: "imvinojanv",
+      url: "https://www.linkedin.com/in/imvinojanv/",
+    },
+  ],
+  viewport:
+    "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
+  icons: [
+    { rel: "apple-touch-icon", url: "/icon-128x128.png" },
+    { rel: "icon", url: "/icon-128x128.png" },
+  ],
 };
 
 // const theme = createTheme({
@@ -59,6 +85,7 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
