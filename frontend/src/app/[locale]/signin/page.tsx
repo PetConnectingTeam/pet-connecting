@@ -18,7 +18,6 @@ import Image from "next/image";
 import logo from "../../../../public/logo.png";
 import { useTranslations } from "next-intl";
 
-
 const SignInSide: React.FC = () => {
   const [email, setEmail] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
@@ -78,11 +77,11 @@ const SignInSide: React.FC = () => {
       }}
     >
       <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-        <Image src={logo} height={50} width={50} alt="PetConnecting" />
+        <Image src={logo} height={85} width={85} alt="PetCareConnect" />
         <Typography
           variant="h4"
           component="h1"
-          sx={{ fontWeight: "bold", color: "#000000", marginLeft: 2 }}
+          sx={{ fontWeight: "bold", color: "#000000", marginLeft: 1 }}
         >
           PetConnecting
         </Typography>
@@ -122,7 +121,7 @@ const SignInSide: React.FC = () => {
               required
               fullWidth
               name="password"
-              label= {t("password")}
+              label={t("password")}
               type="password"
               id="password"
               autoComplete="current-password"
@@ -138,7 +137,7 @@ const SignInSide: React.FC = () => {
               }}
             >
               <Link href="#" variant="body2" sx={{ color: "#ff3b30" }}>
-              {t("forgot_password")}
+                {t("forgot_password")}
               </Link>
               <Button
                 type="button"
@@ -160,7 +159,7 @@ const SignInSide: React.FC = () => {
       <Typography variant="body2" sx={{ mt: 2 }}>
         {t("dont_have_account")}{" "}
         <Link href="/signup" sx={{ color: "#ff3b30" }}>
-        {t("create_account")}
+          {t("create_account")}
         </Link>
       </Typography>
     </Box>
