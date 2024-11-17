@@ -77,7 +77,7 @@ const SignInSide: React.FC = () => {
       }}
     >
       <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-        <Image src={logo} height={85} width={85} alt="PetCareConnect" />
+        <Image src={logo} height={85} width={85} alt="PetConnecting" />
         <Typography
           variant="h4"
           component="h1"
