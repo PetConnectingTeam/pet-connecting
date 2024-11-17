@@ -20,6 +20,7 @@ import {
 import axios from "axios";
 import MenuAppBar from "../../components/appBar";
 import BottomBar from "@/app/components/BottomBar";
+import Chat from "@/app/components/chat";
 
 const UserProfile: React.FC<{ params: { userId: string } }> = ({
   params,
@@ -35,6 +36,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [clientLoaded, setClientLoaded] = useState(false);
+  const [isChatVisible, setIsChatVisible] = useState(false);
 
   const accessToken = Cookies.get("accessToken");
   const { userId } = params;
@@ -228,6 +230,10 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
 
   const handleEditProfile = () => {
     setIsEditing(true);
+  };
+
+  const toggleChat = () => {
+    setIsChatVisible((prev) => !prev);
   };
 
   return (
@@ -449,7 +455,12 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
             </Alert>
           )}
         </Snackbar>
-        <BottomBar />
+        {isChatVisible && (
+          <Box>
+            <Chat />
+          </Box>
+        )}
+        <BottomBar toggleChat={toggleChat} />
       </Box>
     </>
   );

@@ -1,6 +1,7 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import BottomAppBar from "../../components/BottomBar";
+import Chat from "../../components/chat";
 import {
   Avatar,
   Box,
@@ -28,7 +29,6 @@ import MenuAppBar from "../../components/appBar";
 import Grid from "@mui/material/Grid2";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useEffect } from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TweetBox from "../../components/tweet-box";
 import NotFoundPage from "@/app/components/not-found";
@@ -161,6 +161,8 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [tabValue, setTabValue] = React.useState(0);
+  const [isChatVisible, setIsChatVisible] = useState(!isMobile);
+  const [backgroundImage, setBackgroundImage] = React.useState<string>("");
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -188,6 +190,13 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
           );
 
           if (petResponse.status === 200) {
+            const firstPhoto = petResponse.data[0];
+            if (firstPhoto) {
+              setBackgroundImage(
+                `data:image/${firstPhoto.MimeType};base64,${firstPhoto.Photo}`
+              );
+            }
+
             petResponse.data.forEach(
               (photo: {
                 ID: string;
@@ -270,6 +279,20 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
     fetchPetData();
   });
 
+  useEffect(() => {
+    if (isMobile) {
+      setIsChatVisible(false);
+    } else {
+      setIsChatVisible(true);
+    }
+  }, [isMobile]);
+
+  const toggleChat = () => {
+    if (isMobile) {
+      setIsChatVisible((prev) => !prev);
+    }
+  };
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -323,7 +346,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
           <Box
             sx={{
               height: 200,
-              backgroundImage: `url('https://plus.unsplash.com/premium_photo-1710406095492-7e62eba19745?q=80&w=2102&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
+              backgroundImage: `url(${backgroundImage})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               borderTopLeftRadius: 12,
@@ -534,6 +557,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                   </ImageList>
                 </Paper>
               )}
+              {isChatVisible && <Chat />}
             </Box>
           ) : (
             // Desktop layout
@@ -687,7 +711,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
               </Grid>
             </Box>
           )}
-          <BottomAppBar />
+          <BottomAppBar toggleChat={toggleChat} />
         </Card>
       )}
     </>
