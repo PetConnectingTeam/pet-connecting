@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import {
   AppBar,
   Toolbar,
@@ -34,10 +35,11 @@ import {
   Close as CloseIcon,
   Pets as PetsIcon,
 } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { FormControlLabel } from "@mui/material";
+
 const LanguageSwitch = styled(Switch)(({ theme }) => ({
   width: 60,
   height: 34,
@@ -134,6 +136,7 @@ export default function NavigationBar() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // True on mobile screens
   const t = useTranslations("AppBar");
   const router = useRouter();
+  const locale = useLocale();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchOpen, setSearchOpen] = useState(false); // Controls visibility of search input on mobile
@@ -149,6 +152,7 @@ export default function NavigationBar() {
   const [endDate, setEndDate] = useState("");
   const [selectedPets, setSelectedPets] = useState<string[]>([]);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const pathname = usePathname();
 
   const fetchPetList = async () => {
     const token = Cookies.get("accessToken");
@@ -506,7 +510,20 @@ export default function NavigationBar() {
                 <MenuItem>
                   {" "}
                   <FormControlLabel
-                    control={<LanguageSwitch defaultChecked />}
+                    control={
+                      <LanguageSwitch
+                        value={locale}
+                        onChange={(e) => {
+                          const language = e.target.checked ? "es" : "en";
+                          router.push(
+                            `/${language}/${pathname
+                              .split("/")
+                              .slice(2)
+                              .join("/")}`
+                          );
+                        }}
+                      />
+                    }
                     label={
                       <Box display="flex" alignItems="center">
                         <Typography variant="body2" sx={{ ml: 1 }}>
