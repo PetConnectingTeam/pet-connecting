@@ -17,6 +17,7 @@ import {
 import { Close as CloseIcon, Send as SendIcon } from "@mui/icons-material";
 import Cookies from "js-cookie";
 import axios from "axios";
+import ChatTest from "./chat-test";
 
 interface User {
   id: string;
@@ -97,6 +98,7 @@ const Sidebar = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
+  const currentUserId = Cookies.get("user_id");
 
   useEffect(() => {
     const userId = Cookies.get("user_id");
@@ -142,10 +144,6 @@ const Sidebar = () => {
     setSelectedUser(user);
   };
 
-  const handleCloseChat = () => {
-    setSelectedUser(null);
-  };
-
   return (
     <>
       <Box
@@ -186,7 +184,11 @@ const Sidebar = () => {
       </Box>
 
       {selectedUser && (
-        <ChatBox user={selectedUser} onClose={handleCloseChat} />
+        <ChatTest
+          userId={currentUserId}
+          onClose={() => setSelectedUser(null)}
+        />
+        // <ChatBox user={selectedUser} onClose={handleCloseChat} />
       )}
     </>
   );
