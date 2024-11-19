@@ -69,7 +69,7 @@ function App() {
         item
         xs={12}
         md={6}
-        sx={{ backgroundColor: "#ff2f2f", color: "#fff", p: 4 }}
+        sx={{ backgroundColor: "#df4f46", color: "#fff", p: 4 }}
       >
         <Box
           display="flex"
