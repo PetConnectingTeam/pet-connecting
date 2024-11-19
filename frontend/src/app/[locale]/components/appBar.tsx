@@ -1,5 +1,5 @@
 "use client";
-
+import TranslateIcon from '@mui/icons-material/Translate';
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useTranslations } from "next-intl";
@@ -497,10 +497,13 @@ export default function NavigationBar() {
               </CircularButton>
 
               <Avatar
-                src={profileImageUrl ?? "/placeholder.svg"}
+                
                 sx={{ width: 32, height: 32 }}
                 onMouseEnter={handleProfileHover}
-              />
+              >
+                <TranslateIcon />
+              </Avatar>
+              
               <Menu
                 anchorEl={profileAnchorEl}
                 open={Boolean(profileAnchorEl)}
