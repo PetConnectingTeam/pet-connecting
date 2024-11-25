@@ -370,7 +370,6 @@ def add_pet_photo(pet_id):
 
     return jsonify({'error': 'Invalid file type'}), 400
     
-
 @app.route('/pets/<int:pet_id>/photos/<int:photo_id>', methods=['DELETE']) 
 @jwt_required()
 def delete_pet_photo(pet_id, photo_id):
@@ -599,53 +598,6 @@ def delete_service(service_id):
 
     return jsonify({"msg": "Service deleted successfully"}), 200
 
-@app.route('/service/<int:service_id>/apply', methods=['PUT'])
-@jwt_required()
-def apply_for_service(service_id):
-    current_user_id = get_jwt_identity()
-
-    service = RequestService.query.get(service_id)
-
-    if not service:
-        return jsonify({"msg": "Service not found"}), 404
-
-    if service.PublisherId == current_user_id:
-        return jsonify({"msg": "You cannot take your own service"}), 400
-
-    applications = Application.query.filter_by(ServiceId=service_id).all()
-    for application in applications:
-        if application.UserId == current_user_id:
-            return jsonify({"msg": "You have already applied for this service"}), 400
-        if application.Accepted:
-            return jsonify({"msg": "Service already taken"}), 400
-
-    application = Application(
-        ServiceId = service_id,
-        UserId = current_user_id
-    )
-    db.session.add(application)    
-    db.session.commit()
-
-    return jsonify({"msg": "Service taken successfully"}), 200
-
-@app.route('/service/<int:service_id>/applications', methods=['GET'])
-@jwt_required()
-def get_applications(service_id):
-    current_user_id = get_jwt_identity()
-
-    service = RequestService.query.get(service_id)
-
-    if not service:
-        return jsonify({"msg": "Service not found"}), 404
-
-    if service.PublisherId != current_user_id:
-        return jsonify({"msg": "You are not authorized to view this service's applications"}), 403
-
-    applications = Application.query.filter_by(ServiceId=service_id).all()
-
-    application_list = [application.to_dict() for application in applications]
-    return jsonify(application_list)
-
 @app.route('/service/<int:service_id>/assign', methods=['PUT'])
 @jwt_required()
 def assign_service(service_id):
@@ -758,9 +710,88 @@ def rate_service(service_id):
 
     return jsonify({"msg": "Service rated successfully"}), 200
 
+
+
+# --- Application Endpoints ---
+@app.route('/service/<int:service_id>/apply', methods=['PUT'])
+@jwt_required()
+def apply_for_service(service_id):
+    current_user_id = get_jwt_identity()
+
+    service = RequestService.query.get(service_id)
+
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+
+    if service.PublisherId == current_user_id:
+        return jsonify({"msg": "You cannot take your own service"}), 400
+
+    applications = Application.query.filter_by(ServiceId=service_id).all()
+    for application in applications:
+        if application.UserId == current_user_id:
+            return jsonify({"msg": "You have already applied for this service"}), 400
+        if application.Accepted:
+            return jsonify({"msg": "Service already taken"}), 400
+
+    application = Application(
+        ServiceId = service_id,
+        UserId = current_user_id
+    )
+    db.session.add(application)    
+    db.session.commit()
+
+    return jsonify({"msg": "Service taken successfully"}), 200
+
+@app.route('/service/<int:service_id>/applications', methods=['GET'])
+@jwt_required()
+def get_applications(service_id):
+    current_user_id = get_jwt_identity()
+
+    service = RequestService.query.get(service_id)
+
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+
+    if service.PublisherId != current_user_id:
+        return jsonify({"msg": "You are not authorized to view this service's applications"}), 403
+
+    applications = Application.query.filter_by(ServiceId=service_id).all()
+
+    application_list = [application.to_dict() for application in applications]
+    return jsonify(application_list)
+
+@app.route('/service/<int:service_id>/applications/<int:application_id>', methods=['DELETE'])
+@jwt_required()
+def delete_application(service_id, application_id):
+    current_user_id = get_jwt_identity()
+
+    service = RequestService.query.get(service_id)
+
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+
+    if service.PublisherId != current_user_id:
+        return jsonify({"msg": "You are not authorized to delete this application"}), 403
+
+    application = Application.query.get(application_id)
+
+    if not application:
+        return jsonify({"msg": "Application not found"}), 404
+
+    db.session.delete(application)
+    db.session.commit()
+
+    return jsonify({"msg": "Application deleted successfully"}), 200
+
+# --- Chat Endpoints ---
+@app.route('/user/<int:user_id>/chat', methods=['GET'])
+@jwt_required()
+
+
+
 @app.route('/service/applications', methods=['GET'])
 @jwt_required()
-def get_allapplications():
+def get_all_applications():
     applications = Application.query.all()
     application_list = [application.to_dict() for application in applications]
     return jsonify(application_list)
