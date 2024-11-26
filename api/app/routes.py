@@ -796,13 +796,28 @@ def get_all_applications():
 @jwt_required()
 def get_chat(user_id):
     current_user_id = get_jwt_identity()
+    messages = Message.query.filter(((Message.sender_id == current_user_id) | (Message.sender_id == user_id)) &
+                                    ((Message.receiver_id == current_user_id) | (Message.receiver_id == user_id)) ).all()
+    message_list = [message.to_dict() for message in messages]
+    return jsonify(message_list)
 
-    query = Message.query.filter( ((Message.SenderId == current_user_id) | (Message.SenderId == user_id)) and ((Message.ReceiverId == current_user_id) | (Message.ReceiverId == user_id)) )
-    messages = query.all()
+@app.route('/chat_overview', methods=['GET'])
+@jwt_required()
+def get_chat_overview():
+    current_user_id = get_jwt_identity()
+    subquery = db.session.query(
+        Message.receiver_id,
+        func.max(Message.timestamp).label('latest_message')
+    ).filter(Message.sender_id == current_user_id).group_by(Message.receiver_id).subquery()
+
+    messages = db.session.query(Message).join(
+        subquery,
+        (Message.receiver_id == subquery.c.receiver_id) & (Message.timestamp == subquery.c.latest_message)
+    ).all()
 
     message_list = [message.to_dict() for message in messages]
-
     return jsonify(message_list)
+    
 
 
 if __name__ == '__main__':
