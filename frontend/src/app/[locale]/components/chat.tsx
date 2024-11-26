@@ -149,7 +149,7 @@ const Sidebar = () => {
       <Box
         sx={{
           width: 300,
-          backgroundColor: "#f0f0f0",
+          backgroundColor: "#f9f7f4",
           p: 3,
           position: "fixed",
           right: 0,
@@ -164,7 +164,7 @@ const Sidebar = () => {
             variant="h6"
             fontWeight="bold"
             gutterBottom
-            color="#000000"
+            color="#4b887c"
           >
             Pet Owner Chats
           </Typography>
