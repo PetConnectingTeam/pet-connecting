@@ -41,6 +41,9 @@ class Message(db.Model):
     sender = db.relationship('User', foreign_keys=[sender_id])
     receiver = db.relationship('User', foreign_keys=[receiver_id])
 
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 class Pet(db.Model):
     __tablename__ = 'Pet'  # Nombre de la tabla en la base de datos
 
