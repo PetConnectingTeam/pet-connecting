@@ -335,7 +335,7 @@ export default function Component() {
             "& .MuiDrawer-paper": {
               width: drawerWidth,
               boxSizing: "border-box",
-              backgroundColor: "#f0f0f0",
+              backgroundColor: "#f9f7f4",
               height: `calc(100% - 60px)`,
               marginTop: 8,
             },
@@ -403,10 +403,10 @@ export default function Component() {
             <Box
               sx={{
                 padding: 2,
-                backgroundColor: "#f9f9f9",
+                backgroundColor: "#ffffff",
                 borderRadius: 1,
                 margin: 2,
-                color: "#ff4d4f",
+                color: "#3c6b62", //#ff4d4f
               }}
             >
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -449,7 +449,7 @@ export default function Component() {
         </Drawer>
       )}
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-        <DialogTitle style={{ backgroundColor: "#ff4d4f", color: "white" }}>
+        <DialogTitle style={{ backgroundColor: "#4b887c", color: "white" }}>
           {t("post_a_pet")}
         </DialogTitle>
         <DialogContent dividers>
@@ -603,13 +603,13 @@ export default function Component() {
         <DialogActions>
           <Button
             onClick={handleClose}
-            style={{ backgroundColor: "#ff4d4f", color: "white" }}
+            style={{ backgroundColor: "#4b887c", color: "white" }}
           >
             {t("cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
-            style={{ backgroundColor: "#ff4d4f", color: "white" }}
+            style={{ backgroundColor: "#4b887c", color: "white" }}
             disabled={!isFormValid}
           >
             {t("submit")}
@@ -636,13 +636,13 @@ export default function Component() {
         <DialogActions>
           <Button
             onClick={() => setImageUploadOpen(false)}
-            style={{ color: "#ff4d4f" }}
+            style={{ color: "#4b887c" }}
           >
             Cancel
           </Button>
           <Button
             onClick={handleImageSubmit}
-            style={{ backgroundColor: "#ff4d4f", color: "white" }}
+            style={{ backgroundColor: "#4b887c", color: "white" }}
             disabled={!selectedImage}
           >
             {t("uplaod")}
