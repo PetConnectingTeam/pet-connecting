@@ -410,21 +410,6 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                   {petName} Owner
                 </Typography>
               </Box>
-
-              <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
-                <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#ff4d4f",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#ff7875",
-                    },
-                  }}
-                >
-                  Chat
-                </Button>
-              </Box>
             </Box>
           </CardContent>
           <Divider />
@@ -442,11 +427,18 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                 value={tabValue}
                 onChange={handleTabChange}
                 variant="fullWidth"
-                indicatorColor="primary"
-                textColor="primary"
+                sx={{ indicatorColor: "#4b887c", textColor: "#4b887c" }}
               >
-                <Tab label="Pet Details" icon={<PetDetailsIcon />} />
-                <Tab label="Gallery" icon={<CustomIcon />} />
+                <Tab
+                  sx={{ color: "#4b887c" }}
+                  label="Pet Details"
+                  icon={<PetDetailsIcon />}
+                />
+                <Tab
+                  sx={{ color: "#4b887c" }}
+                  label="Gallery"
+                  icon={<CustomIcon />}
+                />
               </Tabs>
 
               {tabValue === 0 && (
@@ -469,6 +461,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                       variant="h6"
                       sx={{
                         fontWeight: "bold",
+                        color: "#4b887c",
                       }}
                     >
                       {t("pet_details")}
@@ -537,31 +530,33 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                     >
                       Gallery
                     </Typography>
-                    <Button
-                      variant="contained"
-                      component="label"
-                      sx={{
-                        backgroundColor: "#1976d2",
-                        color: "white",
-                        "&:hover": { backgroundColor: "#1565c0" },
-                      }}
-                    >
-                      Upload
-                      <input
-                        type="file"
-                        multiple
-                        hidden
-                        onChange={handleImageUpload}
-                      />
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={handleImageSubmit}
-                      disabled={imagesUploaded.length === 0}
-                    >
-                      Submit
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        variant="contained"
+                        component="label"
+                        sx={{
+                          backgroundColor: "#4b887c",
+                          color: "white",
+                          "&:hover": { backgroundColor: "#3c6b62" },
+                        }}
+                      >
+                        Upload
+                        <input
+                          type="file"
+                          multiple
+                          hidden
+                          onChange={handleImageUpload}
+                        />
+                      </Button>
+                      <Button
+                        variant="contained"
+                        sx={{ backgroundColor: "#90b3ac" }}
+                        onClick={handleImageSubmit}
+                        disabled={imagesUploaded.length === 0}
+                      >
+                        Submit
+                      </Button>
+                    </Stack>
                   </Stack>
 
                   <ImageList
@@ -668,31 +663,33 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                         >
                           {t("gallery")}
                         </Typography>
-                        <Button
-                          variant="contained"
-                          component="label"
-                          sx={{
-                            backgroundColor: "#1976d2",
-                            color: "white",
-                            "&:hover": { backgroundColor: "#1565c0" },
-                          }}
-                        >
-                          {t("submit")}
-                          <input
-                            type="file"
-                            multiple
-                            hidden
-                            onChange={handleImageUpload}
-                          />
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={handleImageSubmit}
-                          disabled={imagesUploaded.length === 0}
-                        >
-                          {t("submit")}
-                        </Button>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            variant="contained"
+                            component="label"
+                            sx={{
+                              backgroundColor: "#4b887c",
+                              color: "white",
+                              "&:hover": { backgroundColor: "#3c6b62" },
+                            }}
+                          >
+                            Upload
+                            <input
+                              type="file"
+                              multiple
+                              hidden
+                              onChange={handleImageUpload}
+                            />
+                          </Button>
+                          <Button
+                            variant="contained"
+                            sx={{ backgroundColor: "#90b3ac" }}
+                            onClick={handleImageSubmit}
+                            disabled={imagesUploaded.length === 0}
+                          >
+                            Submit
+                          </Button>
+                        </Stack>
                       </Stack>
 
                       <ImageList

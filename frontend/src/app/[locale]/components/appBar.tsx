@@ -1,5 +1,5 @@
 "use client";
-import TranslateIcon from '@mui/icons-material/Translate';
+import TranslateIcon from "@mui/icons-material/Translate";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useTranslations } from "next-intl";
@@ -381,7 +381,7 @@ export default function NavigationBar() {
 
   return (
     <>
-      <StyledAppBar position="fixed">
+      <StyledAppBar position="fixed" sx={{ background: "#f9f7f4" }}>
         <Toolbar
           sx={{
             display: "flex",
@@ -395,7 +395,7 @@ export default function NavigationBar() {
                 sx={{
                   display: isMobile ? "block" : "inline-block",
                   flexGrow: 0,
-                  color: "black",
+                  color: "#4b887c",
                   fontWeight: "bold",
                   mr: isMobile ? 1 : 2,
                   fontSize: isMobile ? "0.8rem" : "1.25rem",
@@ -445,6 +445,7 @@ export default function NavigationBar() {
             >
               <CircularButton
                 size="small"
+                sx={{ color: "gray" }}
                 onClick={handlePetsButton}
                 aria-controls={open ? "demo-positioned-menu" : undefined}
                 aria-haspopup="true"
@@ -497,13 +498,12 @@ export default function NavigationBar() {
               </CircularButton>
 
               <Avatar
-                
                 sx={{ width: 32, height: 32 }}
                 onMouseEnter={handleProfileHover}
               >
                 <TranslateIcon />
               </Avatar>
-              
+
               <Menu
                 anchorEl={profileAnchorEl}
                 open={Boolean(profileAnchorEl)}
@@ -612,14 +612,16 @@ export default function NavigationBar() {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogClose}>{t("cancel")}</Button>
+            <Button onClick={handleDialogClose} sx={{ color: "#4b887c" }}>
+              {t("cancel")}
+            </Button>
             <Button
               onClick={handleSubmitService}
               variant="contained"
               sx={{
-                backgroundColor: "#FF4D4F",
+                backgroundColor: "#4b887c",
                 color: "white",
-                "&:hover": { backgroundColor: "#FF4D4F" },
+                "&:hover": { backgroundColor: "#3c6b62" },
               }}
               disabled={
                 !description ||

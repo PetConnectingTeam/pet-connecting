@@ -412,9 +412,8 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             onClick={handleSubmit}
             fullWidth
             variant="contained"
-            color="primary"
             disabled={!isFormValid}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, backgroundColor: "#4b887c" }}
           >
             Submit
           </Button>
@@ -438,12 +437,18 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setImageUploadOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => setImageUploadOpen(false)}
+            sx={{ color: "#4b887c" }}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleImageSubmit}
             disabled={!selectedImage}
             color="primary"
             variant="contained"
+            sx={{ backgroundColor: "#4b887c" }}
           >
             Upload
           </Button>

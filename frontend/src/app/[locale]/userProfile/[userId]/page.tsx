@@ -320,10 +320,10 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
                   />
                   <Button
                     sx={{
-                      backgroundColor: "#ff4d4f",
+                      backgroundColor: "#4b887c",
                       color: "white",
                       "&:hover": {
-                        backgroundColor: "#ff7875",
+                        backgroundColor: "#3c6b62",
                       },
                     }}
                     variant="contained"
@@ -412,10 +412,10 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
                 (isEditing ? (
                   <Button
                     sx={{
-                      backgroundColor: "#ff4d4f",
+                      backgroundColor: "#4b887c",
                       color: "white",
                       "&:hover": {
-                        backgroundColor: "#ff7875",
+                        backgroundColor: "#3c6b62",
                       },
                       mt: 2,
                     }}
@@ -427,10 +427,10 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
                 ) : (
                   <Button
                     sx={{
-                      backgroundColor: "#ff4d4f",
+                      backgroundColor: "#4b887c",
                       color: "white",
                       "&:hover": {
-                        backgroundColor: "#ff7875",
+                        backgroundColor: "#3c6b62",
                       },
                       mt: 2,
                     }}
