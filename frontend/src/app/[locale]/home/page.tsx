@@ -378,7 +378,7 @@ const HomePage: React.FC = () => {
                         key={service.ServiceId}
                         sx={{
                           padding: 2,
-                          bgcolor: "#f5f8fa",
+                          bgcolor: "#f9f7f4",
                           borderRadius: 2,
                           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                           border: "1px solid #e1e8ed",
@@ -516,10 +516,10 @@ const HomePage: React.FC = () => {
                               color="primary"
                               sx={{
                                 mt: 1,
-                                backgroundColor: "#e53935",
+                                backgroundColor: "#4b887c",
                                 color: "#fff",
                                 "&:hover": {
-                                  backgroundColor: "#d32f2f",
+                                  backgroundColor: "#3c6b62",
                                 },
                                 borderRadius: 2,
                                 boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -631,7 +631,7 @@ const HomePage: React.FC = () => {
                       key={service.ServiceId}
                       sx={{
                         padding: 2,
-                        bgcolor: "#fff",
+                        bgcolor: "#f9f7f4",
                         borderRadius: 2,
                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                         border: "1px solid #e1e8ed",
@@ -653,10 +653,10 @@ const HomePage: React.FC = () => {
                           onClick={() => handleOpenModal(service.ServiceId)}
                           sx={{
                             mt: 1,
-                            backgroundColor: "#e53935",
+                            backgroundColor: "#4b887c",
                             color: "#fff",
                             "&:hover": {
-                              backgroundColor: "#d32f2f",
+                              backgroundColor: "#3c6b62",
                             },
                             borderRadius: 2,
                             boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -714,7 +714,7 @@ const HomePage: React.FC = () => {
                       key={service.ServiceId}
                       sx={{
                         padding: 2,
-                        bgcolor: "#f5f8fa",
+                        bgcolor: "#f9f7f4",
                         borderRadius: 2,
                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                         border: "1px solid #e1e8ed",
@@ -840,10 +840,10 @@ const HomePage: React.FC = () => {
                           color="primary"
                           sx={{
                             mt: 1,
-                            backgroundColor: "#e53935",
+                            backgroundColor: "#4b887c",
                             color: "#fff",
                             "&:hover": {
-                              backgroundColor: "#d32f2f",
+                              backgroundColor: "#3c6b62",
                             },
                             borderRadius: 2,
                             boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -942,7 +942,7 @@ const HomePage: React.FC = () => {
                     key={service.ServiceId}
                     sx={{
                       padding: 2,
-                      bgcolor: "#fff",
+                      bgcolor: "#f9f7f4",
                       borderRadius: 2,
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                       border: "1px solid #e1e8ed",
@@ -964,10 +964,10 @@ const HomePage: React.FC = () => {
                         onClick={() => handleOpenModal(service.ServiceId)}
                         sx={{
                           mt: 1,
-                          backgroundColor: "#e53935",
+                          backgroundColor: "#4b887c", //color changed
                           color: "#fff",
                           "&:hover": {
-                            backgroundColor: "#d32f2f",
+                            backgroundColor: "#3c6b62", //#d32f2f
                           },
                           borderRadius: 2,
                           boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -999,11 +999,11 @@ const HomePage: React.FC = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: { xs: "90%", sm: "400px" }, // Responsive width
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
-            p: 4,
+            p: 3,
           }}
         >
           <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
@@ -1016,13 +1016,13 @@ const HomePage: React.FC = () => {
                 sx={{
                   mb: 1,
                   p: 2,
-                  bgcolor: application.Accepted ? "#e8f5e9" : "#ffebee",
+                  bgcolor: application.Accepted ? "#f6eacf" : "#eed6ce",
                   borderRadius: 1,
                 }}
               >
                 <Typography
                   variant="body2"
-                  sx={{ color: application.Accepted ? "#4caf50" : "#e0245e" }}
+                  sx={{ color: application.Accepted ? "#e74c3c" : "#E53935" }}
                 >
                   {t("user")}: {serviceInfo?.publisher} -{" "}
                   {application.Accepted ? "Approved" : "Pending Approval"}
@@ -1033,10 +1033,10 @@ const HomePage: React.FC = () => {
                     color="primary"
                     sx={{
                       mt: 1,
-                      backgroundColor: "#e53935",
+                      backgroundColor: "#33524a", //color changed
                       color: "#fff",
                       "&:hover": {
-                        backgroundColor: "#d32f2f",
+                        backgroundColor: "#3c6b62",
                       },
                       borderRadius: 2,
                       boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
@@ -1059,7 +1059,7 @@ const HomePage: React.FC = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    sx={{ mt: 1 }}
+                    sx={{ mt: 1, backgroundColor: "#e74c3c" }}
                     onClick={() => {
                       const confirmed = window.confirm(
                         "Are you sure you want to reject this application?"
@@ -1081,7 +1081,7 @@ const HomePage: React.FC = () => {
           )}
           <Button
             onClick={handleCloseModal}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, backgroundColor: "#3c6b62" }}
             variant="contained"
             color="secondary"
           >
