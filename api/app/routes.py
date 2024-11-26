@@ -783,12 +783,6 @@ def delete_application(service_id, application_id):
 
     return jsonify({"msg": "Application deleted successfully"}), 200
 
-# --- Chat Endpoints ---
-@app.route('/user/<int:user_id>/chat', methods=['GET'])
-@jwt_required()
-
-
-
 @app.route('/service/applications', methods=['GET'])
 @jwt_required()
 def get_all_applications():
