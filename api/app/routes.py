@@ -1,6 +1,6 @@
 from flask import jsonify, request, send_file
 from app import app, db, bcrypt, utils
-from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService
+from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService, Message
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import base64
 from flask_cors import CORS
@@ -769,25 +769,19 @@ def delete_application(service_id, application_id):
 
     if not service:
         return jsonify({"msg": "Service not found"}), 404
-
-    if service.PublisherId != current_user_id:
-        return jsonify({"msg": "You are not authorized to delete this application"}), 403
-
+    
     application = Application.query.get(application_id)
 
     if not application:
         return jsonify({"msg": "Application not found"}), 404
 
+    if current_user_id != service.PublisherId and current_user_id != application.UserId:
+        return jsonify({"msg": "You are not authorized to delete this application"}), 403
+
     db.session.delete(application)
     db.session.commit()
 
     return jsonify({"msg": "Application deleted successfully"}), 200
-
-# --- Chat Endpoints ---
-@app.route('/user/<int:user_id>/chat', methods=['GET'])
-@jwt_required()
-
-
 
 @app.route('/service/applications', methods=['GET'])
 @jwt_required()
@@ -795,6 +789,20 @@ def get_all_applications():
     applications = Application.query.all()
     application_list = [application.to_dict() for application in applications]
     return jsonify(application_list)
+
+
+# --- Chat Endpoints ---
+@app.route('/user/<int:user_id>/chat', methods=['GET'])
+@jwt_required()
+def get_chat(user_id):
+    current_user_id = get_jwt_identity()
+
+    query = Message.query.filter( ((Message.SenderId == current_user_id) | (Message.SenderId == user_id)) and ((Message.ReceiverId == current_user_id) | (Message.ReceiverId == user_id)) )
+    messages = query.all()
+
+    message_list = [message.to_dict() for message in messages]
+
+    return jsonify(message_list)
 
 
 if __name__ == '__main__':
