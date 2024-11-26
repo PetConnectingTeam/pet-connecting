@@ -69,7 +69,7 @@ function App() {
         item
         xs={12}
         md={6}
-        sx={{ backgroundColor: "#df4f46", color: "#fff", p: 4 }}
+        sx={{ backgroundColor: "#ede2c4", color: "#fff", p: 4 }}
       >
         <Box
           display="flex"
@@ -134,10 +134,10 @@ function App() {
             fullWidth
             sx={{
               mt: 2,
-              backgroundColor: "#ff2f2f",
+              backgroundColor: "#4b887c",
               color: "#fff",
               "&:hover": {
-                backgroundColor: "#ff2f2f",
+                backgroundColor: "#3c6b62",
               },
             }}
             onClick={handleSignInButton}
