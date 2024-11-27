@@ -13,6 +13,8 @@ import axios from "axios";
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import portrait from "../../../../public/portrait.png";
+import logo from "../../../../public/Logo3.png";
 
 const SignUp: React.FC = () => {
   const [name, setName] = React.useState<string>("");
@@ -54,76 +56,85 @@ const SignUp: React.FC = () => {
   return (
     <Box
       sx={{
+        position: "relative",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
+        width: "100vw",
         bgcolor: "#f5f5f5",
+        backgroundImage: `url(${portrait.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        zIndex: 1,
       }}
     >
-      <Card sx={{ maxWidth: 400, width: "100%", boxShadow: 3 }}>
-        <CardContent>
-          <Typography
-            variant="h5"
-            component="h2"
-            gutterBottom
-            align="center"
-            sx={{ fontWeight: "bold", mb: 3 }}
-          >
-            {t("create_new_account")}
-          </Typography>
-          <Box component="form" noValidate autoComplete="off">
-            <TextField
-              fullWidth
-              label={t("name")}
-              variant="outlined"
-              margin="normal"
-              placeholder={t("enter_your_name")}
-              onChange={handleNameChange}
-            />
-            <TextField
-              fullWidth
-              label={t("surname")}
-              variant="outlined"
-              margin="normal"
-              placeholder={t("enter_your_surname")}
-              onChange={handleSurnameChange}
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              variant="outlined"
-              margin="normal"
-              type="email"
-              placeholder={t("enter_your_email")}
-              onChange={handleEmailChange}
-            />
-            <TextField
-              fullWidth
-              label={t("password")}
-              variant="outlined"
-              margin="normal"
-              type="password"
-              placeholder={t("enter_your_password")}
-              onChange={handlePasswordChange}
-            />
-            <Button
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 2,
-                bgcolor: "#ff3b30",
-                "&:hover": {
-                  bgcolor: "#ff3b30",
-                },
-              }}
-              onClick={handleSignUpButton}
+      <Box>
+        <img src={logo.src} height={85} width={85} alt="PetConnecting" />
+        <Card sx={{ maxWidth: 400, width: "100%", boxShadow: 3, zIndex: 2 }}>
+          <CardContent>
+            <Typography
+              variant="h5"
+              component="h2"
+              gutterBottom
+              align="center"
+              sx={{ fontWeight: "bold", mb: 3, color: "#4b887c" }}
             >
-              {t("sign_up")}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
+              {t("create_new_account")}
+            </Typography>
+            <Box component="form" noValidate autoComplete="off">
+              <TextField
+                fullWidth
+                label={t("name")}
+                variant="outlined"
+                margin="normal"
+                placeholder={t("enter_your_name")}
+                onChange={handleNameChange}
+              />
+              <TextField
+                fullWidth
+                label={t("surname")}
+                variant="outlined"
+                margin="normal"
+                placeholder={t("enter_your_surname")}
+                onChange={handleSurnameChange}
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                variant="outlined"
+                margin="normal"
+                type="email"
+                placeholder={t("enter_your_email")}
+                onChange={handleEmailChange}
+              />
+              <TextField
+                fullWidth
+                label={t("password")}
+                variant="outlined"
+                margin="normal"
+                type="password"
+                placeholder={t("enter_your_password")}
+                onChange={handlePasswordChange}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 2,
+                  bgcolor: "#4b887c",
+                  "&:hover": {
+                    bgcolor: "#3c6b62",
+                  },
+                }}
+                onClick={handleSignUpButton}
+              >
+                {t("sign_up")}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
     // <Box
     //   sx={{
