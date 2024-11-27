@@ -24,8 +24,8 @@ class User(db.Model):
     Points = db.Column(db.Float)
     ProfilePhoto = db.Column(db.LargeBinary, nullable=True)  # Cambiar el tipo según lo que necesites
     MimeType = db.Column(db.String(50), nullable=True)
-    TotalRating = db.Column(db.Numeric(5, 2))
-    RatingCount = db.Column(db.Integer)
+    TotalRating = db.Column(db.Numeric(5, 2), default = 0)
+    RatingCount = db.Column(db.Integer, default = 0)
 
     def __repr__(self):
         return f'<User {self.Name}, Email: {self.Email}>'
@@ -57,6 +57,8 @@ class Pet(db.Model):
     Weight = db.Column(db.Float)
     Size = db.Column(db.Enum('Big', 'Medium', 'Small'), nullable=False)
     Age = db.Column(db.Integer)
+    TotalRating = db.Column(db.Numeric(5, 2), default=0)
+    RatingCount = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return f'<Pet {self.Name}, Type: {self.AnimalType}>'
@@ -115,6 +117,7 @@ class PetsInService(db.Model):
     PetId = db.Column(db.BigInteger, db.ForeignKey('Pet.ID'), nullable=False, primary_key=True)
     ServiceId = db.Column(db.BigInteger, db.ForeignKey('RequestService.ServiceId'), nullable=False, primary_key=True)
     UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
+    Rated = db.Column(db.Boolean, nullable=False, default=False)
     
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -122,6 +125,7 @@ class PetsInService(db.Model):
 class Application(db.Model):
     __tablename__ = 'Application'
 
+    ApplicationId = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     ServiceId = db.Column(db.BigInteger, db.ForeignKey('RequestService.ServiceId'), nullable=False, primary_key=True)
     UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
     Accepted = db.Column(db.Boolean, nullable=False, default=False)
