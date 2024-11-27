@@ -30,6 +30,7 @@ import {
   FormControl,
   Alert,
   useMediaQuery,
+  SelectChangeEvent,
 } from "@mui/material";
 import { Home } from "@mui/icons-material";
 import Link from "next/link";
@@ -46,6 +47,11 @@ interface PetFormData {
   weight: number;
   size: string;
   age: number;
+}
+
+interface Pet {
+  ID: number;
+  Name: string;
 }
 
 export default function Component() {
@@ -66,6 +72,7 @@ export default function Component() {
     size: "small",
     age: 0,
   });
+  const [serviceDialogOpen, setDialogOpen] = useState(false);
   const [customPetInputVisible, setCustomPetInputVisible] = useState(false);
   const [customPetName, setCustomPetName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +95,43 @@ export default function Component() {
     t("tip_10"),
     t("tip_11"),
   ];
+
+  const [selectedPets, setSelectedPets] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [cost, setCost] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [petList, setPetList] = useState<Pet[]>([]); // Add state for pet list
+
+  // Function to fetch pet list
+  const fetchPetList = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available in cookies");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:5001/pets?name=&id=&user_id=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPetList(response.data);
+    } catch (error) {
+      console.error("Error fetching pet list", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPetList(); // Fetch pet list when component mounts
+  }, []);
 
   useEffect(() => {
     const randomTip = tips[Math.floor(Math.random() * tips.length)];
@@ -222,24 +266,20 @@ export default function Component() {
         }
       );
 
-      console.log("Pet creation response:", response.data); // Log response to inspect its structure
+      console.log("Pet creation response:", response.data);
 
       if (response.status === 200 || response.status === 201) {
         setSuccess(true);
 
-        // Assuming the backend returns the new pet ID in the response data
         if (response.data && response.data.id) {
-          setNewPetId(response.data.id); // Set newPetId directly if available in response
+          setNewPetId(response.data.id);
           console.log("New Pet ID from response:", response.data.id);
         } else {
-          // If pet ID isn't directly in the response, fetch it with a follow-up request
           await fetchNewPetId();
         }
 
-        setTimeout(() => {
-          setOpen(false);
-          setImageUploadOpen(true); // Open image upload dialog after successful pet submission
-        }, 2000);
+        setOpen(false);
+        setImageUploadOpen(true);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to post pet");
@@ -325,6 +365,89 @@ export default function Component() {
     }
   };
 
+  const handlePetChange = (event: SelectChangeEvent<string[]>) => {
+    setSelectedPets(
+      typeof event.target.value === "string"
+        ? event.target.value.split(",")
+        : event.target.value
+    );
+  };
+
+  const handleSubmitService = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available");
+      return;
+    }
+
+    if (
+      !description ||
+      !location ||
+      !cost ||
+      !startDate ||
+      !endDate ||
+      selectedPets.length === 0
+    ) {
+      console.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}/${(
+          date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
+      };
+
+      const serviceData = {
+        description: description,
+        serviceDateIni: formatDate(startDate),
+        serviceDateFin: formatDate(endDate),
+        address: location,
+        cost: cost,
+        pets: selectedPets.map(String),
+      };
+
+      const response = await axios.post(
+        "http://127.0.0.1:5001/service",
+        serviceData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("Service created successfully");
+        setDescription("");
+        setLocation("");
+        setCost("");
+        setStartDate("");
+        setEndDate("");
+        setSelectedPets([]);
+        handleDialogClose();
+      } else {
+        console.error("Failed to create service");
+      }
+    } catch (error) {
+      console.error("Error creating service:", error);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+  const handleDialogOpen = () => {
+    setDialogOpen(true);
+  };
+
   return (
     <Box>
       {!isMobile && (
@@ -387,6 +510,7 @@ export default function Component() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="lucide lucide-dog"
+                    style={{ color: "#4b887c" }}
                   >
                     <path d="M11.25 16.25h1.5L12 17z" />
                     <path d="M16 14v.5" />
@@ -396,6 +520,173 @@ export default function Component() {
                   </svg>
                 </ListItemIcon>
                 <ListItemText primary={t("post_a_pet")} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton onClick={() => setDialogOpen(true)}>
+                <ListItemIcon>
+                  <svg
+                    width="40px"
+                    height="40px"
+                    style={{ paddingRight: "10px" }}
+                    viewBox="0 0 512 512"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M382.6,279.11v147.07c0,8.79-7.13,15.93-15.93,15.93H140.33c-8.8,0-15.93-7.14-15.93-15.93V111.82c0-8.56,6.75-15.52,15.21-15.9l20.08-34.78c1.65-2.85,5.77-2.85,7.42,0l20.06,34.75h130l20.06-34.75c1.65-2.85,5.77-2.85,7.42,0l20.06,34.75h1.96c8.8,0,15.93,7.13,15.93,15.93v107.22"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                      fill="none"
+                    />
+                    <g>
+                      <path
+                        d="M463.1,200.95c-5.74,5.58-17.11,3.16-25.39-5.37-8.3-8.55-10.37-19.98-4.63-25.56,.69-.67,1.48-1.23,2.32-1.66,6.13-3.25,15.79-.47,23.09,7.05,7.28,7.5,9.78,17.24,6.35,23.27-.46,.83-1.04,1.6-1.73,2.27Z"
+                        fill="#4b887c"
+                      />
+                      <path
+                        d="M435.4,168.37c-.84,.43-1.63,.99-2.32,1.66l2.02-1.97,.3,.3Z"
+                        fill="#4b887c"
+                      />
+                      <path
+                        d="M465.13,198.99l-2.02,1.97c.69-.67,1.27-1.44,1.73-2.27l.3,.3Z"
+                        fill="#4b887c"
+                      />
+                      <path
+                        d="M463.1,200.95l-98.33,95.46c-16.76-3.76-26.77-14.07-30.02-30.93l98.33-95.46c-5.74,5.58-3.67,17.01,4.63,25.56,8.29,8.54,19.65,10.95,25.39,5.37Z"
+                        fill="#4b887c"
+                      />
+                      <path
+                        d="M364.78,296.41l-62.14,30.31,32.12-61.23c3.26,16.86,13.27,27.17,30.02,30.93Z"
+                        fill="#4b887c"
+                      />
+                      <path
+                        d="M320.17,317.83l-16.87,8.23,8.72-16.62c.88,4.58,3.6,7.38,8.15,8.4Z"
+                        fill="#4b887c"
+                      />
+                      <line
+                        x1="423.25"
+                        x2="365.98"
+                        y1="209.6"
+                        y2="265.2"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                      />
+                      <line
+                        x1="416.61"
+                        x2="359.34"
+                        y1="202.76"
+                        y2="258.36"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                      />
+                      <line
+                        x1="429.01"
+                        x2="371.74"
+                        y1="217.31"
+                        y2="272.91"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                      />
+                    </g>
+                    <g>
+                      <path
+                        d="M273.02,387.35c-3.24-5.58-10.21-9.44-18.29-9.44s-15.05,3.86-18.29,9.44c-5.79,2.7-9.44,6.66-9.44,11.07,0,8.14,12.42,14.73,27.73,14.73s27.73-6.6,27.73-14.73c0-4.41-3.66-8.37-9.44-11.07Z"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                        fill="none"
+                      />
+                      <ellipse
+                        cx="264.92"
+                        cy="357.62"
+                        rx="10.92"
+                        ry="8.38"
+                        transform="translate(-144.17 532.89) rotate(-76.66)"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                        fill="none"
+                      />
+                      <ellipse
+                        cx="241.57"
+                        cy="357.62"
+                        rx="8.38"
+                        ry="10.92"
+                        transform="translate(-75.99 65.38) rotate(-13.34)"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                        fill="none"
+                      />
+                      <ellipse
+                        cx="223.53"
+                        cy="375.53"
+                        rx="7.36"
+                        ry="9.6"
+                        transform="translate(-157.82 162.08) rotate(-30)"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                        fill="none"
+                      />
+                      <ellipse
+                        cx="283.9"
+                        cy="373.04"
+                        rx="9.6"
+                        ry="7.36"
+                        transform="translate(-181.12 432.39) rotate(-60)"
+                        stroke="#4b887c"
+                        strokeWidth="10"
+                        fill="none"
+                      />
+                    </g>
+                    <line
+                      x1="176.59"
+                      x2="330.84"
+                      y1="140.92"
+                      y2="140.92"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                    />
+                    <line
+                      x1="176.59"
+                      x2="330.84"
+                      y1="176.97"
+                      y2="176.97"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                    />
+                    <line
+                      x1="176.59"
+                      x2="330.84"
+                      y1="213.02"
+                      y2="213.02"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                    />
+                    <line
+                      x1="176.59"
+                      x2="330.84"
+                      y1="249.06"
+                      y2="249.06"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                    />
+                    <line
+                      x1="176.59"
+                      x2="293.95"
+                      y1="285.11"
+                      y2="285.11"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                    />
+                    <line
+                      x1="176.59"
+                      x2="277.19"
+                      y1="321.16"
+                      y2="321.16"
+                      stroke="#4b887c"
+                      strokeWidth="10"
+                    />
+                  </svg>
+                </ListItemIcon>
+                <ListItemText primary={t("post_a_service")} />
               </ListItemButton>
             </ListItem>
             <Divider />
@@ -646,6 +937,103 @@ export default function Component() {
             disabled={!selectedImage}
           >
             {t("uplaod")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Service Dialog */}
+      <Dialog open={serviceDialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>{t("pet_care_services")}</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel id="pet-select-label">Select Pets</InputLabel>
+            <Select
+              labelId="pet-select-label"
+              multiple
+              value={selectedPets}
+              onChange={handlePetChange}
+              label={t("select_pets")}
+            >
+              {petList.map((pet) => (
+                <MenuItem key={pet.ID} value={pet.ID.toString()}>
+                  {pet.Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label={t("description")}
+            fullWidth
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("location")}
+            fullWidth
+            variant="outlined"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("cost")}
+            fullWidth
+            variant="outlined"
+            type="number"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("start_date_time")}
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("end_date_time")}
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            required
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} sx={{ color: "#4b887c" }}>
+            {t("cancel")}
+          </Button>
+          <Button
+            onClick={handleSubmitService}
+            variant="contained"
+            sx={{
+              backgroundColor: "#4b887c",
+              color: "white",
+              "&:hover": { backgroundColor: "#3c6b62" },
+            }}
+            disabled={
+              !description ||
+              !location ||
+              !cost ||
+              !startDate ||
+              !endDate ||
+              selectedPets.length === 0
+            }
+          >
+            {t("submit")}
           </Button>
         </DialogActions>
       </Dialog>
