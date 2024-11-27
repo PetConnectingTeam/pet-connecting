@@ -30,6 +30,7 @@
     "post_a_pet": "Publicar una mascota",
     "pet_care_tip": "Consejo de cuidado de mascotas",
     "help_support": "Ayuda y Soporte",
+    "post_a_service": "Publicar un servicio",
     "log_out": "Cerrar sesión",
     "pet_posted_successfully": "¡Mascota publicada exitosamente!",
     "new_pet_id": "Nuevo ID de mascota",
@@ -61,7 +62,11 @@
     "tip_8": "Asea a tu mascota regularmente para reducir el pelo suelto y prevenir enredos.",
     "tip_9": "Introduce nuevos juguetes y actividades para estimular la mente de tu mascota.",
     "tip_10": "Protege a tu mascota de temperaturas extremas manteniéndola fresca en verano y cálida en invierno.",
-    "tip_11": "Enseña comandos básicos para mejorar el comportamiento y seguridad de tu mascota."
+    "tip_11": "Enseña comandos básicos para mejorar el comportamiento y seguridad de tu mascota.",
+    "location": "Ubicación",
+    "cost": "Costo",
+    "start_date_time": "Fecha y hora de inicio",
+    "end_date_time": "Fecha y hora de fin"
   },
   "AppBar": {
     "search_for_pet_care_services": "Buscar servicios de cuidado de mascotas",
