@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Roles (
     Description VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS User (
+/*CREATE TABLE IF NOT EXISTS User (
     ID BIGINT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(100) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE Messages (
     FOREIGN KEY (receiver_id) REFERENCES User(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
+*/
 -- Populate
 
 -- Roles
@@ -95,7 +95,7 @@ INSERT INTO Roles (RolType, Description) VALUES
 ('Normal', 'Basic user'),
 ('Premium', 'Premium user'),
 ('Owner', 'Owner user');
-
+/*
 --  User
 INSERT INTO User (Email, Password, Name, Surname, RoleID, Points, ProfilePhoto, TotalRating, RatingCount) VALUES
 ('user1@example.com', 'password123', 'John', 'Doe', 1, 100, NULL, 0.0, 0),
@@ -110,3 +110,4 @@ INSERT INTO Pet (UserID, Name, AnimalType, Breed, Description, Allergies, Weight
 -- Request Service
 INSERT INTO RequestService (PublisherId, publishDate, description, serviceDateIni, serviceDateEnd, address, cost, completed)
 VALUES (1, NOW(), 'Cuidar perro durante el fin de semana', '2024-10-20 09:00:00', '2024-10-22 18:00:00', 'Calle Falsa 123', 50.00, FALSE);
+*/
