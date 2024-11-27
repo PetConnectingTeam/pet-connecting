@@ -8,6 +8,8 @@ import {
   Link,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
@@ -15,11 +17,14 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Cookies from "js-cookie";
 import portrait from "../../../public/illustration.png";
+import logo from "../../../public/Logo2.png";
 
 function App() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -53,11 +58,6 @@ function App() {
       path: "/",
     });
 
-    Cookies.set("user_id", response.data.user_id, {
-      expires: expirationTime,
-      path: "/",
-    });
-
     if (response) {
       router.push("/home");
     }
@@ -65,29 +65,32 @@ function App() {
 
   return (
     <Grid container sx={{ minHeight: "100vh" }}>
-      <Grid
-        item
-        xs={12}
-        md={6}
-        sx={{ backgroundColor: "#ede2c4", color: "#fff", p: 4 }}
-      >
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          height="100%"
-          textAlign="center"
+      {!isMobile && (
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{ backgroundColor: "#ede2c4", color: "#fff", p: 4 }}
         >
-          <Image src={portrait} alt="Illustration" width={512} height={512} />
-          <Typography variant="h4" fontWeight="bold" mb={2}>
-            PetConnecting: Connect with Pet
-          </Typography>
-          <Typography variant="body1">
-            All your pet&apos;s needs in one place.
-          </Typography>
-        </Box>
-      </Grid>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            height="100%"
+            textAlign="center"
+            color="#4b887c"
+          >
+            <Image src={portrait} alt="Illustration" width={512} height={512} />
+            <Typography variant="h4" fontWeight="bold" mb={2}>
+              PetConnecting: Connect with Pet
+            </Typography>
+            <Typography variant="body1">
+              All your pet&apos;s needs in one place.
+            </Typography>
+          </Box>
+        </Grid>
+      )}
 
       <Grid
         item
@@ -101,13 +104,21 @@ function App() {
         }}
       >
         <Box sx={{ maxWidth: "400px", width: "100%", p: 4 }}>
+          {isMobile && (
+            <Box textAlign="center" mb={3}>
+              <Image src={logo} alt="Logo" width={100} height={100} />
+              <Typography variant="h4" fontWeight="bold" color="#4b887c">
+                PetConnecting
+              </Typography>
+            </Box>
+          )}
           <Typography
             variant="h5"
             fontWeight="bold"
             mb={3}
             align="center"
             sx={{
-              color: "#000000",
+              color: "#4b887c",
             }}
           >
             Log in

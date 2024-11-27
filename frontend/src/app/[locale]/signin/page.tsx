@@ -9,13 +9,16 @@ import {
   Card,
   Typography,
   CardContent,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
+import portrait from "../../../../public/portrait.png";
 
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import logo from "../../../../public/logo.png";
+import logo from "../../../../public/Logo2.png";
 import { useTranslations } from "next-intl";
 
 const SignInSide: React.FC = () => {
@@ -65,6 +68,9 @@ const SignInSide: React.FC = () => {
     }
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box
       sx={{
@@ -74,6 +80,12 @@ const SignInSide: React.FC = () => {
         justifyContent: "center",
         minHeight: "100vh",
         bgcolor: "#f5f5f5",
+        width: "100vw",
+        backgroundImage: `url(${portrait.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        zIndex: 1,
+        padding: isMobile ? "20px" : "0px",
       }}
     >
       <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
@@ -90,8 +102,10 @@ const SignInSide: React.FC = () => {
         sx={{
           maxWidth: 400,
           width: "100%",
+          maxHeigh: 200,
           padding: "24px",
           boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.05)",
+          height: isMobile ? "auto" : "100%",
         }}
       >
         <CardContent>
@@ -99,7 +113,7 @@ const SignInSide: React.FC = () => {
             variant="h5"
             component="h2"
             align="center"
-            sx={{ mb: 3, fontWeight: "bold" }}
+            sx={{ mb: 3, fontWeight: "bold", color: "#4b887c" }}
           >
             {t("welcom_back")}
           </Typography>
@@ -143,9 +157,9 @@ const SignInSide: React.FC = () => {
                 type="button"
                 variant="contained"
                 sx={{
-                  bgcolor: "#ff3b30",
+                  bgcolor: "#4b887c",
                   "&:hover": {
-                    bgcolor: "#ff3b30",
+                    bgcolor: "#3c6b62",
                   },
                 }}
                 onClick={handleSignInButton}
@@ -155,13 +169,13 @@ const SignInSide: React.FC = () => {
             </Box>
           </Box>
         </CardContent>
+        <Typography variant="body2" sx={{ mt: 2, paddingLeft: "46px" }}>
+          {t("dont_have_account")}{" "}
+          <Link href="/signup" sx={{ color: "#ff3b30" }}>
+            {t("create_account")}
+          </Link>
+        </Typography>
       </Card>
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        {t("dont_have_account")}{" "}
-        <Link href="/signup" sx={{ color: "#ff3b30" }}>
-          {t("create_account")}
-        </Link>
-      </Typography>
     </Box>
   );
 };
