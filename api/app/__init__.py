@@ -6,6 +6,9 @@ from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt 
 from datetime import timedelta
 from flask_socketio import SocketIO
+from time import sleep
+
+sleep(10)
 
 app = Flask(__name__)
 
@@ -21,3 +24,6 @@ db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 from . import routes, sockets
+
+with app.app_context():
+    db.create_all()
