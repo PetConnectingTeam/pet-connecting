@@ -9,6 +9,8 @@ import {
   Card,
   Typography,
   CardContent,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import portrait from "../../../../public/portrait.png";
 
@@ -16,7 +18,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import logo from "../../../../public/Logo3.png";
+import logo from "../../../../public/Logo2.png";
 import { useTranslations } from "next-intl";
 
 const SignInSide: React.FC = () => {
@@ -66,6 +68,9 @@ const SignInSide: React.FC = () => {
     }
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box
       sx={{
@@ -80,6 +85,7 @@ const SignInSide: React.FC = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         zIndex: 1,
+        padding: isMobile ? "20px" : "0px",
       }}
     >
       <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
@@ -96,8 +102,10 @@ const SignInSide: React.FC = () => {
         sx={{
           maxWidth: 400,
           width: "100%",
+          maxHeigh: 200,
           padding: "24px",
           boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.05)",
+          height: isMobile ? "auto" : "100%",
         }}
       >
         <CardContent>
