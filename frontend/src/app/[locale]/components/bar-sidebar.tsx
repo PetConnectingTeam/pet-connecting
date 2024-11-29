@@ -493,7 +493,7 @@ export default function Component() {
                     sx={{ width: 24, height: 24 }}
                   />
                 </ListItemIcon>
-                <ListItemText primary="Profile" />
+                <ListItemText primary={t("profile")} />
               </ListItemButton>
             </ListItem>
             <ListItem>
@@ -761,7 +761,7 @@ export default function Component() {
           )}
           <form>
             <TextField
-              label="Pet Name"
+              label={t("pet_name")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -812,7 +812,7 @@ export default function Component() {
             </Box>
             {customPetInputVisible && (
               <TextField
-                label="Custom Pet Type"
+                label={t("custom_pet_type")}
                 fullWidth
                 margin="dense"
                 variant="outlined"
@@ -821,7 +821,7 @@ export default function Component() {
               />
             )}
             <TextField
-              label="Breed"
+              label={t("breed")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -830,7 +830,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <TextField
-              label="Age"
+              label={t("age")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -840,7 +840,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <TextField
-              label="Weight"
+              label={t("weight")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -852,7 +852,7 @@ export default function Component() {
             <FormControl fullWidth margin="dense" variant="outlined">
               <InputLabel>Size</InputLabel>
               <Select
-                label="Size"
+                label={t("size")}
                 name="size"
                 value={formData.size}
                 onChange={(event) =>
@@ -864,13 +864,13 @@ export default function Component() {
                   )
                 }
               >
-                <MenuItem value="small">Small</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="large">Large</MenuItem>
+                <MenuItem value="small">{t("small")}</MenuItem>
+                <MenuItem value="medium">{t("medium")}</MenuItem>
+                <MenuItem value="large">{t("large")}</MenuItem>
               </Select>
             </FormControl>
             <TextField
-              label="Allergies"
+              label={t("allergies")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -879,7 +879,7 @@ export default function Component() {
               onChange={handleInputChange}
             />
             <TextField
-              label="Description"
+              label={t("description")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -946,7 +946,7 @@ export default function Component() {
         <DialogTitle>{t("pet_care_services")}</DialogTitle>
         <DialogContent>
           <FormControl fullWidth margin="dense" variant="outlined">
-            <InputLabel id="pet-select-label">Select Pets</InputLabel>
+            <InputLabel id="pet-select-label">{t("select_pets")}</InputLabel>
             <Select
               labelId="pet-select-label"
               multiple
