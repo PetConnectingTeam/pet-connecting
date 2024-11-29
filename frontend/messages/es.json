@@ -22,7 +22,17 @@
     "accept": "Aceptar",
     "cancel": "Cancelar",
     "no_applications_found": "No hay solicitudes disponibles para este servicio.",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "pending_approval": "aprobación pendiente",
+    "approved": "approved",
+    "applications": "applications",
+    "no_services_applied": "No se han aplicado servicios",
+    "services_where_you_applied": "Servicios donde has aplicado",
+    "no_services_found": "No se encontraron servicios",
+    "points": "Puntos",
+    "Services": "Servicios",
+    "Your Applications": "Tus solicitudes",
+    "Delete": "Borrar"
   },
   "Sidebar": {
     "home": "Inicio",
@@ -66,7 +76,9 @@
     "location": "Ubicación",
     "cost": "Costo",
     "start_date_time": "Fecha y hora de inicio",
-    "end_date_time": "Fecha y hora de fin"
+    "end_date_time": "Fecha y hora de fin",
+    "custom": "Personalizado",
+    "select_pets": "Seleccionar mascotas"
   },
   "AppBar": {
     "search_for_pet_care_services": "Buscar servicios de cuidado de mascotas",
@@ -81,7 +93,16 @@
     "start_date_time": "Fecha y hora de inicio",
     "end_date_time": "Fecha y hora de fin",
     "cancel": "Cancelar",
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "post_a_service": "Publicar un servicio",
+    "Delete": "Borrar",
+    "Pet's Profile": "Perfil de mascota",
+    "Language": "Idioma",
+    "Are you sure you want to accept this application?": "¿Estás seguro de que quieres aceptar esta solicitud?",
+    "Are you sure you want to reject this application?": "¿Estás seguro de que quieres rechazar esta solicitud?",
+    "no_applications_found": "No hay solicitudes disponibles para este servicio.",
+    "close": "Cerrar",
+    "Post a Service": "Publicar un servicio"
   },
   "tweetBox": {
     "share": "Compartir",
