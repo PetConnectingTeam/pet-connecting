@@ -278,11 +278,15 @@ def delete_pet(pet_id):
     if not pet:
         return jsonify({'error': 'Pet not found or you are not authorized to delete this pet'}), 404
 
+    pet_photos = PetPhotos.query.filter_by(PetID=pet_id).all()
+    for pet_photo in pet_photos:
+        db.session.delete(pet_photo)
+
     # Eliminar la mascota
     db.session.delete(pet)
     db.session.commit()
 
-    return jsonify({'message': f'Pet with id {pet_id} has been deleted'}), 200
+    return jsonify({'message': f'Pet successfully deleted'}), 200
 
 @app.route('/pets/<int:pet_id>/photos', methods=['GET'])
 @jwt_required()
