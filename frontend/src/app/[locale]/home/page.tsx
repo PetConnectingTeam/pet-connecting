@@ -428,7 +428,7 @@ const HomePage: React.FC = () => {
         paddingTop: 5,
       }}
     >
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%", color: "#4b887c" }}>
         <Tabs
           value={tabIndex}
           onChange={handleTabChange}
@@ -438,10 +438,10 @@ const HomePage: React.FC = () => {
               backgroundColor: "#4b887c",
             },
             "& .Mui-selected": {
-              color: "#4b887c",
+              color: "#4b887c !important",
             },
             "& .MuiTab-root": {
-              color: "4b887c",
+              color: "#4b887c",
             },
           }}
         >
