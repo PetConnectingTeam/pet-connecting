@@ -391,6 +391,32 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const fetchDeleteToService = async (serviceId: number) => {
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.delete(
+        `http://127.0.0.1:5001/service/${serviceId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Service deleted successfully!");
+
+        // Optionally, update the state to remove the deleted service
+        setServices((prev) =>
+          prev.filter((service) => service.ServiceId !== serviceId)
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("Failed to delete service.");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -581,6 +607,35 @@ const HomePage: React.FC = () => {
                           </Typography>
                         )}
                       </Box>
+                      {service.PublisherId == UserId && !service.completed && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            mt: 1,
+                            backgroundColor: "#c74b4b",
+                            color: "#fff",
+                            "&:hover": {
+                              backgroundColor: "#a43e3e",
+                            },
+                            borderRadius: 2,
+                            boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                            fontWeight: "bold",
+                            padding: "8px 16px",
+                            textTransform: "none",
+                          }}
+                          onClick={() => {
+                            const confirmed = window.confirm(
+                              "Are you sure you want to Delete this service?"
+                            );
+                            if (confirmed) {
+                              fetchDeleteToService(service.ServiceId);
+                            }
+                          }}
+                        >
+                          {t("Delete")}
+                        </Button>
+                      )}
                       {service.PublisherId !== UserId && !service.completed && (
                         <Button
                           variant="contained"
