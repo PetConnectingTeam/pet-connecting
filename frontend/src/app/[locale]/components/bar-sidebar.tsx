@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useTranslations } from "next-intl";
+import logo from "../../../../public/Logo2.png";
 
 import {
   Drawer,
@@ -472,7 +473,7 @@ export default function Component() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <ListItemButton>
-                  <ListItemIcon>
+                  <ListItemIcon sx={{color:"#4b887c"}}>
                     <Home />
                   </ListItemIcon>
                   <ListItemText primary={t("home")} />
@@ -490,7 +491,7 @@ export default function Component() {
                     src={
                       profileImageUrl || "/placeholder.svg?height=40&width=40"
                     }
-                    sx={{ width: 24, height: 24 }}
+                    sx={{ width: 24, height: 24,color:"#4b887c" , backgroundColor:"#b3d2cd"}}
                   />
                 </ListItemIcon>
                 <ListItemText primary={t("profile")} />
@@ -700,7 +701,7 @@ export default function Component() {
                 color: "#3c6b62", //#ff4d4f
               }}
             >
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{color:"#4b887c"}}>
                 {t("pet_care_tip")}
               </Typography>
               <Typography variant="body2">{currentTip}</Typography>
@@ -714,7 +715,7 @@ export default function Component() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <ListItemButton>
-                  <ListItemIcon>
+                  <ListItemIcon sx={{color:"#4b887c"}}>
                     <HelpIcon />
                   </ListItemIcon>
                   <ListItemText primary={t("help_support")} />
@@ -727,7 +728,7 @@ export default function Component() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <ListItemButton>
-                  <ListItemIcon>
+                  <ListItemIcon sx={{color:"#4b887c"}}>
                     <LogoutIcon />
                   </ListItemIcon>
                   <ListItemText primary={t("log_out")} />
@@ -943,7 +944,10 @@ export default function Component() {
 
       {/* Service Dialog */}
       <Dialog open={serviceDialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>{t("pet_care_services")}</DialogTitle>
+      <DialogTitle variant="h5" sx={{ color: "#4b887c" }}>
+            <img src={logo.src} alt="logo" width={50} height={50} />
+            {t("pet_care_services")}
+          </DialogTitle>
         <DialogContent>
           <FormControl fullWidth margin="dense" variant="outlined">
             <InputLabel id="pet-select-label">{t("select_pets")}</InputLabel>
