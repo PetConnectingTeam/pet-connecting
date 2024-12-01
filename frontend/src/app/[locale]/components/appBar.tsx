@@ -30,6 +30,7 @@ import {
   ClickAwayListener,
   Switch,
   Chip,
+  ListItemText,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -206,7 +207,7 @@ export default function NavigationBar() {
   ) => {
     if (event.key === "Enter") {
       router.push(`/home?animal_type=${searchTerm}`);
-      if (isMobile) setSearchOpen(false); // Close the search bar after submitting on mobile
+      if (isMobile) setSearchOpen(false);
     }
   };
 
@@ -432,6 +433,11 @@ export default function NavigationBar() {
     }
   };
 
+  const handleLanguageToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLocale = event.target.checked ? "es" : "en";
+    router.push(`/${newLocale}/${pathname.split("/").slice(2).join("/")}`);
+  };
+
   return (
     <>
       <StyledAppBar position="fixed" sx={{ background: "#f9f7f4" }}>
@@ -505,9 +511,7 @@ export default function NavigationBar() {
                     />
                   )}
                   {searchOpen && (
-                    <IconButton onClick={handleClearSearch}>
-                      <CloseIcon />
-                    </IconButton>
+                    <IconButton onClick={handleClearSearch}></IconButton>
                   )}
                 </SearchWrapper>
               </ClickAwayListener>
@@ -571,53 +575,54 @@ export default function NavigationBar() {
                   }}
                 >
                   {/* Add MenuItems here */}
-                  <MenuItem onClick={handleCloseBoneMenu}>
-                    <Button
-                      size="small"
-                      onClick={handlePawClick}
-                      sx={{ color: "#4b887c", width: "100%" }}
-                    >
+                  <MenuItem onClick={handlePawClick}>
+                    <Button sx={{ color: "#4b887c", width: "100%" }}>
                       <PetsIcon />
-                      {t("Post a Service")}
+
+                      <ListItemText sx={{ color: "#000000" }}>
+                        {t("Post a Service")}
+                      </ListItemText>
                     </Button>
                   </MenuItem>
-                  <MenuItem onClick={handleCloseBoneMenu}>
-                    <Button
-                      sx={{ color: "#4b887c", width: "100%" }}
-                      onClick={handlePetsButton}
-                    >
+                  <MenuItem onClick={handlePetsButton}>
+                    <Button sx={{ color: "#4b887c", width: "100%" }}>
                       <PetsIcon />
-                      {t("Pet's Profile")}
+                      <ListItemText sx={{ color: "#000000" }}>
+                        {t("Pet's Profile")}
+                      </ListItemText>
                     </Button>
                   </MenuItem>
                   <MenuItem>
-                    {" "}
-                    <FormControlLabel
-                      control={
-                        <LanguageSwitch
-                          value={locale}
-                          onChange={(e) => {
-                            const language = e.target.checked ? "es" : "en";
-                            router.push(
-                              `/${language}/${pathname
-                                .split("/")
-                                .slice(2)
-                                .join("/")}`
-                            );
-                          }}
-                        />
-                      }
-                      label={
-                        <Box display="flex" alignItems="center">
-                          <Typography
-                            variant="body2"
-                            sx={{ ml: 1, color: "#4b887c" }}
-                          >
-                            {t("Language")}
-                          </Typography>
-                        </Box>
-                      }
-                    />
+                    <ListItemText>
+                      <FormControlLabel
+                        sx={{
+                          paddingLeft: "14px",
+                          width: "100%",
+                          color: "#000000",
+                          fontWeight: "bold",
+                        }}
+                        control={
+                          <LanguageSwitch
+                            checked={locale === "es"}
+                            onChange={handleLanguageToggle}
+                          />
+                        }
+                        label={
+                          <Box display="flex" alignItems="center">
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                ml: 1,
+                                color: "#00000",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {t("Language")}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItemText>
                   </MenuItem>
                 </Menu>
               </>
@@ -625,7 +630,17 @@ export default function NavigationBar() {
           </Box>
         </Toolbar>
 
-        <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <Dialog
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          sx={{
+            "& .MuiDialog-paper": {
+              width: "500px",
+              backgroundColor: "#f9f7f4",
+              height: isMobile ? "70%" : "auto",
+            },
+          }}
+        >
           <DialogTitle variant="h5" sx={{ color: "#4b887c" }}>
             <img src={logo.src} alt="logo" width={50} height={50} />
             {t("pet_care_services")}
@@ -730,7 +745,7 @@ export default function NavigationBar() {
           onClose={handlePetDialogClose}
           sx={{
             "& .MuiDialog-paper": {
-              width: "500px",
+              width: isMobile ? "90%" : "500px",
               backgroundColor: "#f9f7f4",
             },
           }}

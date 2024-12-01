@@ -71,7 +71,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
     }));
   };
   const handleCustomPetIconClick = () => {
-    setCustomPetInputVisible(true);
+    setCustomPetInputVisible((prev) => !prev);
     setSelectedPet("custom");
   };
 
@@ -344,6 +344,17 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
               <Typography variant="caption">Custom</Typography>
             </Box>
           </Box>
+          {customPetInputVisible && (
+            <TextField
+              label="Custom Pet Name"
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              value={customPetName}
+              onChange={handleCustomPetNameChange}
+              size="small"
+            />
+          )}
           <TextField
             label="Breed"
             fullWidth
