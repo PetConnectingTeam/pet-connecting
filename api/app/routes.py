@@ -278,11 +278,15 @@ def delete_pet(pet_id):
     if not pet:
         return jsonify({'error': 'Pet not found or you are not authorized to delete this pet'}), 404
 
+    pet_photos = PetPhotos.query.filter_by(PetID=pet_id).all()
+    for pet_photo in pet_photos:
+        db.session.delete(pet_photo)
+
     # Eliminar la mascota
     db.session.delete(pet)
     db.session.commit()
 
-    return jsonify({'message': f'Pet with id {pet_id} has been deleted'}), 200
+    return jsonify({'message': f'Pet successfully deleted'}), 200
 
 @app.route('/pets/<int:pet_id>/photos', methods=['GET'])
 @jwt_required()
@@ -588,6 +592,9 @@ def delete_service(service_id):
     if service.PublisherId != current_user_id:
         return jsonify({"msg": "You are not authorized to delete this service"}), 403
 
+    for pet_in_service in PetsInService.query.filter_by(ServiceId=service_id).all():
+        db.session.delete(pet_in_service)
+
     db.session.delete(service)
 
     pets_in_service = PetsInService.query.filter_by(ServiceId=service_id).all()
@@ -693,24 +700,58 @@ def rate_service(service_id):
     
     if not service:
         return jsonify({"msg": "Service not found"}), 404
+    if service.completed == False:
+        return jsonify({"msg": "Service not completed yet"}), 400
     if service.PublisherId != current_user_id:
         return jsonify({"msg": "You are not authorized to rate this service"}), 403
     if service.rated == True:
         return jsonify({"msg": "Service already rated"}), 400
     
-    application = Application.query.filter_by(ServiceId=service_id, Accepted=True).first()
+    application = Application.query.filter_by(ServiceId=service_id, Accepted=True).first() 
     appliant = User.query.get(application.UserId)
     appliant.RatingCount = appliant.RatingCount + 1
-    print(appliant.TotalRating)
     appliant.TotalRating = float(appliant.TotalRating) + float(rating)
     
-    service.rated = True
+    service.appliantRated = True
 
     db.session.commit()
 
     return jsonify({"msg": "Service rated successfully"}), 200
 
+@app.route('/service/<int:service_id>/rate_pet/<int:pet_id>', methods=['PUT'])
+@jwt_required()
+def rate_pet(service_id, pet_id):
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    rating = data.get("rating")
 
+    if not rating:  
+        return jsonify({"msg": "Missing data"}), 400
+    
+    application = Application.query.filter_by(ServiceId=service_id, Accepted=True).first()
+
+    if application.UserId != current_user_id:
+        return jsonify({"msg": "You are not authorized to rate pets in this service"}), 403
+    
+    pet = Pet.query.get(pet_id)
+    pets_in_service = PetsInService.query.filter_by(ServiceId=service_id).all()
+
+    pet_ids_in_service = [pet_in_service.PetId for pet_in_service in pets_in_service]
+    if pet_id not in pet_ids_in_service:
+        return jsonify({"msg": "Pet not found in this service"}), 404
+    
+    pet.TotalRating = float(pet.TotalRating) + float(rating)
+    pet.RatingCount = pet.RatingCount + 1
+
+    pet_in_service = PetsInService.query.filter_by(ServiceId=service_id, PetId=pet_id).first()
+    pet_in_service.Rated = True
+
+    db.session.commit()
+
+    return jsonify({"msg": "Pet rated successfully"}), 200
+    
+
+   
 
 # --- Application Endpoints ---
 @app.route('/service/<int:service_id>/apply', methods=['PUT'])
@@ -760,7 +801,7 @@ def get_applications(service_id):
     application_list = [application.to_dict() for application in applications]
     return jsonify(application_list)
 
-@app.route('/service/<int:service_id>/applications/<int:application_id>', methods=['DELETE'])
+@app.route('/service/<int:service_id>/application/<int:application_id>', methods=['DELETE'])
 @jwt_required()
 def delete_application(service_id, application_id):
     current_user_id = get_jwt_identity()
@@ -770,7 +811,7 @@ def delete_application(service_id, application_id):
     if not service:
         return jsonify({"msg": "Service not found"}), 404
     
-    application = Application.query.get(application_id)
+    application = Application.query.filter_by(ApplicationId=application_id).first()
 
     if not application:
         return jsonify({"msg": "Application not found"}), 404
@@ -789,7 +830,6 @@ def get_all_applications():
     applications = Application.query.all()
     application_list = [application.to_dict() for application in applications]
     return jsonify(application_list)
-
 
 # --- Chat Endpoints ---
 @app.route('/user/<int:user_id>/chat', methods=['GET'])

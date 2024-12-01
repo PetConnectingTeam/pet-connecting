@@ -19,10 +19,23 @@
     "no_services_requested": "No services requested",
     "applications_for_service": "Applications for service",
     "user": "User",
+
+    "applications": "applications",
+
+    "application_status": "User: {name} - {status}",
+    "approved": "Approved",
+    "pending_approval": "Pending Approval",
     "accept": "Accept",
     "cancel": "Cancel",
     "no_applications_found": "No applications available for this service.",
-    "close": "Close"
+    "no_services_applied": "No services applied",
+    "services_where_you_applied": "Services where you applied",
+    "no_services_found": "No services found",
+    "points": "Points",
+    "Services": "Services",
+    "Your Applications": "Your Applications",
+    "Delete": "Delete",
+    "Are you sure you want to delete this application?": "Are you sure you want to delete this application?"
   },
   "Sidebar": {
     "home": "Home",
@@ -71,7 +84,8 @@
     "location": "Location",
     "cost": "Cost",
     "start_date_time": "Start date & time",
-    "end_date_time": "End date & time"
+    "end_date_time": "End date & time",
+    "custom": "Custom"
   },
   "AppBar": {
     "find_pet_care": "Find pet care",
@@ -87,7 +101,16 @@
     "start_date_time": "Start date & time",
     "end_date_time": "End date & time",
     "cancel": "Cancel",
-    "submit": "Submit"
+    "submit": "Submit",
+    "post_a_service": "Post a service",
+    "Delete": "Delete",
+    "Pet's Profile": "Pet's Profile",
+    "Profile Pictures": "Profile Pictures",
+    "Language": "Language",
+    "Are you sure you want to accept this application?": "Are you sure you want to accept this application?",
+    "Are you sure you want to reject this application?": "Are you sure you want to reject this application?",
+    "close": "Close",
+    "Post a Service": "Post a Service"
   },
   "tweetBox": {
     "share": "Share",
