@@ -281,7 +281,7 @@ def delete_pet(pet_id):
     pet_photos = PetPhotos.query.filter_by(PetID=pet_id).all()
     for pet_photo in pet_photos:
         db.session.delete(pet_photo)
-
+    db.session.commit()
     # Eliminar la mascota
     db.session.delete(pet)
     db.session.commit()
