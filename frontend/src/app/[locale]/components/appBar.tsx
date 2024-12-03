@@ -746,6 +746,8 @@ export default function NavigationBar() {
           sx={{
             "& .MuiDialog-paper": {
               width: isMobile ? "90%" : "500px",
+              height: isMobile ? "50%" : "auto",
+
               backgroundColor: "#f9f7f4",
             },
           }}
@@ -772,6 +774,7 @@ export default function NavigationBar() {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+
                   alignItems: "center",
                   padding: "8px",
                   cursor: "pointer",
