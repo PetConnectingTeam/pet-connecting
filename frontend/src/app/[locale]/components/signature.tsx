@@ -1,33 +1,42 @@
 import React, { useState } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Box,
+  Button,
+  Chip,
+} from "@mui/material";
 import SignaturePad from "react-signature-canvas";
-import { useTranslations } from "next-intl"; // Para traducciones
-import axios from "axios"; // Importar Axios
+import { useTranslations } from "next-intl";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 interface SignatureProps {
-  apiUrl: string; // URL de la API a la cual enviar las firmas
-  onSuccess?: () => void; // Callback en caso de éxito
-  onError?: (error: any) => void; // Callback en caso de error
+  applicationId: number; // Recibe el ApplicationId para construir la URL
 }
 
-const Signature: React.FC<SignatureProps> = ({ apiUrl, onSuccess, onError }) => {
+const Signature: React.FC<SignatureProps> = ({ applicationId }) => {
   const [open, setOpen] = useState(false);
   const [signaturePadRef, setSignaturePadRef] = useState<SignaturePad | null>(null);
-  const [step, setStep] = useState<"owner" | "applier">("owner"); // Paso actual: propietario o applier
-  const [ownerSignature, setOwnerSignature] = useState<string | null>(null); // Firma del propietario
-  const [applierSignature, setApplierSignature] = useState<string | null>(null); // Firma del applier
+  const [step, setStep] = useState<"owner" | "applier">("owner");
+  const [ownerSignature, setOwnerSignature] = useState<string | null>(null);
+  const token = Cookies.get("accessToken");
 
   const t = useTranslations("signature");
 
+  // Construir la URL de la API usando el applicationId
+  const apiUrl = `http://127.0.0.1:5001/application/${applicationId}/sign`;
+
   const handleClickOpen = () => {
-    setStep("owner"); // Iniciar con la firma del propietario
+    setStep("owner");
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setOwnerSignature(null);
-    setApplierSignature(null);
   };
 
   const clearSignature = () => signaturePadRef?.clear();
@@ -38,10 +47,9 @@ const Signature: React.FC<SignatureProps> = ({ apiUrl, onSuccess, onError }) => 
 
       if (step === "owner") {
         setOwnerSignature(dataURL);
-        setStep("applier"); // Pasar al siguiente paso (firma del applier)
-        clearSignature(); // Limpiar el canvas para la siguiente firma
+        setStep("applier");
+        clearSignature();
       } else if (step === "applier") {
-        setApplierSignature(dataURL);
         await sendSignaturesToApi(dataURL);
       }
     } else {
@@ -65,32 +73,38 @@ const Signature: React.FC<SignatureProps> = ({ apiUrl, onSuccess, onError }) => 
         await axios.post(apiUrl, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        if (onSuccess) onSuccess(); // Llamar al callback en caso de éxito
-        handleClose(); // Cerrar el diálogo después de guardar
+        // Cerrar el diálogo después de enviar las firmas
+        handleClose();
       } catch (error) {
         console.error("Error al enviar las firmas:", error);
-        if (onError) onError(error); // Llamar al callback en caso de error
       }
     }
   };
 
   return (
     <div>
-      {/* Botón que abre el diálogo */}
-      <Button variant="contained" onClick={handleClickOpen}>
-        {t("open")}
-      </Button>
+      <Chip
+        label={t("open")}
+        onClick={handleClickOpen}
+        
+        sx={{
+          backgroundColor: "#33524a",
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "#3c6b62",
+          },
+        }}
+      />
 
-      {/* Diálogo con SignaturePad */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>
           {step === "owner" ? t("dialog_title_owner") : t("dialog_title_applier")}
         </DialogTitle>
         <DialogContent>
-          {/* Contenedor del Canvas con ajuste responsivo */}
           <Box
             sx={{
               width: "100%",

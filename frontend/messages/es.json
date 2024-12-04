@@ -155,7 +155,7 @@
   },
   
   "signature": {
-    "open": "Añadir Firmas",
+    "open": "Firmar",
     "dialog_title_owner": "Firma del Propietario",
     "dialog_title_applier": "Firma del Applier",
     "clear": "Limpiar",

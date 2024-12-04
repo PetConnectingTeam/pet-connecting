@@ -162,7 +162,7 @@
     "owner": "Owner"
   },
   "signature": {
-    "open": "Add Signatures",
+    "open": "Sign",
     "dialog_title_owner": "Owner's Signature",
     "dialog_title_applier": "Applier's Signature",
     "clear": "Clear",
