@@ -23,6 +23,9 @@ services:
       - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:${user_password}@mysql_db/mydb
       - FLASK_ENV=development
       - FLASK_DEBUG=1
+      - MAIL_SERVER=${MAIL_SERVER}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
     ports:
       - "5001:5000"
     volumes:
@@ -39,6 +42,15 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend/src:/app/src
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "8025:8025" # Interfaz web de MailHog
+      - "1025:1025" # Puerto SMTP
+    networks:
+      - webnet
 
 networks:
   webnet:
