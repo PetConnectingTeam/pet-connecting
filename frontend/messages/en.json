@@ -160,5 +160,15 @@
     "share": "Share",
     "whats_New_Whit_pet": "Whats's new with your pet?",
     "owner": "Owner"
+  },
+  "signature": {
+    "open": "Add Signatures",
+    "dialog_title_owner": "Owner's Signature",
+    "dialog_title_applier": "Applier's Signature",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "next": "Next",
+    "save": "Save"
   }
+  
 }
