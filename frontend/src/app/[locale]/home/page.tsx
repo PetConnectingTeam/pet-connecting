@@ -26,6 +26,7 @@ import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import Signature from "../components/signature";
 import ListSubheader from "@mui/material/ListSubheader";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -635,7 +636,9 @@ const HomePage: React.FC = () => {
                         >
                           {t("Delete")}
                         </Button>
+                        
                       )}
+                      
                       {service.PublisherId !== UserId && !service.completed && (
                         <Button
                           variant="contained"
@@ -1030,6 +1033,7 @@ const HomePage: React.FC = () => {
                                             }}
                                           />
                                         )}
+                                        <Signature applicationId={application.ApplicationId} />
                                         <Chip
                                           label={t("Delete")}
                                           color="secondary"
