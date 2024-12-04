@@ -14,10 +14,11 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 interface SignatureProps {
-  applicationId: number; // Recibe el ApplicationId para construir la URL
+  applicationId: number;
+  serviceId: number;  // Añadir serviceId
 }
 
-const Signature: React.FC<SignatureProps> = ({ applicationId }) => {
+const Signature: React.FC<SignatureProps> = ({ applicationId, serviceId }) => {
   const [open, setOpen] = useState(false);
   const [signaturePadRef, setSignaturePadRef] = useState<SignaturePad | null>(null);
   const [step, setStep] = useState<"owner" | "applier">("owner");
@@ -26,8 +27,8 @@ const Signature: React.FC<SignatureProps> = ({ applicationId }) => {
 
   const t = useTranslations("signature");
 
-  // Construir la URL de la API usando el applicationId
-  const apiUrl = `http://127.0.0.1:5001/application/${applicationId}/sign`;
+  // Construir la URL de la API usando el serviceId y applicationId
+  const apiUrl = `http://127.0.0.1:5001/service/${serviceId}/application/${applicationId}/sign`;
 
   const handleClickOpen = () => {
     setStep("owner");
@@ -37,6 +38,7 @@ const Signature: React.FC<SignatureProps> = ({ applicationId }) => {
   const handleClose = () => {
     setOpen(false);
     setOwnerSignature(null);
+    clearSignature();
   };
 
   const clearSignature = () => signaturePadRef?.clear();
@@ -58,30 +60,28 @@ const Signature: React.FC<SignatureProps> = ({ applicationId }) => {
   };
 
   const sendSignaturesToApi = async (applierSignatureDataURL: string) => {
-    if (ownerSignature && applierSignatureDataURL) {
-      try {
-        // Convertir ambas firmas a Blob
-        const ownerBlob = await (await fetch(ownerSignature)).blob();
-        const applierBlob = await (await fetch(applierSignatureDataURL)).blob();
+    if (!ownerSignature) return;
 
-        // Crear un FormData para enviar las dos firmas
-        const formData = new FormData();
-        formData.append("owner_signature", ownerBlob, "owner_signature.png");
-        formData.append("applier_signature", applierBlob, "applier_signature.png");
+    try {
+      const formData = new FormData();
 
-        // Enviar a la API
-        await axios.post(apiUrl, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      // Convertir las URLs en blobs y agregarlas al FormData
+      formData.append("owner_signature", await (await fetch(ownerSignature)).blob());
+      formData.append("applier_signature", await (await fetch(applierSignatureDataURL)).blob());
 
-        // Cerrar el diálogo después de enviar las firmas
-        handleClose();
-      } catch (error) {
-        console.error("Error al enviar las firmas:", error);
+      // Enviar el FormData a la API
+      const response = await axios.post(apiUrl, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        handleClose(); // Cerrar diálogo al enviar correctamente
       }
+    } catch (error) {
+      console.error("Error al enviar las firmas:", error);
     }
   };
 
@@ -90,10 +90,11 @@ const Signature: React.FC<SignatureProps> = ({ applicationId }) => {
       <Chip
         label={t("open")}
         onClick={handleClickOpen}
-        
         sx={{
           backgroundColor: "#33524a",
           color: "#fff",
+          cursor: "pointer",
+          fontWeight: "bold",
           "&:hover": {
             backgroundColor: "#3c6b62",
           },
