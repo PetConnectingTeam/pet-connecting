@@ -126,5 +126,17 @@
     "share": "Compartir",
     "whats_New_Whit_pet": "¿Qué hay de nuevo con tu mascota?",
     "owner": "Propietario"
+  },
+  
+  "signature": {
+    "open": "Añadir Firmas",
+    "dialog_title_owner": "Firma del Propietario",
+    "dialog_title_applier": "Firma del Applier",
+    "clear": "Limpiar",
+    "cancel": "Cancelar",
+    "next": "Siguiente",
+    "save": "Guardar"
   }
+  
+  
 }
