@@ -1,10 +1,12 @@
-from flask import jsonify, request, send_file
-from app import app, db, bcrypt, utils
+from flask import jsonify, request, send_file, render_template, make_response
+from app import app, db, bcrypt, mail
 from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService, Message
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import base64
 from flask_cors import CORS
 from sqlalchemy import func
+from weasyprint import HTML
+from flask_mail import Message
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 from datetime import datetime
@@ -634,8 +636,7 @@ def assign_service(service_id):
     
     db.session.commit()
 
-    pdf_path = 'pdf/PET_CARE_AGREEMENT.pdf'
-    return send_file(pdf_path, as_attachment=True, download_name='Pet_Care_Agreement_Template.pdf')
+    return jsonify({"msg": "Service assigned successfully"}), 200
 
 @app.route('/service/<int:service_id>/unassign', methods=['PUT'])
 @jwt_required()
@@ -831,6 +832,85 @@ def get_all_applications():
     application_list = [application.to_dict() for application in applications]
     return jsonify(application_list)
 
+
+@app.route('/service/<int:service_id>/application/<int:application_id>/sign', methods=['POST'])
+@jwt_required()
+def sign_application(service_id, application_id):
+
+    service = RequestService.query.get(service_id)
+    if not service:
+        return jsonify({"msg": "Service not found"}), 404
+    if service.completed:
+        return jsonify({"msg": "Service already completed"}), 400
+    if service.PublisherId != get_jwt_identity():
+        return jsonify({"msg": "You are not authorized to sign this service"}), 403
+
+    """if 'owner_signature' not in request.files:
+        return jsonify({'error': 'No owner signature part'}), 400
+
+    owner_signature = request.files['owner_signature']
+
+    if owner_signature.filename == '':
+        return jsonify({'error': 'No selected owner_signature'}), 400
+    
+    if owner_signature:
+        owner_mime_type = owner_signature.mimetype
+        owner_image_data = owner_signature.read()
+
+    if 'caregiver_signature' not in request.files:
+        return jsonify({'error': 'No caregiver signature part'}), 400
+
+    caregiver_signature = request.files['caregiver_signature']
+
+    if caregiver_signature.filename == '':
+        return jsonify({'error': 'No selected caregiver_signature'}), 400
+    
+    if caregiver_signature:
+        caregiver_mime_type = caregiver_signature.mimetype
+        caregiver_image_data = caregiver_signature.read()"""
+
+    current_user_id = get_jwt_identity()
+
+    formatted_date = datetime.now().strftime("%d/%m/%Y")
+    start_date = service.serviceDateIni.strftime("%d/%m/%Y")
+    end_date = service.serviceDateEnd.strftime("%d/%m/%Y")
+
+    owner_email = User.query.get(current_user_id).Email
+
+    application = Application.query.filter_by(ApplicationId=application_id).first()
+    caregiver_email = User.query.get(application.UserId).Email
+
+    pets = PetsInService.query.filter_by(ServiceId=service_id).all()
+    pets_list = []
+    for pet in pets:
+        pet = Pet.query.get(pet.PetId)
+        pets_list.append(pet.to_dict())
+
+    html_content = render_template('legal.html', current_date=formatted_date, owner_email=owner_email, caregiver_email=caregiver_email, pets_list=pets_list, start_date=start_date, end_date=end_date)
+    
+    pdf = HTML(string=html_content).write_pdf()
+
+    msg = Message(
+        'Signed Pet Care Agreement',
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[owner_email, caregiver_email],
+        body="Here is the Pet Care Agreement you just signed.",
+    )
+
+    msg.attach(
+        "Pet_Care_Agreement.pdf",  
+        "application/pdf",         
+        pdf                         
+    )
+
+    mail.send(msg)
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=reporte.pdf'
+    return response
+
+
 # --- Chat Endpoints ---
 @app.route('/user/<int:user_id>/chat', methods=['GET'])
 @jwt_required()
@@ -858,6 +938,22 @@ def get_chat_overview():
     message_list = [message.to_dict() for message in messages]
     return jsonify(message_list)
     
+
+
+@app.route('/test-email')
+def test_email():
+    msg = Message(
+        "Prueba de correo",
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=["destinatario@ejemplo.com"],
+        body="Este es un correo de prueba usando MailHog."
+    )
+    try:
+        mail.send(msg)
+        return "Correo enviado y capturado por MailHog"
+    except Exception as e:
+        return f"Error al enviar correo: {e}", 500
+
 
 
 if __name__ == '__main__':
