@@ -80,6 +80,35 @@
     "custom": "Personalizado",
     "select_pets": "Seleccionar mascotas"
   },
+  "Bottom": {
+    "age": "Edad",
+    "weight": "Peso",
+    "Custom": "Custom",
+    "Breed": "Raza",
+    "petName": "Nombre de la mascota",
+    "custompetname": "Nombre de mascota personalizado",
+    "small": "Pequeño",
+    "medium": "Mediano",
+    "large": "Grande",
+    "allergies": "Alergias",
+    "description": "Descripción",
+    "Dog": "Perro",
+    "Cat": "Gato",
+    "Bird": "Pájaro",
+    "name": "Nombre",
+    "uploadpetimage": "Subir imagen de la mascota",
+    "uplaod": "Subir",
+
+    "Cancel": "Cancelar",
+    "Submit": "Enviar",
+    "Chat": "Chat",
+    "Home": "Inicio",
+    "Profile": "Perfil",
+    "Pet": "Mascota",
+    "Services": "Servicios",
+    "size": "Tamaño",
+    "upload": "Subir"
+  },
   "AppBar": {
     "search_for_pet_care_services": "Buscar servicios de cuidado de mascotas",
     "pets_list": "Lista de mascotas",
@@ -153,7 +182,7 @@
     "whats_New_Whit_pet": "¿Qué hay de nuevo con tu mascota?",
     "owner": "Propietario"
   },
-  
+
   "signature": {
     "open": "Añadir Firmas",
     "dialog_title_owner": "Firma del Propietario",
@@ -163,6 +192,4 @@
     "next": "Siguiente",
     "save": "Guardar"
   }
-  
-  
 }
