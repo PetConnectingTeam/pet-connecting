@@ -7,6 +7,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useTranslations } from "next-intl";
 import logo from "../../../../public/Logo2.png";
+import { breedMaxAges, breedMinWeights, breedWeights } from "../../../api/api";
 
 import {
   Drawer,
@@ -32,6 +33,7 @@ import {
   Alert,
   useMediaQuery,
   SelectChangeEvent,
+  Slider,
 } from "@mui/material";
 import { Home } from "@mui/icons-material";
 import Link from "next/link";
@@ -53,6 +55,20 @@ interface PetFormData {
 interface Pet {
   ID: number;
   Name: string;
+}
+
+// Function to determine size based on weight and breed
+function determineSize(weight: number, breed: string): string {
+  const maxWeight = breedWeights[breed.toLowerCase()] || 100; // Default to 100 if breed not found
+  const weightPercentage = (weight / maxWeight) * 100;
+
+  if (weightPercentage < 30) {
+    return "small";
+  } else if (weightPercentage >= 30 && weightPercentage <= 70) {
+    return "medium";
+  } else {
+    return "large";
+  }
 }
 
 export default function Component() {
@@ -179,8 +195,6 @@ export default function Component() {
       formData.breed.trim() !== "" &&
       formData.description.trim() !== "" &&
       formData.allergies.trim() !== "" &&
-      formData.weight > 0 &&
-      formData.size.trim() !== "" &&
       formData.age > 0;
 
     setIsFormValid(isValid);
@@ -256,6 +270,13 @@ export default function Component() {
         return;
       }
 
+      // Log form data and headers
+      console.log("Form Data:", formData);
+      console.log("Headers:", {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      });
+
       const response = await axios.post(
         `http://127.0.0.1:5001/pets?user_id=${userId}`,
         formData,
@@ -283,8 +304,13 @@ export default function Component() {
         setImageUploadOpen(true);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to post pet");
-      console.error("Error in pet creation:", err);
+      if (axios.isAxiosError(err)) {
+        console.error("Axios error:", err.response?.data || err.message);
+        setError(err.response?.data?.message || "Failed to post pet");
+      } else {
+        console.error("Unexpected error:", err);
+        setError("Failed to post pet");
+      }
     }
   };
 
@@ -449,6 +475,22 @@ export default function Component() {
     setDialogOpen(true);
   };
 
+  const handleAgeChange = (event: Event, newValue: number | number[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      age: newValue as number,
+    }));
+  };
+
+  const handleWeightChange = (event: Event, newValue: number | number[]) => {
+    const weight = newValue as number;
+    setFormData((prev) => ({
+      ...prev,
+      weight: weight,
+      size: determineSize(weight, prev.breed), // Set size based on weight and breed
+    }));
+  };
+
   return (
     <Box>
       {!isMobile && (
@@ -473,7 +515,7 @@ export default function Component() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <ListItemButton>
-                  <ListItemIcon sx={{color:"#4b887c"}}>
+                  <ListItemIcon sx={{ color: "#4b887c" }}>
                     <Home />
                   </ListItemIcon>
                   <ListItemText primary={t("home")} />
@@ -491,7 +533,12 @@ export default function Component() {
                     src={
                       profileImageUrl || "/placeholder.svg?height=40&width=40"
                     }
-                    sx={{ width: 24, height: 24,color:"#4b887c" , backgroundColor:"#b3d2cd"}}
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      color: "#4b887c",
+                      backgroundColor: "#b3d2cd",
+                    }}
                   />
                 </ListItemIcon>
                 <ListItemText primary={t("profile")} />
@@ -701,13 +748,18 @@ export default function Component() {
                 color: "#3c6b62", //#ff4d4f
               }}
             >
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{color:"#4b887c"}}>
+              <Typography
+                variant="subtitle1"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ color: "#4b887c" }}
+              >
                 {t("pet_care_tip")}
               </Typography>
               <Typography variant="body2">{currentTip}</Typography>
             </Box>
-
             <Divider />
+            <Divider style={{ paddingTop: "160px" }} />
 
             <ListItem>
               <Link
@@ -715,7 +767,7 @@ export default function Component() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <ListItemButton>
-                  <ListItemIcon sx={{color:"#4b887c"}}>
+                  <ListItemIcon sx={{ color: "#4b887c" }}>
                     <HelpIcon />
                   </ListItemIcon>
                   <ListItemText primary={t("help_support")} />
@@ -728,7 +780,7 @@ export default function Component() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <ListItemButton>
-                  <ListItemIcon sx={{color:"#4b887c"}}>
+                  <ListItemIcon sx={{ color: "#4b887c" }}>
                     <LogoutIcon />
                   </ListItemIcon>
                   <ListItemText primary={t("log_out")} />
@@ -737,7 +789,7 @@ export default function Component() {
             </ListItem>
           </List>
 
-          <Divider />
+          {/* <Divider /> */}
         </Drawer>
       )}
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
@@ -829,47 +881,60 @@ export default function Component() {
               name="breed"
               value={formData.breed}
               onChange={handleInputChange}
+              inputProps={{ maxLength: 50 }}
             />
-            <TextField
-              label={t("age")}
-              fullWidth
-              margin="dense"
-              variant="outlined"
-              type="number"
-              name="age"
+
+            <Typography gutterBottom>{t("age")}</Typography>
+            <Slider
               value={formData.age}
-              onChange={handleInputChange}
+              onChange={handleAgeChange}
+              aria-labelledby="age-slider"
+              valueLabelDisplay="auto"
+              sx={{ color: "#4b887c", width: "50%", marginLeft: "25%" }}
+              step={1}
+              marks
+              min={0}
+              max={breedMaxAges[formData.breed.toLowerCase()]} // Use breedMaxAges
             />
-            <TextField
-              label={t("weight")}
-              fullWidth
-              margin="dense"
-              variant="outlined"
-              type="number"
-              name="weight"
+            <Typography gutterBottom>{t("weight")}</Typography>
+            <Slider
               value={formData.weight}
-              onChange={handleInputChange}
+              onChange={handleWeightChange}
+              aria-labelledby="weight-slider"
+              valueLabelDisplay="auto"
+              sx={{ color: "#4b887c", width: "50%", marginLeft: "25%" }}
+              step={1}
+              marks
+              // ... existing code ...
+
+              // Assuming you have a similar setup for the min weight
+              min={breedMinWeights[formData.breed.toLowerCase()] || 1}
+              // ... existing code ...
+              max={breedWeights[formData.breed.toLowerCase()] || 100}
             />
-            <FormControl fullWidth margin="dense" variant="outlined">
-              <InputLabel>Size</InputLabel>
-              <Select
-                label={t("size")}
-                name="size"
-                value={formData.size}
-                onChange={(event) =>
-                  handleInputChange(
-                    event as React.ChangeEvent<{
-                      name?: string;
-                      value: unknown;
-                    }>
-                  )
-                }
-              >
-                <MenuItem value="small">{t("small")}</MenuItem>
-                <MenuItem value="medium">{t("medium")}</MenuItem>
-                <MenuItem value="large">{t("large")}</MenuItem>
-              </Select>
-            </FormControl>
+            <Box display="flex" justifyContent="space-around" sx={{ my: 2 }}>
+              {["small", "medium", "large"].map((size) => (
+                <Box
+                  key={size}
+                  sx={{
+                    padding: 2,
+                    border:
+                      formData.size === size
+                        ? "2px solid green"
+                        : "2px solid transparent",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    width: "100px", // Adjust width as needed
+                    backgroundColor:
+                      formData.size === size ? "#e0f7fa" : "transparent",
+                  }}
+                >
+                  <Typography variant="h6">
+                    {size.charAt(0).toUpperCase() + size.slice(1)}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
             <TextField
               label={t("allergies")}
               fullWidth
@@ -944,10 +1009,10 @@ export default function Component() {
 
       {/* Service Dialog */}
       <Dialog open={serviceDialogOpen} onClose={handleDialogClose}>
-      <DialogTitle variant="h5" sx={{ color: "#4b887c" }}>
-            <img src={logo.src} alt="logo" width={50} height={50} />
-            {t("pet_care_services")}
-          </DialogTitle>
+        <DialogTitle variant="h5" sx={{ color: "#4b887c" }}>
+          <img src={logo.src} alt="logo" width={50} height={50} />
+          {t("pet_care_services")}
+        </DialogTitle>
         <DialogContent>
           <FormControl fullWidth margin="dense" variant="outlined">
             <InputLabel id="pet-select-label">{t("select_pets")}</InputLabel>

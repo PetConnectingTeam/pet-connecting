@@ -17,7 +17,12 @@ import {
   DialogActions,
   IconButton,
   Typography,
+  Slider,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
+
+import { breedMaxAges, breedMinWeights, breedWeights } from "../../../api/api";
+
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import HomeIcon from "@mui/icons-material/Home";
 import CloseIcon from "@mui/icons-material/Close";
@@ -32,6 +37,7 @@ interface BottomBarProps {
 const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const t = useTranslations("Bottom");
 
   const [selectedPet, setSelectedPet] = useState<string | null>(null);
 
@@ -111,12 +117,15 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
   const handleSubmit = async () => {
     try {
       const token = Cookies.get("accessToken");
+      console.log("Token:", token);
       const userId = Cookies.get("user_id");
 
       if (!userId || !token) {
         setError("User not authenticated. Please log in.");
         return;
       }
+
+      console.log("Form Data:", formData);
 
       const response = await axios.post(
         `http://127.0.0.1:5001/pets?user_id=${userId}`,
@@ -147,8 +156,13 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
         }, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to post pet");
-      console.error("Error in pet creation:", err);
+      if (axios.isAxiosError(err)) {
+        console.error("Axios error:", err.response?.data || err.message);
+        setError(err.response?.data?.message || "Failed to post pet");
+      } else {
+        console.error("Unexpected error:", err);
+        setError("Failed to post pet");
+      }
     }
   };
 
@@ -197,7 +211,34 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
       }
     }
   };
+  function determineSize(weight: number, breed: string): string {
+    const maxWeight = breedWeights[breed.toLowerCase()] || 100; // Default to 100 if breed not found
+    const weightPercentage = (weight / maxWeight) * 100;
 
+    if (weightPercentage < 40) {
+      return "small";
+    } else if (weightPercentage >= 30 && weightPercentage <= 70) {
+      return "medium";
+    } else {
+      return "large";
+    }
+  }
+
+  const handleAgeChange = (event: Event, newValue: number | number[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      age: newValue as number,
+    }));
+  };
+
+  const handleWeightChange = (event: Event, newValue: number | number[]) => {
+    const weight = newValue as number;
+    setFormData((prev) => ({
+      ...prev,
+      weight: weight,
+      size: determineSize(weight, prev.breed), // Set size based on weight and breed
+    }));
+  };
   if (!isMobile) {
     return null;
   }
@@ -218,7 +259,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
         }}
       >
         <BottomNavigationAction
-          label="Pet"
+          label={t("Pet")}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -242,19 +283,19 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
           onClick={() => setFormOpen(!formOpen)}
         />
         <BottomNavigationAction
-          label="Profile"
+          label={t("Profile")}
           icon={<AccountCircleIcon />}
           component="a"
           onClick={() => router.push(`/userProfile/${Cookies.get("user_id")}`)}
         />
         <BottomNavigationAction
-          label="Home"
+          label={t("Home")}
           component="a"
           href="/home"
           icon={<HomeIcon />}
         />
         <BottomNavigationAction
-          label="Chat"
+          label={t("Chat")}
           icon={<ChatIcon />}
           onClick={toggleChat}
         />
@@ -290,11 +331,11 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
           )}
           {success && (
             <Alert severity="success" sx={{ mb: 1 }}>
-              Pet posted successfully!
+              {t("Pet posted successfully!")}
             </Alert>
           )}
           <TextField
-            label="Pet Name"
+            label={t("petName")}
             fullWidth
             margin="dense"
             variant="outlined"
@@ -305,9 +346,9 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
           />
           <Box display="flex" justifyContent="space-around" sx={{ my: 2 }}>
             {[
-              { name: "Dog", icon: "🐶" },
-              { name: "Cat", icon: "🐱" },
-              { name: "Bird", icon: "🐦" },
+              { name: t("Dog"), icon: "🐶" },
+              { name: t("Cat"), icon: "🐱" },
+              { name: t("Bird"), icon: "🐦" },
             ].map((pet, index) => (
               <Box
                 key={index}
@@ -341,12 +382,12 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
               }}
             >
               <Typography variant="h4">🐾</Typography>
-              <Typography variant="caption">Custom</Typography>
+              <Typography variant="caption">{t("Custom")}</Typography>
             </Box>
           </Box>
           {customPetInputVisible && (
             <TextField
-              label="Custom Pet Name"
+              label={t("custompetname")}
               fullWidth
               margin="dense"
               variant="outlined"
@@ -356,39 +397,50 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             />
           )}
           <TextField
-            label="Breed"
+            label={t("Breed")}
             fullWidth
             margin="dense"
             variant="outlined"
             name="breed"
             value={formData.breed}
             onChange={handleInputChange}
-            size="small"
           />
-          <Box display="flex" gap={1} sx={{ my: 1 }}>
-            <TextField
-              label="Age"
-              type="number"
-              fullWidth
-              variant="outlined"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              size="small"
-            />
-            <TextField
-              label="Weight"
-              type="number"
-              fullWidth
-              variant="outlined"
-              name="weight"
+
+          <Typography gutterBottom>{t("age")}</Typography>
+
+          <Slider
+            value={formData.age}
+            onChange={handleAgeChange}
+            aria-labelledby="age-slider"
+            valueLabelDisplay="auto"
+            sx={{ color: "#4b887c", width: "50%", marginLeft: "25%" }}
+            step={1}
+            marks
+            min={0}
+            max={breedMaxAges[formData.breed.toLowerCase()]} // Use breedMaxAges
+          />
+
+          <Box>
+            <Typography gutterBottom>{t("weight")}</Typography>
+
+            <Slider
               value={formData.weight}
-              onChange={handleInputChange}
-              size="small"
+              onChange={handleWeightChange}
+              aria-labelledby="weight-slider"
+              valueLabelDisplay="auto"
+              sx={{ color: "#4b887c", width: "50%", marginLeft: "25%" }}
+              step={1}
+              marks
+              // ... existing code ...
+
+              // Assuming you have a similar setup for the min weight
+              min={breedMinWeights[formData.breed.toLowerCase()]}
+              // ... existing code ...
+              max={breedWeights[formData.breed.toLowerCase()] || 100}
             />
           </Box>
           <TextField
-            label="Size"
+            label={t("size")}
             fullWidth
             margin="dense"
             variant="outlined"
@@ -398,7 +450,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             size="small"
           />
           <TextField
-            label="Allergies"
+            label={t("allergies")}
             fullWidth
             margin="dense"
             variant="outlined"
@@ -408,7 +460,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             size="small"
           />
           <TextField
-            label="Description"
+            label={t("description")}
             fullWidth
             margin="dense"
             variant="outlined"
@@ -426,7 +478,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             disabled={!isFormValid}
             sx={{ mt: 2, backgroundColor: "#4b887c" }}
           >
-            Submit
+            {t("Submit")}
           </Button>
         </Box>
       </Collapse>
@@ -438,7 +490,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Upload Pet Image</DialogTitle>
+        <DialogTitle>{t("uploadpetimage")}</DialogTitle>
         <DialogContent>
           <TextField
             type="file"
@@ -452,7 +504,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             onClick={() => setImageUploadOpen(false)}
             sx={{ color: "#4b887c" }}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             onClick={handleImageSubmit}
@@ -461,7 +513,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             variant="contained"
             sx={{ backgroundColor: "#4b887c" }}
           >
-            Upload
+            {t("upload")}
           </Button>
         </DialogActions>
       </Dialog>
