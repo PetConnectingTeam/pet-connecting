@@ -627,11 +627,15 @@ def assign_service(service_id):
 
     if not User.query.get(taker_id):
         return jsonify({"msg": "User to be assigned not found"}), 404
-    
+
+    if  Application.query.filter_by(ServiceId=service_id, Accepted=True).first():
+        return jsonify({"msg": "Service already assigned"}), 400
+
     application = Application.query.filter_by(ServiceId=service_id, UserId=taker_id).first()
     if not application:
         return jsonify({"msg": "User has not applied for this service"}), 400
-    
+
+
     application.Accepted = True
     
     db.session.commit()
