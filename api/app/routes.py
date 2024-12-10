@@ -849,30 +849,18 @@ def sign_application(service_id, application_id):
     if service.PublisherId != get_jwt_identity():
         return jsonify({"msg": "You are not authorized to sign this service"}), 403
 
-    """if 'owner_signature' not in request.files:
-        return jsonify({'error': 'No owner signature part'}), 400
+    if 'owner_signature' not in request.files or 'applier_signature' not in request.files:
+        return jsonify({'error': 'Both owner_signature and applier_signature are required'}), 400
 
+    # Procesar las imágenes
     owner_signature = request.files['owner_signature']
+    applier_signature = request.files['applier_signature']
 
-    if owner_signature.filename == '':
-        return jsonify({'error': 'No selected owner_signature'}), 400
-    
-    if owner_signature:
-        owner_mime_type = owner_signature.mimetype
-        owner_image_data = owner_signature.read()
+    if owner_signature.filename == '' or applier_signature.filename == '':
+        return jsonify({'error': 'Both signatures must have filenames'}), 400
 
-    if 'caregiver_signature' not in request.files:
-        return jsonify({'error': 'No caregiver signature part'}), 400
-
-    caregiver_signature = request.files['caregiver_signature']
-
-    if caregiver_signature.filename == '':
-        return jsonify({'error': 'No selected caregiver_signature'}), 400
-    
-    if caregiver_signature:
-        caregiver_mime_type = caregiver_signature.mimetype
-        caregiver_image_data = caregiver_signature.read()"""
-
+    owner_signature_base64 = base64.b64encode(owner_signature.read()).decode('utf-8')
+    applier_signature_base64 = base64.b64encode(applier_signature.read()).decode('utf-8')
     current_user_id = get_jwt_identity()
 
     formatted_date = datetime.now().strftime("%d/%m/%Y")
@@ -890,7 +878,16 @@ def sign_application(service_id, application_id):
         pet = Pet.query.get(pet.PetId)
         pets_list.append(pet.to_dict())
 
-    html_content = render_template('legal.html', current_date=formatted_date, owner_email=owner_email, caregiver_email=caregiver_email, pets_list=pets_list, start_date=start_date, end_date=end_date)
+    html_content = render_template(
+        'legal.html', 
+        current_date=formatted_date, 
+        owner_email=owner_email, 
+        caregiver_email=caregiver_email, 
+        pets_list=pets_list, 
+        start_date=start_date, 
+        end_date=end_date,
+        owner_signature_base64=owner_signature_base64,
+        applier_signature_base64=applier_signature_base64)
     
     pdf = HTML(string=html_content).write_pdf()
 
