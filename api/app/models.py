@@ -2,14 +2,16 @@ from . import db
 import base64
 
 class Role(db.Model):
-    __tablename__ = 'Roles'  # Nombre de la tabla en la base de datos
+    __tablename__ = 'Roles'
 
-    ID = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    RolType = db.Column(db.Enum('Normal', 'Premium', 'Owner'), nullable=False)
-    Description = db.Column(db.String(255), nullable=False)
+    RoleID = db.Column(db.String(255), primary_key=True, unique=True, nullable=False)
 
     def __repr__(self):
         return f'<Role {self.RolType}>'
+    
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
 
 
 class User(db.Model):
@@ -20,8 +22,8 @@ class User(db.Model):
     Password = db.Column(db.String(255), nullable=False)
     Name = db.Column(db.String(100), nullable=False)
     Surname = db.Column(db.String(100))
-    RoleID = db.Column(db.BigInteger, db.ForeignKey('Roles.ID'))  # Relación con la tabla Roles
-    Points = db.Column(db.Float)
+    RoleID = db.Column(db.String(100), db.ForeignKey('Roles.RoleID'))  # Relación con la tabla Roles
+    #Points = db.Column(db.Float)
     ProfilePhoto = db.Column(db.LargeBinary, nullable=True)  # Cambiar el tipo según lo que necesites
     MimeType = db.Column(db.String(50), nullable=True)
     TotalRating = db.Column(db.Numeric(5, 2), default = 0)
@@ -55,7 +57,7 @@ class Pet(db.Model):
     Description = db.Column(db.Text)
     Allergies = db.Column(db.Text)
     Weight = db.Column(db.Float)
-    Size = db.Column(db.Enum('Big', 'Medium', 'Small'), nullable=False)
+    Size = db.Column(db.Enum('Large', 'Medium', 'Small'), nullable=False)
     Age = db.Column(db.Integer)
     TotalRating = db.Column(db.Numeric(5, 2), default=0)
     RatingCount = db.Column(db.Integer, default=0)
