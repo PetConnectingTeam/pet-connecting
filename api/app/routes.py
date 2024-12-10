@@ -686,6 +686,13 @@ def complete_service(service_id):
     if service.PublisherId != current_user_id:
         return jsonify({"msg": "You are not authorized to complete this service"}), 403
 
+    application = Application.query.filter_by(ServiceId=service_id, Accepted=True).first()
+    if not application:
+        return jsonify({"msg": "Service not assigned yet"}),
+
+    if application.Signed == False:
+        return jsonify({"msg": "Service not signed yet"}), 400
+
     service.completed = True
     db.session.commit()
 
@@ -852,7 +859,6 @@ def sign_application(service_id, application_id):
     if 'owner_signature' not in request.files or 'applier_signature' not in request.files:
         return jsonify({'error': 'Both owner_signature and applier_signature are required'}), 400
 
-    # Procesar las imágenes
     owner_signature = request.files['owner_signature']
     applier_signature = request.files['applier_signature']
 
@@ -870,6 +876,7 @@ def sign_application(service_id, application_id):
     owner_email = User.query.get(current_user_id).Email
 
     application = Application.query.filter_by(ApplicationId=application_id).first()
+    application.Signed = True
     caregiver_email = User.query.get(application.UserId).Email
 
     pets = PetsInService.query.filter_by(ServiceId=service_id).all()

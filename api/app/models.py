@@ -129,6 +129,7 @@ class Application(db.Model):
     ServiceId = db.Column(db.BigInteger, db.ForeignKey('RequestService.ServiceId'), nullable=False, primary_key=True)
     UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
     Accepted = db.Column(db.Boolean, nullable=False, default=False)
+    Signed = db.Column(db.Boolean, nullable=False, default=False)
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
