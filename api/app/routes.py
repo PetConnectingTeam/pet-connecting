@@ -24,7 +24,7 @@ def index():
 def get_users():
     user_id = request.args.get('id', type=int)  
     name_filter = request.args.get('name')  
-    query = User.query.filter(User.RoleID == 'normal')  
+    query = User.query.filter(User.RoleID == 'basic')  
 
     if user_id is not None:  
         query = query.filter(User.ID == user_id)  
