@@ -22,7 +22,17 @@
     "accept": "Aceptar",
     "cancel": "Cancelar",
     "no_applications_found": "No hay solicitudes disponibles para este servicio.",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "pending_approval": "aprobación pendiente",
+    "approved": "approved",
+    "applications": "applications",
+    "no_services_applied": "No se han aplicado servicios",
+    "services_where_you_applied": "Servicios donde has aplicado",
+    "no_services_found": "No se encontraron servicios",
+    "points": "Puntos",
+    "Services": "Servicios",
+    "Your Applications": "Tus solicitudes",
+    "Delete": "Borrar"
   },
   "Sidebar": {
     "home": "Inicio",
@@ -30,6 +40,7 @@
     "post_a_pet": "Publicar una mascota",
     "pet_care_tip": "Consejo de cuidado de mascotas",
     "help_support": "Ayuda y Soporte",
+    "post_a_service": "Publicar un servicio",
     "log_out": "Cerrar sesión",
     "pet_posted_successfully": "¡Mascota publicada exitosamente!",
     "new_pet_id": "Nuevo ID de mascota",
@@ -61,7 +72,42 @@
     "tip_8": "Asea a tu mascota regularmente para reducir el pelo suelto y prevenir enredos.",
     "tip_9": "Introduce nuevos juguetes y actividades para estimular la mente de tu mascota.",
     "tip_10": "Protege a tu mascota de temperaturas extremas manteniéndola fresca en verano y cálida en invierno.",
-    "tip_11": "Enseña comandos básicos para mejorar el comportamiento y seguridad de tu mascota."
+    "tip_11": "Enseña comandos básicos para mejorar el comportamiento y seguridad de tu mascota.",
+    "location": "Ubicación",
+    "cost": "Costo",
+    "start_date_time": "Fecha y hora de inicio",
+    "end_date_time": "Fecha y hora de fin",
+    "custom": "Personalizado",
+    "select_pets": "Seleccionar mascotas"
+  },
+  "Bottom": {
+    "age": "Edad",
+    "weight": "Peso",
+    "Custom": "Custom",
+    "Breed": "Raza",
+    "petName": "Nombre de la mascota",
+    "custompetname": "Nombre de mascota personalizado",
+    "small": "Pequeño",
+    "medium": "Mediano",
+    "large": "Grande",
+    "allergies": "Alergias",
+    "description": "Descripción",
+    "Dog": "Perro",
+    "Cat": "Gato",
+    "Bird": "Pájaro",
+    "name": "Nombre",
+    "uploadpetimage": "Subir imagen de la mascota",
+    "uplaod": "Subir",
+
+    "Cancel": "Cancelar",
+    "Submit": "Enviar",
+    "Chat": "Chat",
+    "Home": "Inicio",
+    "Profile": "Perfil",
+    "Pet": "Mascota",
+    "Services": "Servicios",
+    "size": "Tamaño",
+    "upload": "Subir"
   },
   "AppBar": {
     "search_for_pet_care_services": "Buscar servicios de cuidado de mascotas",
@@ -76,7 +122,16 @@
     "start_date_time": "Fecha y hora de inicio",
     "end_date_time": "Fecha y hora de fin",
     "cancel": "Cancelar",
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "post_a_service": "Publicar un servicio",
+    "Delete": "Borrar",
+    "Pet's Profile": "Perfil de mascota",
+    "Language": "Idioma",
+    "Are you sure you want to accept this application?": "¿Estás seguro de que quieres aceptar esta solicitud?",
+    "Are you sure you want to reject this application?": "¿Estás seguro de que quieres rechazar esta solicitud?",
+    "no_applications_found": "No hay solicitudes disponibles para este servicio.",
+    "close": "Cerrar",
+    "Post a Service": "Publicar un servicio"
   },
   "tweetBox": {
     "share": "Compartir",
@@ -126,5 +181,15 @@
     "share": "Compartir",
     "whats_New_Whit_pet": "¿Qué hay de nuevo con tu mascota?",
     "owner": "Propietario"
+  },
+
+  "signature": {
+    "open": "Firmar",
+    "dialog_title_owner": "Firma del Propietario",
+    "dialog_title_applier": "Firma del Applier",
+    "clear": "Limpiar",
+    "cancel": "Cancelar",
+    "next": "Siguiente",
+    "save": "Guardar"
   }
 }

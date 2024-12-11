@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Care Agreement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        /*.input-field {
+            display: inline-block;
+            width: 300px;
+            border-bottom: 1px solid black;
+            margin-left: 5px;
+        }*/
+        .content {
+            margin-top: 10px;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .signature-section {
+            margin-top: 40px;
+            float: left;
+        }
+        img {
+            max-width: 200px; /* Ancho máximo en píxeles */
+            width: auto;      /* Ajusta el ancho proporcionalmente */
+            height: auto;     /* Ajusta el alto proporcionalmente */
+            border: 1px solid #1a1818 !important; /* Borde opcional */
+            padding: 5px;     /* Espaciado interno opcional */
+            display: block;   /* Bloque para centrar */
+            margin: 10px auto; /* Centra las imágenes horizontalmente */
+        }
+    </style>
+</head>
+<body>
+    <h1>Pet Care Agreement</h1>
+    <p>This Pet Care Agreement ("Agreement") is made and entered into on this <span class="input-field">{{ current_date }}</span>, by and between:</p>
+    
+    <p>
+        <strong>Pet Owner:</strong> <span class="input-field">______________________________</span>, with email address {{ owner_email}},
+        residing at <span class="input-field">____________________________________</span>, hereinafter referred to as "Owner."
+    </p>
+    <p>
+        <strong>Pet Caregiver:</strong> <span class="input-field">_______________________________</span>, with email address {{ caregiver_email }},
+        residing at <span class="input-field">______________________________</span>, hereinafter referred to as "Caregiver."
+    </p>
+
+    <div class="section-title">1. PET INFORMATION</div>
+    <p>The Owner grants the Caregiver permission to care for the following pet(s):</p>
+    <ul>
+        {% for pet in pets_list %}
+            <li>Pet Name: {{pet['Name']}}</li>
+            <li>Type/Breed: {{pet['AnimalType']}}, {{pet['Breed']}}</li>
+            <li>Age: {{pet['Age']}}</li>
+            <li>Size: {{pet['Size']}}, {{pet['Weight']}}kg</li>
+            <li>Allergies: {{pet['Allergies']}}</li>
+        {% endfor %}
+    </ul>
+
+    <div class="section-title">2. TERM OF AGREEMENT</div>
+    <p>Start Date: {{start_date}}</p>
+    <p>End Date: {{end_date}} (or "Ongoing until terminated by either party in writing")</p>
+
+    <div class="section-title">3. SERVICES PROVIDED</div>
+    <p>The Caregiver agrees to provide the following services for the Pet:</p>
+    <ul>
+        <li><span class="input-field">_____________________________________________________________________________</span></li>
+        <li><span class="input-field">_____________________________________________________________________________</span></li>
+        <li><span class="input-field">_____________________________________________________________________________</span></li>
+        <li><span class="input-field">_____________________________________________________________________________</span></li>
+        <li><span class="input-field">_____________________________________________________________________________</span></li>
+        <li><span class="input-field">_____________________________________________________________________________</span></li>
+    </ul>
+
+    <div class="section-title">4. HEALTH AND SAFETY</div>
+    <p>The Owner warrants that the Pet is up-to-date on all vaccinations, licenses, and medical treatments required by local laws.</p>
+    <p>The Caregiver agrees to take all reasonable precautions to ensure the Pet’s safety and well-being.</p>
+
+    <div class="section-title">5. LIABILITY AND INDEMNIFICATION</div>
+    <p>
+        <strong>Liability:</strong> The Owner agrees that the Caregiver will not be held liable for any injury, illness, or accidental death of the Pet during the term of this Agreement, provided that reasonable care and precautions were taken by the Caregiver.
+    </p>
+    <p>
+        <strong>Indemnification:</strong> The Owner agrees to indemnify and hold the Caregiver harmless from any liabilities or claims resulting from the Caregiver’s care of the Pet, except in cases of gross negligence or willful misconduct.
+    </p>
+
+    <div class="section-title">6. SIGNATURES</div>
+    <div class="signature-section">
+        <p>Owner’s Signature:</p>
+        <img src="data:image/png;base64,{{ owner_signature_base64 }}" alt="Owner's Signature">
+        <p>Date: {{current_date}}</p>
+        <p>Caregiver’s Signature:</p>
+        <img src="data:image/png;base64,{{ applier_signature_base64 }}" alt="Caregiver's Signature">
+        <p>Date: {{current_date}}</p>
+    </div>
+</body>
+</html>

@@ -19,10 +19,51 @@
     "no_services_requested": "No services requested",
     "applications_for_service": "Applications for service",
     "user": "User",
+
+    "applications": "applications",
+
+    "application_status": "User: {name} - {status}",
+    "approved": "Approved",
+    "pending_approval": "Pending Approval",
     "accept": "Accept",
     "cancel": "Cancel",
     "no_applications_found": "No applications available for this service.",
-    "close": "Close"
+    "no_services_applied": "No services applied",
+    "services_where_you_applied": "Services where you applied",
+    "no_services_found": "No services found",
+    "points": "Points",
+    "Services": "Services",
+    "Your Applications": "Your Applications",
+    "Delete": "Delete",
+    "Are you sure you want to delete this application?": "Are you sure you want to delete this application?"
+  },
+  "Bottom": {
+    "age": "Age",
+    "weight": "Weight",
+    "Breed": "Breed",
+    "custompetname": "Custom pet name",
+    "size": "Size",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "allergies": "Allergies",
+    "description": "Description",
+    "Custom": "Custom",
+    "Dog": "Dog",
+    "Cat": "Cat",
+    "Bird": "Bird",
+    "name": "Name",
+    "uploadpetimage": "Upload pet image",
+    "uplaod": "Upload",
+    "petName": "Pet Name",
+    "Cancel": "Cancel",
+    "Submit": "Submit",
+    "Chat": "Chat",
+    "Home": "Home",
+    "Profile": "Profile",
+    "Pet": "Pet",
+    "Services": "Services",
+    "upload": "Upload"
   },
   "Sidebar": {
     "home": "Home",
@@ -39,12 +80,13 @@
     "bird": "Bird",
     "custom_pet_type": "Custom pet type",
     "breed": "Breed",
-    "age":  "Age",
+    "age": "Age",
     "weight": "Weight",
     "size": "Size",
     "small": "Small",
     "medium": "Medium",
     "large": "Large",
+    "post_a_service": "Post a service",
     "allergies": "Allergies",
     "description": "Description",
     "cancel": "Cancel",
@@ -61,7 +103,17 @@
     "tip_8": "Groom your pet regularly to reduce shedding and prevent matting.",
     "tip_9": "Introduce new toys and activities to stimulate your pet's mind.",
     "tip_10": "Protect your pet from extreme weather by keeping them cool in summer and warm in winter.",
-    "tip_11": "Teach basic commands to improve your pet's behavior and safety."
+    "tip_11": "Teach basic commands to improve your pet's behavior and safety.",
+    "search_for_pet_care_services": "Search for pet care services",
+    "pets_list": "Pets list",
+    "pet_care": "Pet care",
+    "pet_care_services": "Pet care services",
+    "select_pets": "Select pets",
+    "location": "Location",
+    "cost": "Cost",
+    "start_date_time": "Start date & time",
+    "end_date_time": "End date & time",
+    "custom": "Custom"
   },
   "AppBar": {
     "find_pet_care": "Find pet care",
@@ -77,7 +129,16 @@
     "start_date_time": "Start date & time",
     "end_date_time": "End date & time",
     "cancel": "Cancel",
-    "submit": "Submit"
+    "submit": "Submit",
+    "post_a_service": "Post a service",
+    "Delete": "Delete",
+    "Pet's Profile": "Pet's Profile",
+    "Profile Pictures": "Profile Pictures",
+    "Language": "Language",
+    "Are you sure you want to accept this application?": "Are you sure you want to accept this application?",
+    "Are you sure you want to reject this application?": "Are you sure you want to reject this application?",
+    "close": "Close",
+    "Post a Service": "Post a Service"
   },
   "tweetBox": {
     "share": "Share",
@@ -93,8 +154,7 @@
     "enter_your_password": "Enter your password",
     "login": "Login"
   },
-  "SignUp" :
-  {
+  "SignUp": {
     "name": "Name",
     "enter_your_name": "Enter your name",
     "surname": "Surname",
@@ -103,11 +163,9 @@
     "password": "Password",
     "enter_your_password": "Enter your password",
     "sign_up": "SIGN UP",
-    "create_new_account":"Create a New Account"
-
+    "create_new_account": "Create a New Account"
   },
-  "userProfile" :
-  {
+  "userProfile": {
     "name": "Name",
     "edit_profile": "EDIT PROFILE",
     "user_role": "User Role",
@@ -120,8 +178,7 @@
     "profile_updated_success": "Profile updated successfully",
     "fialed_update_profile": "Failed to update profile"
   },
-  "petsProfile" :
-  {
+  "petsProfile": {
     "name": "Name :",
     "type": "Type :",
     "pet_details": "Pet Details",
@@ -130,6 +187,16 @@
     "submit": "submit",
     "share": "Share",
     "whats_New_Whit_pet": "Whats's new with your pet?",
-    "owner":"Owner"
+    "owner": "Owner"
+  },
+  "signature": {
+    "open": "Sign",
+    "dialog_title_owner": "Owner's Signature",
+    "dialog_title_applier": "Applier's Signature",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "next": "Next",
+    "save": "Save"
   }
+  
 }

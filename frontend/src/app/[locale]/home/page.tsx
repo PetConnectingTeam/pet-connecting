@@ -15,11 +15,25 @@ import {
   useMediaQuery,
   useTheme,
   Link,
+  Chip,
+  ListItem,
 } from "@mui/material";
+import DoneIcon from "@mui/icons-material/Done";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import Signature from "../components/signature";
+import ListSubheader from "@mui/material/ListSubheader";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Collapse from "@mui/material/Collapse";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 
 interface Service {
   PublisherId: number;
@@ -38,10 +52,13 @@ interface Service {
   profilePhotoBase64: string | undefined;
 }
 
-interface Aplication {
+interface Application {
   Accepted: boolean;
   ServiceId: number;
   UserId: number;
+  ApplicationId?: number;
+  userName?: string; // Optional for dynamically fetched user name
+  profileImage?: string; // Optional for dynamically fetched profile image
 }
 
 interface PhotoState {
@@ -64,7 +81,7 @@ const HomePage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [tabIndex, setTabIndex] = useState(0);
-  const [aplications, setAplications] = useState<Aplication[]>([]);
+  const [aplications, setAplications] = useState<Application[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -73,8 +90,9 @@ const HomePage: React.FC = () => {
   );
   const [serviceInfo, setServiceInfo] = useState<Service | null>(null); // Nuevo estado para almacenar la información del servicio
   const [applicationsForService, setApplicationsForService] = useState<
-    Aplication[]
+    Application[]
   >([]);
+  const [open, setOpen] = useState(false);
 
   const UserId = Number(Cookies.get("user_id"));
 
@@ -175,6 +193,7 @@ const HomePage: React.FC = () => {
     try {
       const token = Cookies.get("accessToken");
 
+      // Fetch applications for the service
       const applicationResponse = await axios.get(
         `http://127.0.0.1:5001/service/${serviceId}/applications`,
         {
@@ -183,27 +202,48 @@ const HomePage: React.FC = () => {
           },
         }
       );
+
       if (Array.isArray(applicationResponse.data)) {
-        setApplicationsForService(applicationResponse.data);
-      }
+        const applications = applicationResponse.data;
+        setApplicationsForService(applications);
 
-      const servicesResponse = await axios.get(
-        "http://127.0.0.1:5001/services",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (Array.isArray(servicesResponse.data)) {
-        const selectedService = servicesResponse.data.find(
-          (service: Service) => service.ServiceId === serviceId
+        // Extract unique user IDs
+        const userIds = Array.from(
+          new Set(applications.map((app) => app.UserId))
         );
-        setServiceInfo(selectedService || null);
+
+        // Fetch user details in bulk
+        const userResponse = await axios.get(
+          `http://127.0.0.1:5001/users?user_ids=${userIds.join(",")}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (Array.isArray(userResponse.data)) {
+          const users = userResponse.data;
+          console.log("Fetched users:", users);
+
+          // Map user details to applications
+          const applicationsWithUsers = applications.map((application) => {
+            const user = users.find((user) => user.id === application.UserId);
+            return {
+              ...application,
+              userName: user?.name || "Unknown User",
+              profileImage: user?.profile_image_base64
+                ? `data:${user.image_mimetype};base64,${user.profile_image_base64}`
+                : null,
+            };
+          });
+
+          console.log("Applications with user details:", applicationsWithUsers);
+          setApplicationsForService(applicationsWithUsers);
+        }
       }
     } catch (error) {
-      console.error("Error fetching applications or service info:", error);
+      console.error("Error fetching applications or user info:", error);
     }
   };
 
@@ -319,6 +359,65 @@ const HomePage: React.FC = () => {
     setTabIndex(newValue);
   };
 
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
+  const handleDeleteApplication = async (
+    serviceId: number,
+    applicationId: number
+  ) => {
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.delete(
+        `http://127.0.0.1:5001/service/${serviceId}/application/${applicationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Application deleted successfully!");
+
+        // Optionally, update the state to remove the deleted application
+        setApplicationsForService((prev) =>
+          prev.filter((app) => app.ApplicationId !== applicationId)
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting application:", error);
+      alert("Failed to delete application.");
+    }
+  };
+
+  const fetchDeleteToService = async (serviceId: number) => {
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.delete(
+        `http://127.0.0.1:5001/service/${serviceId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Service deleted successfully!");
+
+        // Optionally, update the state to remove the deleted service
+        setServices((prev) =>
+          prev.filter((service) => service.ServiceId !== serviceId)
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("Failed to delete service.");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -330,365 +429,34 @@ const HomePage: React.FC = () => {
         paddingTop: 5,
       }}
     >
-      {isMobile ? (
-        <Box sx={{ width: "100%" }}>
-          <Tabs
-            value={tabIndex}
-            onChange={handleTabChange}
-            centered
-            sx={{
-              "& .MuiTabs-indicator": {
-                backgroundColor: "ff4d4f",
-              },
-              "& .Mui-selected": {
-                color: "#ff4d4f",
-              },
-              "& .MuiTab-root": {
-                color: "ff4d4f",
-              },
-            }}
-          >
-            <Tab label="Services" sx={{ color: "gray" }} />
-            <Tab label="Your Applications" sx={{ color: "gray" }} />
-          </Tabs>
-          {tabIndex === 0 && (
-            <Container sx={{ marginTop: 2 }}>
-              {loading ? (
-                <CircularProgress />
-              ) : (
-                <Stack
-                  spacing={3}
-                  paddingTop={5}
-                  sx={{
-                    flexDirection: "column",
-                    alignItems: "center",
-                    "& > :not(style)": {
-                      width: "100%",
-                      maxWidth: "700px",
-                    },
-                  }}
-                >
-                  {services.length === 0 ? (
-                    <Typography variant="h6">
-                      No se encontraron servicios.
-                    </Typography>
-                  ) : (
-                    services.map((service) => (
-                      <Box
-                        key={service.ServiceId}
-                        sx={{
-                          padding: 2,
-                          bgcolor: "#f9f7f4",
-                          borderRadius: 2,
-                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                          border: "1px solid #e1e8ed",
-                          width: "100%",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 2,
-                          }}
-                        >
-                          <Link href={`/userProfile/${service.PublisherId}`}>
-                            <img
-                              key={service.PublisherId}
-                              src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
-                              alt="Profile"
-                              style={{
-                                width: "40px",
-                                height: "40px",
-                                borderRadius: "50%",
-                                marginRight: "10px",
-                              }}
-                            />
-                          </Link>
-                          <Box>
-                            <Typography
-                              variant="body1"
-                              sx={{ fontWeight: "bold", color: "#14171A" }}
-                            >
-                              {service.publisher}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "#657786" }}
-                            >
-                              {new Date(
-                                service.publishDate
-                              ).toLocaleDateString()}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            color: "#14171A",
-                            fontWeight: "bold",
-                            marginBottom: 2,
-                          }}
-                        >
-                          {service.description}
-                        </Typography>
-                        <Box sx={{ marginBottom: 2 }}>
-                          <Typography variant="body2" sx={{ color: "#657786" }}>
-                            📍 {service.address}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: "#657786" }}>
-                            💸 {service.cost} Points
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: "#657786" }}>
-                            🗓{" "}
-                            {new Date(
-                              service.serviceDateIni
-                            ).toLocaleDateString()}{" "}
-                            -{" "}
-                            {new Date(
-                              service.serviceDateEnd
-                            ).toLocaleDateString()}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: "#657786" }}>
-                            🐾 Pets: {service.pets.join(", ")}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: "bold",
-                              color: service.completed ? "#17bf63" : "#e0245e",
-                            }}
-                          >
-                            {service.completed
-                              ? "✅ Completado"
-                              : "⏳ Pendiente"}
-                          </Typography>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            overflowX: "auto",
-                            gap: 1,
-                            padding: 1,
-                          }}
-                        >
-                          {service.photos.length > 0 ? (
-                            service.photos.map((photo, index) => (
-                              <Box
-                                key={index}
-                                sx={{
-                                  minWidth: "100px",
-                                  height: "100px",
-                                  borderRadius: "8px",
-                                  overflow: "hidden",
-                                  flexShrink: 0,
-                                  border: "1px solid #ddd",
-                                }}
-                              >
-                                <Link href={`/petsProfile/${photo.PetID}`}>
-                                  <img
-                                    src={`data:${photo.MimeType};base64,${photo.Photo}`}
-                                    alt={`Pet Image ${index + 1}`}
-                                    style={{
-                                      width: "100%",
-                                      height: "100%",
-                                      objectFit: "cover",
-                                    }}
-                                  />
-                                </Link>
-                              </Box>
-                            ))
-                          ) : (
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "#657786" }}
-                            >
-                              No images available
-                            </Typography>
-                          )}
-                        </Box>
-                        {service.PublisherId !== UserId &&
-                          !service.completed && (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              sx={{
-                                mt: 1,
-                                backgroundColor: "#4b887c",
-                                color: "#fff",
-                                "&:hover": {
-                                  backgroundColor: "#3c6b62",
-                                },
-                                borderRadius: 2,
-                                boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
-                                fontWeight: "bold",
-                                padding: "8px 16px",
-                                textTransform: "none",
-                              }}
-                              onClick={() => {
-                                const confirmed = window.confirm(
-                                  "Are you sure you want to apply for this service?"
-                                );
-                                if (confirmed) {
-                                  fetchAplicationToService(service.ServiceId);
-                                }
-                              }}
-                            >
-                              Apply
-                            </Button>
-                          )}
-                      </Box>
-                    ))
-                  )}
-                </Stack>
-              )}
-            </Container>
-          )}
-          {tabIndex === 1 && (
-            <Box
-              sx={{
-                width: "100%",
-                marginTop: 2,
-                paddingLeft: 4,
-                paddingRight: 4,
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
-              >
-                Services where you applied
-              </Typography>
-              <Stack spacing={2}>
-                {servicesToAccept.length > 0 ? (
-                  servicesToAccept.map((service) => {
-                    const application = aplications.find(
-                      (aplication) =>
-                        aplication.ServiceId === service.ServiceId &&
-                        aplication.UserId === UserId
-                    );
-
-                    return (
-                      <Box
-                        key={service.ServiceId}
-                        sx={{
-                          padding: 2,
-                          bgcolor: application?.Accepted
-                            ? "#b1fcb2"
-                            : "#ffebee",
-                          borderRadius: 2,
-                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                          border: "1px solid #e1e8ed",
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: "bold", color: "#14171A" }}
-                        >
-                          {service.description}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: "#657786" }}>
-                          🐾 Pets:{" "}
-                          {Array.isArray(service.pets)
-                            ? service.pets.join(", ")
-                            : "N/A"}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: application?.Accepted
-                              ? "#4caf50"
-                              : "#e0245e",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {application?.Accepted
-                            ? "Approved"
-                            : "Application pending approval"}
-                        </Typography>
-                      </Box>
-                    );
-                  })
-                ) : (
-                  <Typography variant="body2" sx={{ color: "#657786" }}>
-                    No hay servicios por aceptar.
-                  </Typography>
-                )}
-              </Stack>
-              <Divider sx={{ my: 3 }} />
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
-              >
-                Services published
-              </Typography>
-              <Stack spacing={2}>
-                {servicesRequested.length > 0 ? (
-                  servicesRequested.map((service) => (
-                    <Box
-                      key={service.ServiceId}
-                      sx={{
-                        padding: 2,
-                        bgcolor: "#f9f7f4",
-                        borderRadius: 2,
-                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                        border: "1px solid #e1e8ed",
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: "bold", color: "#14171A" }}
-                      >
-                        {service.description}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "#657786" }}>
-                        🐾 Pets: {service.pets.join(", ")}
-                      </Typography>
-                      {!service.completed && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleOpenModal(service.ServiceId)}
-                          sx={{
-                            mt: 1,
-                            backgroundColor: "#4b887c",
-                            color: "#fff",
-                            "&:hover": {
-                              backgroundColor: "#3c6b62",
-                            },
-                            borderRadius: 2,
-                            boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
-                            fontWeight: "bold",
-                            padding: "8px 16px",
-                            textTransform: "none",
-                          }}
-                        >
-                          View Applications
-                        </Button>
-                      )}
-                    </Box>
-                  ))
-                ) : (
-                  <Typography variant="body2" sx={{ color: "#657786" }}>
-                    No has solicitado ningún servicio.
-                  </Typography>
-                )}
-              </Stack>
-            </Box>
-          )}
-        </Box>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "row", width: "100%" }}>
-          <Container
-            sx={{
-              flex: 1,
-              marginRight: 2,
-              marginLeft: 30,
-              marginTop: 0,
-            }}
-          >
+      <Box sx={{ width: "100%", color: "#4b887c" }}>
+        <Tabs
+          value={tabIndex}
+          onChange={handleTabChange}
+          centered
+          sx={{
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#4b887c",
+            },
+            "& .Mui-selected": {
+              color: "#4b887c !important",
+            },
+            "& .MuiTab-root": {
+              color: "#4b887c",
+            },
+          }}
+        >
+          <Tab
+            label={t("Services")}
+            sx={{ color: "#4b887c", fontWeight: "bold", paddingTop: "20px" }}
+          />
+          <Tab
+            label={t("Your Applications")}
+            sx={{ color: "#4b887c", fontWeight: "bold", paddingTop: "20px" }}
+          />
+        </Tabs>
+        {tabIndex === 0 && (
+          <Container sx={{ marginTop: 2 }}>
             {loading ? (
               <CircularProgress />
             ) : (
@@ -730,6 +498,7 @@ const HomePage: React.FC = () => {
                       >
                         <Link href={`/userProfile/${service.PublisherId}`}>
                           <img
+                            key={service.PublisherId}
                             src={`data:${service.profilePhotoMimeType};base64,${service.profilePhotoBase64}`}
                             alt="Profile"
                             style={{
@@ -768,7 +537,7 @@ const HomePage: React.FC = () => {
                           📍 {service.address}
                         </Typography>
                         <Typography variant="body2" sx={{ color: "#657786" }}>
-                          💸 {service.cost} Points
+                          💸 {service.cost} {t("points")}
                         </Typography>
                         <Typography variant="body2" sx={{ color: "#657786" }}>
                           🗓{" "}
@@ -781,16 +550,21 @@ const HomePage: React.FC = () => {
                           ).toLocaleDateString()}
                         </Typography>
                         <Typography variant="body2" sx={{ color: "#657786" }}>
-                          🐾 Pets: {service.pets.join(", ")}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: "bold",
-                            color: service.completed ? "#17bf63" : "#e0245e",
-                          }}
-                        >
-                          {service.completed ? t("completed") : t("pending")}
+                          {t("pets")}:{" "}
+                          {service.pets.map((petId) => (
+                            <Link
+                              key={petId}
+                              href={`/petsProfile/${petId}`}
+                              sx={{
+                                color: "#4b887c",
+                                textDecoration: "none",
+                                marginRight: 1,
+                              }}
+                            >
+                              {` ${petId}`}{" "}
+                              {/* Replace with actual pet name if available */}
+                            </Link>
+                          ))}
                         </Typography>
                       </Box>
 
@@ -830,10 +604,41 @@ const HomePage: React.FC = () => {
                           ))
                         ) : (
                           <Typography variant="body2" sx={{ color: "#657786" }}>
-                            {t("no_images_available")}
+                            No images available
                           </Typography>
                         )}
                       </Box>
+                      {service.PublisherId == UserId && !service.completed && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            mt: 1,
+                            backgroundColor: "#c74b4b",
+                            color: "#fff",
+                            "&:hover": {
+                              backgroundColor: "#a43e3e",
+                            },
+                            borderRadius: 2,
+                            boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                            fontWeight: "bold",
+                            padding: "8px 16px",
+                            textTransform: "none",
+                          }}
+                          onClick={() => {
+                            const confirmed = window.confirm(
+                              "Are you sure you want to Delete this service?"
+                            );
+                            if (confirmed) {
+                              fetchDeleteToService(service.ServiceId);
+                            }
+                          }}
+                        >
+                          {t("Delete")}
+                        </Button>
+                        
+                      )}
+                      
                       {service.PublisherId !== UserId && !service.completed && (
                         <Button
                           variant="contained"
@@ -869,14 +674,26 @@ const HomePage: React.FC = () => {
               </Stack>
             )}
           </Container>
-          <Box sx={{ width: "300px", marginLeft: 0, marginRight: 40 }}>
+        )}
+        {tabIndex === 1 && (
+          <Box
+            sx={{
+              width: "100%",
+              marginTop: 2,
+              paddingLeft: { xs: 2, md: 10 },
+              paddingRight: { xs: 2, md: 10 },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <Typography
               variant="h6"
               sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
             >
-              {t("applied_services")}
+              {t("services_where_you_applied")}
             </Typography>
-            <Stack spacing={2}>
+            <Stack spacing={2} sx={{ width: "100%", maxWidth: "700px" }}>
               {servicesToAccept.length > 0 ? (
                 servicesToAccept.map((service) => {
                   const application = aplications.find(
@@ -894,6 +711,7 @@ const HomePage: React.FC = () => {
                         borderRadius: 2,
                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                         border: "1px solid #e1e8ed",
+                        width: "100%",
                       }}
                     >
                       <Typography
@@ -903,7 +721,7 @@ const HomePage: React.FC = () => {
                         {service.description}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#657786" }}>
-                        {t("pets")}{" "}
+                        {t("pets")}:{" "}
                         {Array.isArray(service.pets)
                           ? service.pets.join(", ")
                           : "N/A"}
@@ -916,26 +734,53 @@ const HomePage: React.FC = () => {
                         }}
                       >
                         {application?.Accepted
-                          ? "Approved"
-                          : "Application pending approval"}
+                          ? t("approved")
+                          : t("pending_approval")}
                       </Typography>
+                      <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
+                        <Chip
+                          label={t("Delete")}
+                          color="secondary"
+                          onClick={() => {
+                            const confirmed = window.confirm(
+                              "Are you sure you want to delete this application?"
+                            );
+                            if (
+                              confirmed &&
+                              service.ServiceId &&
+                              application?.ApplicationId
+                            ) {
+                              handleDeleteApplication(
+                                service.ServiceId,
+                                application.ApplicationId
+                              );
+                            }
+                          }}
+                          sx={{
+                            backgroundColor: "#e74c3c",
+                            "&:hover": {
+                              backgroundColor: "#d32f2f",
+                            },
+                          }}
+                        />
+                      </Box>
                     </Box>
                   );
                 })
               ) : (
                 <Typography variant="body2" sx={{ color: "#657786" }}>
-                  {t("no_services_to_accept")}
+                  {t("no_services_applied")}
                 </Typography>
               )}
             </Stack>
-            <Divider sx={{ my: 3 }} />
+
             <Typography
               variant="h6"
-              sx={{ fontWeight: "bold", color: "#333", mb: 1 }}
+              sx={{ fontWeight: "bold", color: "#333", mb: 1, mt: 4 }}
             >
               {t("services_published")}
             </Typography>
-            <Stack spacing={2}>
+            <Stack spacing={2} sx={{ width: "100%", maxWidth: "700px" }}>
               {servicesRequested.length > 0 ? (
                 servicesRequested.map((service) => (
                   <Box
@@ -946,50 +791,302 @@ const HomePage: React.FC = () => {
                       borderRadius: 2,
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                       border: "1px solid #e1e8ed",
+                      width: "100%",
                     }}
                   >
                     <Typography
-                      variant="body2"
-                      sx={{ fontWeight: "bold", color: "#14171A" }}
+                      variant="body1"
+                      sx={{
+                        color: "#14171A",
+                        fontWeight: "bold",
+                        marginBottom: 2,
+                      }}
                     >
                       {service.description}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#657786" }}>
-                      {t("pets")}: {service.pets.join(", ")}
-                    </Typography>
-                    {!service.completed && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleOpenModal(service.ServiceId)}
+                    <Box sx={{ marginBottom: 2 }}>
+                      <Typography variant="body2" sx={{ color: "#657786" }}>
+                        📍 {service.address}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#657786" }}>
+                        💸 {service.cost} {t("points")}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#657786" }}>
+                        🗓{" "}
+                        {new Date(service.serviceDateIni).toLocaleDateString()}{" "}
+                        -{" "}
+                        {new Date(service.serviceDateEnd).toLocaleDateString()}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#657786" }}>
+                        {t("pets")}: {service.pets.join(", ")}
+                      </Typography>
+                      <Typography
+                        variant="body2"
                         sx={{
-                          mt: 1,
-                          backgroundColor: "#4b887c", //color changed
-                          color: "#fff",
-                          "&:hover": {
-                            backgroundColor: "#3c6b62", //#d32f2f
-                          },
-                          borderRadius: 2,
-                          boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
                           fontWeight: "bold",
-                          padding: "8px 16px",
-                          textTransform: "none",
+                          color: service.completed ? "#17bf63" : "#e0245e",
                         }}
                       >
-                        {t("view_applications")}
-                      </Button>
-                    )}
+                        {service.completed ? t("completed") : t("pending")}
+                      </Typography>
+
+                      {!service.completed && (
+                        <Box>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: "bold",
+                              color: service.completed ? "#17bf63" : "#e0245e",
+                            }}
+                          ></Typography>
+
+                          {/* Nested List Component */}
+                          <List
+                            sx={{
+                              width: "100%",
+                              bgcolor: "#f9f7f4",
+                              borderRadius: 1,
+                              mt: 1,
+                            }}
+                          >
+                            <ListItemButton
+                              onClick={async () => {
+                                if (selectedServiceId === service.ServiceId) {
+                                  // Close the list if already open
+                                  setSelectedServiceId(null);
+                                  setApplicationsForService([]);
+                                } else {
+                                  // Fetch applications for this service
+                                  setSelectedServiceId(service.ServiceId);
+                                  try {
+                                    const token = Cookies.get("accessToken");
+                                    const applicationResponse = await axios.get(
+                                      `http://127.0.0.1:5001/service/${service.ServiceId}/applications`,
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${token}`,
+                                        },
+                                      }
+                                    );
+
+                                    if (
+                                      Array.isArray(applicationResponse.data)
+                                    ) {
+                                      const applications =
+                                        applicationResponse.data;
+
+                                      // Extract unique user IDs
+                                      const userIds = Array.from(
+                                        new Set(
+                                          applications.map((app) => app.UserId)
+                                        )
+                                      );
+
+                                      // Fetch user details in bulk
+                                      const userResponse = await axios.get(
+                                        `http://127.0.0.1:5001/users?user_ids=${userIds.join(
+                                          ","
+                                        )}`,
+                                        {
+                                          headers: {
+                                            Authorization: `Bearer ${token}`,
+                                          },
+                                        }
+                                      );
+
+                                      if (Array.isArray(userResponse.data)) {
+                                        const users = userResponse.data;
+
+                                        // Map user details to applications
+                                        const applicationsWithUsers =
+                                          applications.map((application) => {
+                                            const user = users.find(
+                                              (user) =>
+                                                user.id === application.UserId
+                                            );
+                                            return {
+                                              ...application,
+                                              userName:
+                                                user?.name || "Unknown User",
+                                              profileImage:
+                                                user?.profile_image_base64
+                                                  ? `data:${user.image_mimetype};base64,${user.profile_image_base64}`
+                                                  : "/default-avatar.png", // Use a default image if not available
+                                            };
+                                          });
+
+                                        setApplicationsForService(
+                                          applicationsWithUsers
+                                        );
+                                      }
+                                    }
+                                  } catch (error) {
+                                    console.error(
+                                      "Error fetching applications or user info:",
+                                      error
+                                    );
+                                  }
+                                }
+                              }}
+                            >
+                              <ListItemText primary={t("view_applications")} />
+                              {selectedServiceId === service.ServiceId ? (
+                                <ExpandLess />
+                              ) : (
+                                <ExpandMore />
+                              )}
+                            </ListItemButton>
+                            <Collapse
+                              in={selectedServiceId === service.ServiceId}
+                              timeout="auto"
+                              unmountOnExit
+                            >
+                              <List component="div" disablePadding>
+                                {applicationsForService.length > 0 ? (
+                                  applicationsForService.map((application) => (
+                                    <ListItem
+                                      key={application.UserId}
+                                      sx={{
+                                        bgcolor: application.Accepted
+                                          ? "#f6eacf"
+                                          : "#eed6ce",
+                                        borderRadius: 1,
+                                        mb: 1,
+                                      }}
+                                    >
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: 2,
+                                        }}
+                                      >
+                                        {application.profileImage && (
+                                          <Link
+                                            href={`/userProfile/${application.UserId}`}
+                                          >
+                                            <img
+                                              src={application.profileImage}
+                                              alt="User Profile"
+                                              style={{
+                                                width: "40px",
+                                                height: "40px",
+                                                borderRadius: "50%",
+                                                cursor: "pointer",
+                                              }}
+                                            />
+                                          </Link>
+                                        )}
+                                        <Typography>
+                                          {application.userName}
+                                        </Typography>
+                                      </Box>
+
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          gap: 1,
+                                          marginLeft: "auto",
+                                        }}
+                                      >
+                                        {!application.Accepted ? (
+                                          <Chip
+                                            label={t("accept")}
+                                            color="primary"
+                                            onClick={() => {
+                                              const confirmed = window.confirm(
+                                                "Are you sure you want to accept this application?"
+                                              );
+                                              if (confirmed) {
+                                                handleAcceptApplication(
+                                                  application.UserId
+                                                );
+                                              }
+                                            }}
+                                            sx={{
+                                              backgroundColor: "#33524a",
+                                              color: "#fff",
+                                              "&:hover": {
+                                                backgroundColor: "#3c6b62",
+                                              },
+                                            }}
+                                          />
+                                        ) : (
+                                          <Chip
+                                            label={t("cancel")}
+                                            color="secondary"
+                                            onClick={() => {
+                                              const confirmed = window.confirm(
+                                                "Are you sure you want to cancel this application?"
+                                              );
+                                              if (confirmed) {
+                                                handleUnAcceptApplication(
+                                                  application.UserId
+                                                );
+                                              }
+                                            }}
+                                            sx={{
+                                              backgroundColor: "#e74c3c",
+                                              "&:hover": {
+                                                backgroundColor: "#d32f2f",
+                                              },
+                                            }}
+                                          />
+                                        )}
+                                        <Signature applicationId={application.ApplicationId} serviceId={service.ServiceId} />
+                                        <Chip
+                                          label={t("Delete")}
+                                          color="secondary"
+                                          onClick={() => {
+                                            const confirmed = window.confirm(
+                                              "Are you sure you want to delete this application?"
+                                            );
+                                            if (
+                                              confirmed &&
+                                              service.ServiceId &&
+                                              application.ApplicationId
+                                            ) {
+                                              handleDeleteApplication(
+                                                service.ServiceId,
+                                                application.ApplicationId
+                                              );
+                                            }
+                                          }}
+                                          sx={{
+                                            backgroundColor: "#e74c3c",
+                                            "&:hover": {
+                                              backgroundColor: "#d32f2f",
+                                            },
+                                          }}
+                                        />
+                                      </Box>
+                                    </ListItem>
+                                  ))
+                                ) : (
+                                  <ListItem>
+                                    <ListItemText
+                                      primary={t("no_applications_found")}
+                                      sx={{ color: "#657786" }}
+                                    />
+                                  </ListItem>
+                                )}
+                              </List>
+                            </Collapse>
+                          </List>
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 ))
               ) : (
                 <Typography variant="body2" sx={{ color: "#657786" }}>
-                  {t("no_services_requested")}
+                  {t("no_services_found")}
                 </Typography>
               )}
             </Stack>
           </Box>
-        </Box>
-      )}
+        )}
+      </Box>
 
       {/* Modal for viewing applications */}
       <Modal open={openModal} onClose={handleCloseModal}>
@@ -1046,7 +1143,9 @@ const HomePage: React.FC = () => {
                     }}
                     onClick={() => {
                       const confirmed = window.confirm(
-                        "Are you sure you want to accept this application?"
+                        `${t(
+                          "Are you sure you want to accept this application?"
+                        )}`
                       );
                       if (confirmed) {
                         handleAcceptApplication(application.UserId);
@@ -1062,7 +1161,9 @@ const HomePage: React.FC = () => {
                     sx={{ mt: 1, backgroundColor: "#e74c3c" }}
                     onClick={() => {
                       const confirmed = window.confirm(
-                        "Are you sure you want to reject this application?"
+                        `${t(
+                          "Are you sure you want to reject this application?"
+                        )}`
                       );
                       if (confirmed) {
                         handleUnAcceptApplication(application.UserId);
