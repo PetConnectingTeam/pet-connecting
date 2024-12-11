@@ -176,6 +176,7 @@
     "change_picture": "CHANGE PICTURE",
     "unknown_error": "An unknown error occurred",
     "profile_updated_success": "Profile updated successfully",
+    "vet":"vet",
     "fialed_update_profile": "Failed to update profile"
   },
   "petsProfile": {

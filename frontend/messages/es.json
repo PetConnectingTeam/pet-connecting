@@ -168,8 +168,10 @@
     "save_changes": "GUARDAR CAMBIOS",
     "change_picture": "CAMBIAR IMAGEN",
     "unknown_error": "Ocurrió un error desconocido",
+    "vet":"veterinario",
     "profile_updated_success": "Perfil actualizado exitosamente",
     "fialed_update_profile": "No se pudo actualizar el perfil"
+    
   },
   "petsProfile": {
     "name": "Nombre:",

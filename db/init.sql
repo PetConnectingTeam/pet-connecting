@@ -3,27 +3,25 @@ CREATE DATABASE IF NOT EXISTS mydb;
 USE mydb;
 
 CREATE TABLE IF NOT EXISTS Roles (
-    ID BIGINT AUTO_INCREMENT PRIMARY KEY,
-    RolType ENUM('Normal', 'Premium', 'Owner') NOT NULL,
-    Description VARCHAR(255) NOT NULL
+    RoleID varchar(100) NOT NULL PRIMARY KEY
 );
 
-/*CREATE TABLE IF NOT EXISTS User (
+CREATE TABLE IF NOT EXISTS User (
     ID BIGINT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(100) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
     Name VARCHAR(100) NOT NULL,
     Surname VARCHAR(100),
-    RoleID BIGINT,
-    Points FLOAT,
+    RoleID VARCHAR(100),
+    /*Points FLOAT,*/
     ProfilePhoto LONGBLOB, 
     MimeType VARCHAR(50),
     TotalRating DECIMAL(5, 2),
     RatingCount INT,
-    FOREIGN KEY (RoleID) REFERENCES Roles(ID)
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
 
-CREATE TABLE IF NOT EXISTS Pet (
+/*CREATE TABLE IF NOT EXISTS Pet (
     ID BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserID BIGINT,
     Name VARCHAR(100) NOT NULL,
@@ -91,10 +89,15 @@ CREATE TABLE Messages (
 -- Populate
 
 -- Roles
-INSERT INTO Roles (RolType, Description) VALUES
-('Normal', 'Basic user'),
-('Premium', 'Premium user'),
-('Owner', 'Owner user');
+INSERT INTO Roles (RoleID) VALUES
+('admin'),
+('basic'),
+('premium'),
+('vet');
+
+INSERT INTO User (Email, Password, Name, Surname, RoleID, ProfilePhoto, TotalRating, RatingCount) VALUES
+('admin@admin.com', 'admin', 'admin', 'admin', 'admin', NULL, 0.0, 0);
+
 /*
 --  User
 INSERT INTO User (Email, Password, Name, Surname, RoleID, Points, ProfilePhoto, TotalRating, RatingCount) VALUES

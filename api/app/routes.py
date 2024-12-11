@@ -24,7 +24,7 @@ def index():
 def get_users():
     user_id = request.args.get('id', type=int)  
     name_filter = request.args.get('name')  
-    query = User.query  
+    query = User.query.filter(User.RoleID == 'basic')  
 
     if user_id is not None:  
         query = query.filter(User.ID == user_id)  
@@ -115,8 +115,48 @@ def register_user():
         Password=hashed_password,
         Name=name,
         Surname=surname,
-        RoleID=1,
-        Points=100,
+        RoleID='basic',
+        ProfilePhoto=None,
+        TotalRating=0,
+        RatingCount=0
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({
+        'id': new_user.ID,
+        'name': new_user.Name,
+        'email': new_user.Email
+    }), 201
+
+@app.route('/register_vet', methods=['POST'])
+@jwt_required()
+def register_vet():
+    current_user_id = get_jwt_identity()
+    print(User.query.get(current_user_id).RoleID)
+    if not User.query.get(current_user_id).RoleID == 'admin':
+        return jsonify({"msg": "You are not authorized to register a vet"}), 403,
+
+    data = request.get_json()
+
+    email = data['email']
+    password = data['password']
+    name = data["name"]
+    surname = data["surname"]
+
+    if not name or not surname or not email or not password:
+        return jsonify({"msg": "Missing data"}), 400
+    
+    if User.query.filter_by(Email=email).first():
+        return jsonify({"msg": "User already exists"}), 400
+    
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    new_user = User(
+        Email=email,
+        Password=hashed_password,
+        Name=name,
+        Surname=surname,
+        RoleID='vet',
         ProfilePhoto=None,
         TotalRating=0,
         RatingCount=0
@@ -138,14 +178,64 @@ def login_user():
     password = data['password']
 
     user = User.query.filter_by(Email=email).first()
-    if user and bcrypt.check_password_hash(user.Password, password):
+    if not user:
+        return jsonify({"msg": "Invalid username"}), 401
+    
+    if (user.RoleID == 'admin' and user.Password == password) or bcrypt.check_password_hash(user.Password, password):
         access_token = create_access_token(identity=user.ID)
-        return jsonify(access_token=access_token, user_id=user.ID), 200
+        return jsonify(access_token=access_token, user_id=user.ID, role=user.RoleID), 200
     
     return jsonify({"msg": "Invalid username or password"}), 401
 
 
 # --- Role Endpoints ---
+
+@app.route('/user/<int:user_id>/role', methods=['GET'])
+@jwt_required()
+def get_user_role(user_id):
+    current_user_id = get_jwt_identity()
+    role = User.query.get(user_id).RoleID
+
+    if not role:
+        return jsonify({'error': 'Role not found'}), 404
+    
+    return jsonify({'role': role}), 200
+
+@app.route('/upgrade_premium', methods=['PUT'])
+@jwt_required()
+def upgrade_user_premium():
+    current_user_id = get_jwt_identity()
+
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if user.RoleID == 'premium':
+        return jsonify({"msg": "User is already premium"}), 400
+
+    user.RoleID = 'premium'
+    db.session.commit()
+
+    return jsonify({"msg": "User upgraded to premium successfully"}), 200
+
+@app.route('/downgrade_basic', methods=['PUT'])
+@jwt_required()
+def downgrade_user_basic():
+    current_user_id = get_jwt_identity()
+
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if user.RoleID == 'normal':
+        return jsonify({"msg": "User is already basic"}), 400
+
+    user.RoleID = 'normal'
+    db.session.commit()
+
+    return jsonify({"msg": "User downgraded to basic successfully"}), 200
 
 @app.route('/roles', methods=['GET'])
 @jwt_required()
@@ -154,34 +244,15 @@ def get_roles():
     query = Role.query
 
     if role_id is not None:  
-        query = query.filter(Role.ID == role_id)  
+        query = query.filter(Role.RoleID == role_id)  
 
     roles = query.all()  
     if roles:
         return jsonify([{
-            'id': role.ID,
-            'rol_type': role.RolType,
-            'description': role.Description
+            'id': role.RoleID,
         } for role in roles])
     
     return jsonify({'error': 'No roles found'}), 404
-
-
-@app.route('/roles', methods=['POST'])
-@jwt_required()
-def create_role():
-    data = request.get_json()
-    new_role = Role(
-        RolType=data['rol_type'],
-        Description=data['description']
-    )
-    db.session.add(new_role)
-    db.session.commit()
-    return jsonify({
-        'id': new_role.ID,
-        'rol_type': new_role.RolType,
-        'description': new_role.Description
-    }), 201
 
 # --- Pet Endpoints ---
 
@@ -958,8 +1029,6 @@ def get_chat_overview():
     message_list = [message.to_dict() for message in messages]
     return jsonify(message_list)
     
-
-
 @app.route('/test-email')
 def test_email():
     msg = Message(
@@ -973,6 +1042,7 @@ def test_email():
         return "Correo enviado y capturado por MailHog"
     except Exception as e:
         return f"Error al enviar correo: {e}", 500
+
 
 
 
