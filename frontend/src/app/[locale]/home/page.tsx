@@ -27,6 +27,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import Signature from "../components/signature";
+import AD from "../components/ad";
 import ListSubheader from "@mui/material/ListSubheader";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -429,6 +430,7 @@ const HomePage: React.FC = () => {
         paddingTop: 5,
       }}
     >
+      <AD />
       <Box sx={{ width: "100%", color: "#4b887c" }}>
         <Tabs
           value={tabIndex}

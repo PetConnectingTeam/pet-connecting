@@ -80,19 +80,20 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
         );
 
         const roleData = roleResponse.data[0];
-        if (roleResponse.status === 200) {
-          switch (roleData.id) {
-            case 1:
+        console.log("Value of roleData:", roleId);
+        if (roleId) {
+          switch (roleId) {
+            case "admin":
+              setUserType("admin");
+              break;
+            case "basic":
               setUserType("basic");
               break;
-            case 2:
+            case "premium":
               setUserType("premium");
               break;
-            case 3:
-              setUserType("petOwner");
-              break;
-            default:
-              setUserType("petOwner");
+            case "vet":
+              setUserType("vet");
               break;
           }
         }
@@ -137,15 +138,19 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
     try {
       let roleId;
       switch (userType) {
-        case "basic":
+        case "admin":
           roleId = 1;
           break;
-        case "premium":
+        case "basic":
           roleId = 2;
           break;
-        case "petOwner":
-        default:
+        case "premium":
           roleId = 3;
+          break;
+        case "vet":
+          roleId = 4;
+          break;
+
       }
 
       const payload: any = {
@@ -168,7 +173,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
         setErrorMessage(null);
         setSuccessMessage("Profile updated successfully");
 
-        Cookies.set("role_id", roleId.toString());
+        
 
         if (profilePicture) {
           await handleProfilePictureUpload();
@@ -385,9 +390,9 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
                     <FormLabel component="legend">{t("user_role")}</FormLabel>
                     <RadioGroup row value={userType}>
                       <FormControlLabel
-                        value="petOwner"
+                        value="vet"
                         control={<Radio />}
-                        label={t("pet_owner")}
+                        label={t("vet")}
                         disabled
                       />
                       <FormControlLabel

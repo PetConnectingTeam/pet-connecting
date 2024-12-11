@@ -244,14 +244,12 @@ def get_roles():
     query = Role.query
 
     if role_id is not None:  
-        query = query.filter(Role.ID == role_id)  
+        query = query.filter(Role.RoleID == role_id)  
 
     roles = query.all()  
     if roles:
         return jsonify([{
-            'id': role.ID,
-            'rol_type': role.RolType,
-            'description': role.Description
+            'id': role.RoleID,
         } for role in roles])
     
     return jsonify({'error': 'No roles found'}), 404
