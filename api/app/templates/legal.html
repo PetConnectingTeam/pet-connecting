@@ -35,10 +35,16 @@
         }
         .signature-section {
             margin-top: 40px;
+            float: left;
         }
-        .signature {
-            margin-top: 40px;
-            text-align: left;
+        img {
+            max-width: 200px; /* Ancho máximo en píxeles */
+            width: auto;      /* Ajusta el ancho proporcionalmente */
+            height: auto;     /* Ajusta el alto proporcionalmente */
+            border: 1px solid #1a1818 !important; /* Borde opcional */
+            padding: 5px;     /* Espaciado interno opcional */
+            display: block;   /* Bloque para centrar */
+            margin: 10px auto; /* Centra las imágenes horizontalmente */
         }
     </style>
 </head>
@@ -97,8 +103,10 @@
     <div class="section-title">6. SIGNATURES</div>
     <div class="signature-section">
         <p>Owner’s Signature:</p>
+        <img src="data:image/png;base64,{{ owner_signature_base64 }}" alt="Owner's Signature">
         <p>Date: {{current_date}}</p>
         <p>Caregiver’s Signature:</p>
+        <img src="data:image/png;base64,{{ applier_signature_base64 }}" alt="Caregiver's Signature">
         <p>Date: {{current_date}}</p>
     </div>
 </body>
