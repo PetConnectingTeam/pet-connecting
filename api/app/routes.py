@@ -229,10 +229,10 @@ def downgrade_user_basic():
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
-    if user.RoleID == 'normal':
+    if user.RoleID == 'basic':
         return jsonify({"msg": "User is already basic"}), 400
 
-    user.RoleID = 'normal'
+    user.RoleID = 'basic'
     db.session.commit()
 
     return jsonify({"msg": "User downgraded to basic successfully"}), 200
