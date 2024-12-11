@@ -856,6 +856,17 @@ def sign_application(service_id, application_id):
     if service.PublisherId != get_jwt_identity():
         return jsonify({"msg": "You are not authorized to sign this service"}), 403
 
+    application = Application.query.filter_by(ApplicationId=application_id).first()
+
+    if not application:
+        return jsonify({"msg": "Application not found"}), 404
+    
+    if application.Accepted == False:
+        return jsonify({"msg": "Application not accepted"}), 400
+    
+    if application.Signed:
+        return jsonify({"msg": "Application already signed"}), 400
+
     if 'owner_signature' not in request.files or 'applier_signature' not in request.files:
         return jsonify({'error': 'Both owner_signature and applier_signature are required'}), 400
 
@@ -875,7 +886,6 @@ def sign_application(service_id, application_id):
 
     owner_email = User.query.get(current_user_id).Email
 
-    application = Application.query.filter_by(ApplicationId=application_id).first()
     application.Signed = True
     caregiver_email = User.query.get(application.UserId).Email
 
@@ -912,6 +922,8 @@ def sign_application(service_id, application_id):
     )
 
     mail.send(msg)
+
+    db.session.commit()
 
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
