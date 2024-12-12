@@ -25,6 +25,7 @@ import {
   TextField,
   useMediaQuery,
   Modal,
+  Rating,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import MenuAppBar from "../../components/appBar";
@@ -35,6 +36,7 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TweetBox from "../../components/tweet-box";
 import NotFoundPage from "@/app/[locale]/components/not-found";
 import { useTranslations } from "next-intl";
+import StarIcon from "@mui/icons-material/Star";
 
 // Custom SVG Icon Component
 const CustomIcon = () => (
@@ -168,6 +170,7 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
   const [backgroundImage, setBackgroundImage] = React.useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [petDetails, setPetDetails] = useState<any>(null);
+  const [averageRating, setAverageRating] = React.useState<number | null>(null);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -354,6 +357,33 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
     setPetDetails(null);
   };
 
+  useEffect(() => {
+    const fetchRatingData = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5001/pets?user_id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        if (response.status === 200) {
+          const { TotalRating, RatingCount } = response.data[0];
+          if (RatingCount > 0) {
+            const total = parseFloat(TotalRating);
+            setAverageRating(total / RatingCount);
+          } else {
+            setAverageRating(0);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching rating data", error);
+      }
+    };
+
+    fetchRatingData();
+  }, [userId, accessToken]);
+
   return (
     <>
       <CssBaseline />
@@ -409,6 +439,17 @@ const PetsProfilePage: React.FC<{ params: { petID: string } }> = ({
                 <Typography variant="subtitle1" component="div">
                   {petName} Owner
                 </Typography>
+                {averageRating !== null && (
+                  <Rating
+                    name="pet-rating"
+                    value={averageRating}
+                    readOnly
+                    precision={0.5}
+                    emptyIcon={
+                      <StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />
+                    }
+                  />
+                )}
               </Box>
             </Box>
           </CardContent>
