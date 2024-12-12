@@ -9,7 +9,7 @@ from flask_socketio import SocketIO
 from time import sleep
 from flask_mail import Mail
 
-sleep(10)
+sleep(20)
 
 app = Flask(__name__)
 
