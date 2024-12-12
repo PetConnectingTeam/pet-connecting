@@ -32,7 +32,22 @@
     "points": "Puntos",
     "Services": "Servicios",
     "Your Applications": "Tus solicitudes",
-    "Delete": "Borrar"
+    "Delete": "Borrar",
+    "accept_application": "Aceptar solicitud",
+    "reject_application": "Rechazar solicitud",
+    "accept_application_success": "Solicitud aceptada exitosamente",
+    "reject_application_success": "Solicitud rechazada exitosamente",
+    "accept_application_failed": "No se pudo aceptar la solicitud",
+    "reject_application_failed": "No se pudo rechazar la solicitud",
+    "accept_application_error": "Error al aceptar la solicitud",
+    "reject_application_error": "Error al rechazar la solicitud",
+    "accept_application_error_message": "No se pudo aceptar la solicitud. Por favor, inténtalo de nuevo.",
+    "reject_application_error_message": "No se pudo rechazar la solicitud. Por favor, inténtalo de nuevo.",
+    "complete": "Completar",
+    "Rate": "Calificar la mascota",
+    "save_rating": "Guardar",
+    "close_rating": "Cerrar",
+    "rate_service": "Calificar el servicio"
   },
   "Sidebar": {
     "home": "Inicio",

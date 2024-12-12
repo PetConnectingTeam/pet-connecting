@@ -35,7 +35,28 @@
     "Services": "Services",
     "Your Applications": "Your Applications",
     "Delete": "Delete",
-    "Are you sure you want to delete this application?": "Are you sure you want to delete this application?"
+    "Are you sure you want to delete this application?": "Are you sure you want to delete this application?",
+    "accept_application": "Accept application",
+    "reject_application": "Reject application",
+    "accept_application_success": "Application accepted successfully",
+    "reject_application_success": "Application rejected successfully",
+    "accept_application_failed": "Failed to accept application",
+    "reject_application_failed": "Failed to reject application",
+    "accept_application_error": "Error accepting application",
+    "reject_application_error": "Error rejecting application",
+    "accept_application_error_message": "Failed to accept application. Please try again.",
+    "reject_application_error_message": "Failed to reject application. Please try again.",
+    "accept_application_error_message_title": "Error accepting application",
+    "reject_application_error_message_title": "Error rejecting application",
+    "Rate": "Rate the pet",
+    "Close": "Close",
+    "Are you sure you want to accept this application?": "Are you sure you want to accept this application?",
+    "Are you sure you want to reject this application?": "Are you sure you want to reject this application?",
+    "close": "Close",
+    "complete": "Complete",
+    "save_rating": "Save",
+    "close_rating": "Close",
+    "rate_service": "Rate the Service"
   },
   "Bottom": {
     "age": "Age",
@@ -198,5 +219,4 @@
     "next": "Next",
     "save": "Save"
   }
-  
 }
