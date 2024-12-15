@@ -15,12 +15,14 @@ import Cookies from "js-cookie";
 
 interface SignatureProps {
   applicationId: number;
-  serviceId: number;  // Añadir serviceId
+  serviceId: number; // Añadir serviceId
 }
 
 const Signature: React.FC<SignatureProps> = ({ applicationId, serviceId }) => {
   const [open, setOpen] = useState(false);
-  const [signaturePadRef, setSignaturePadRef] = useState<SignaturePad | null>(null);
+  const [signaturePadRef, setSignaturePadRef] = useState<SignaturePad | null>(
+    null
+  );
   const [step, setStep] = useState<"owner" | "applier">("owner");
   const [ownerSignature, setOwnerSignature] = useState<string | null>(null);
   const token = Cookies.get("accessToken");
@@ -66,8 +68,14 @@ const Signature: React.FC<SignatureProps> = ({ applicationId, serviceId }) => {
       const formData = new FormData();
 
       // Convertir las URLs en blobs y agregarlas al FormData
-      formData.append("owner_signature", await (await fetch(ownerSignature)).blob());
-      formData.append("applier_signature", await (await fetch(applierSignatureDataURL)).blob());
+      formData.append(
+        "owner_signature",
+        await (await fetch(ownerSignature)).blob()
+      );
+      formData.append(
+        "applier_signature",
+        await (await fetch(applierSignatureDataURL)).blob()
+      );
 
       // Enviar el FormData a la API
       const response = await axios.post(apiUrl, formData, {
@@ -102,8 +110,10 @@ const Signature: React.FC<SignatureProps> = ({ applicationId, serviceId }) => {
       />
 
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {step === "owner" ? t("dialog_title_owner") : t("dialog_title_applier")}
+        <DialogTitle sx={{ fontWeight: "bold", color: "#33524a" }}>
+          {step === "owner"
+            ? t("dialog_title_owner")
+            : t("dialog_title_applier")}
         </DialogTitle>
         <DialogContent>
           <Box
@@ -131,13 +141,37 @@ const Signature: React.FC<SignatureProps> = ({ applicationId, serviceId }) => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={clearSignature} color="secondary">
+          <Button
+            onClick={clearSignature}
+            sx={{
+              color: "#33524a",
+              "&:hover": {
+                backgroundColor: "#e0f2f1",
+              },
+            }}
+          >
             {t("clear")}
           </Button>
-          <Button onClick={handleClose} color="error">
+          <Button
+            onClick={handleClose}
+            sx={{
+              color: "#33524a",
+              "&:hover": {
+                backgroundColor: "#e0f2f1",
+              },
+            }}
+          >
             {t("cancel")}
           </Button>
-          <Button onClick={saveCurrentSignature} color="primary">
+          <Button
+            onClick={saveCurrentSignature}
+            sx={{
+              color: "#ff4081",
+              "&:hover": {
+                backgroundColor: "#f8bbd0",
+              },
+            }}
+          >
             {step === "owner" ? t("next") : t("save")}
           </Button>
         </DialogActions>
