@@ -55,6 +55,9 @@ interface PetFormData {
 interface Pet {
   ID: number;
   Name: string;
+  TotalRating: number;
+  RatingCount: number;
+  // ... other fields ...
 }
 
 // Function to determine size based on weight and breed
@@ -120,6 +123,7 @@ export default function Component() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [petList, setPetList] = useState<Pet[]>([]); // Add state for pet list
+  const [topPets, setTopPets] = useState<Pet[]>([]);
 
   // Function to fetch pet list
   const fetchPetList = async () => {
@@ -491,6 +495,44 @@ export default function Component() {
     }));
   };
 
+  // Function to fetch and set top 3 pets globally
+  const fetchTopPets = async () => {
+    const token = Cookies.get("accessToken");
+
+    if (!token) {
+      console.error("Auth Token is not available in cookies");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:5001/pets`, // Assuming you have an endpoint for top pets
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const pets: Pet[] = response.data; // Explicitly type the response data as Pet[]
+      const uniquePets = Array.from(
+        new Map(pets.map((pet: Pet) => [pet.TotalRating, pet])).values()
+      );
+
+      const sortedPets = uniquePets.sort(
+        (a: Pet, b: Pet) => b.TotalRating - a.TotalRating
+      );
+
+      setTopPets(sortedPets.slice(0, 3));
+    } catch (error) {
+      console.error("Error fetching top pets", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopPets();
+  }, []);
+
   return (
     <Box>
       {!isMobile && (
@@ -759,7 +801,33 @@ export default function Component() {
               <Typography variant="body2">{currentTip}</Typography>
             </Box>
             <Divider />
-            <Divider style={{ paddingTop: "160px" }} />
+            <Box sx={{ paddingTop: "30px", paddingLeft: "30px" }}>
+              <Typography
+                variant="h6"
+                sx={{ color: "#4b887c", fontWeight: "bold" }}
+              >
+                Top Rated Pets
+              </Typography>
+              {topPets.map((pet) => (
+                <Box
+                  key={pet.ID}
+                  sx={{
+                    marginBottom: 1,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: "#4b887c",
+                  }}
+                >
+                  <Typography variant="body1" sx={{ marginLeft: "10px" }}>
+                    {pet.Name} Rating:{" "}
+                    {pet.RatingCount > 0
+                      ? (pet.TotalRating / pet.RatingCount).toFixed(2)
+                      : "N/A"}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+            <Divider sx={{ paddingTop: "30px" }} />
 
             <ListItem>
               <Link
@@ -787,6 +855,7 @@ export default function Component() {
                 </ListItemButton>
               </Link>
             </ListItem>
+            <Divider />
           </List>
 
           {/* <Divider /> */}
