@@ -40,7 +40,9 @@ const ChatComp = () => {
           headers: { Authorization: `Bearer ${Cookies.get("accessToken")}` },
         });
         setUsers(
-          response.data.filter((u: User) => u.id !== Cookies.get("user_id"))
+          response.data.filter(
+            (u: User) => u.id.toString() !== Cookies.get("user_id")
+          )
         );
       } catch (error) {
         console.error("Error fetching users:", error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -6,12 +6,61 @@ import {
   IconButton,
   TextField,
   Card,
-  CardHeader,
-  CardContent,
+  Paper,
+  Fade,
 } from "@mui/material";
 import { Close as CloseIcon, Send as SendIcon } from "@mui/icons-material";
 import { io, Socket } from "socket.io-client";
+import { styled } from "@mui/system";
 import Cookies from "js-cookie";
+
+const ChatContainer = styled(Card)(({ theme }) => ({
+  maxWidth: "400px",
+  margin: "20px auto",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+  borderRadius: "16px",
+  height: "600px",
+  display: "flex",
+  flexDirection: "column",
+
+  position: "fixed",
+  bottom: 16,
+  right: 316,
+}));
+
+const MessageContainer = styled(Box)({
+  flex: 1,
+  overflowY: "auto",
+  padding: "20px",
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: "#e0e0e0",
+    borderRadius: "3px",
+  },
+});
+
+const Message = styled(Paper)(({ isUser }: { isUser: boolean }) => ({
+  padding: "10px 16px",
+  borderRadius: isUser ? "16px 16px 0 16px" : "16px 16px 16px 0",
+  backgroundColor: isUser ? "#2196f3" : "#f5f5f5",
+  color: isUser ? "#fff" : "#333",
+  maxWidth: "80%",
+  marginBottom: "12px",
+  marginLeft: isUser ? "auto" : "0",
+  marginRight: isUser ? "0" : "auto",
+  position: "relative",
+  transition: "all 0.3s ease",
+}));
+
+const InputContainer = styled(Box)({
+  padding: "16px",
+  borderTop: "1px solid #eee",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+});
 
 interface User {
   id: string;
@@ -47,16 +96,13 @@ const ChatBox = ({
   const [receiverId, setReceiverId] = useState(user.id.toString());
 
   useEffect(() => {
-    // Crea y configura el socket al usuario actual
     const newSocket = io("http://localhost:5001", {
       query: { user_id: currentUserId },
-      transports: ["websocket"], // Usar WebSocket para la comunicación directa
+      transports: ["websocket"],
     });
 
-    // Guardar el socket en el estado
     setSocket(newSocket);
 
-    // Listeners para los eventos
     newSocket.on("connect", () => {
       console.log("Connected to server as user:", currentUserId);
     });
@@ -65,7 +111,6 @@ const ChatBox = ({
       console.log("Status update from server:", data.msg);
     });
 
-    // Escucha de mensajes entrantes
     newSocket.on("receive_message", (data) => {
       console.log("Received message:", data);
       setMessages((prevMessages) => [
@@ -87,12 +132,18 @@ const ChatBox = ({
     };
   }, [receiverId]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    console.log("!", socket);
-    e.preventDefault();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-    console.log("Sender:", currentUserId, Cookies.get("email"));
-    console.log("Receiver:", receiverId, user.name);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
 
     if (socket && message.trim()) {
       socket.emit("send_message", {
@@ -101,73 +152,127 @@ const ChatBox = ({
         content: message,
       });
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      setMessages([
+        ...messages,
         {
-          sender: "You",
           content: message,
+          sender: "You",
           timestamp: new Date().toISOString(),
         },
       ]);
-
       setMessage("");
     }
   };
 
+  const handleKeyPress = (
+    e:
+      | React.KeyboardEvent<HTMLDivElement>
+      | React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(e);
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear().toString().slice(2)} ${date
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+  };
+
   return (
-    <Card
-      sx={{
-        position: "fixed",
-        bottom: 16,
-        right: 316,
-        width: 300,
-        height: 400,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <CardHeader
-        avatar={<Avatar src={getImageSrc(user)} alt={user.name} />}
-        title={user.name}
-        action={
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        }
-      />
-      <CardContent sx={{ flexGrow: 1, overflowY: "auto" }}>
-        {messages.map((msg, index) => (
-          <Typography
-            key={index}
-            color={msg.sender === "You" ? "blue" : "black"}
-          >
-            {msg.timestamp}-{msg.sender}: {msg.content}
-          </Typography>
-        ))}
-      </CardContent>
-      <Box
-        component="form"
-        onSubmit={handleSendMessage}
-        sx={{ p: 2, borderTop: 1, borderColor: "divider" }}
+    <ChatContainer role="region" aria-label="Chat interface">
+      <Typography
+        variant="subtitle1"
+        gutterBottom
+        sx={{
+          borderBottom: "1px solid #eee",
+          pb: 1,
+          ml: 2,
+          mt: 2,
+          mr: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
+        {user.name}
+        <IconButton onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </Typography>
+
+      <MessageContainer>
+        {messages.map((message, index) => (
+          <Fade in={true} key={index} timeout={500}>
+            <Box sx={{ display: "flex", alignItems: "flex-start", mb: 2 }}>
+              {message.sender === "You" ? (
+                <Message isUser={true}>
+                  <Typography variant="body1">{message.content}</Typography>
+                  <Typography variant="caption">
+                    {formatTimestamp(message.timestamp)}
+                  </Typography>
+                </Message>
+              ) : (
+                <>
+                  <Avatar
+                    sx={{ mr: 1, ml: 1, bgcolor: "#2196f3" }}
+                    src={getImageSrc(user)}
+                  ></Avatar>
+                  <Message isUser={false}>
+                    <Typography variant="body1">{message.content}</Typography>
+                    <Typography variant="caption">
+                      {formatTimestamp(message.timestamp)}
+                    </Typography>
+                  </Message>
+                </>
+              )}
+            </Box>
+          </Fade>
+        ))}
+        <div ref={messagesEndRef} />
+      </MessageContainer>
+      <InputContainer>
         <TextField
           fullWidth
-          size="small"
-          placeholder="Type a message..."
+          variant="outlined"
+          placeholder="Type your message..."
           value={message}
-          onChange={(e) => {
-            setMessage(e.target.value);
-          }}
-          InputProps={{
-            endAdornment: (
-              <IconButton type="submit" edge="end">
-                <SendIcon />
-              </IconButton>
-            ),
-          }}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          size="small"
+          aria-label="Message input"
+          multiline
+          maxRows={3}
         />
-      </Box>
-    </Card>
+        <IconButton
+          color="primary"
+          onClick={handleSend}
+          disabled={!message.trim()}
+          aria-label="Send message"
+          sx={{
+            backgroundColor: "#2196f3",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#1976d2",
+            },
+            "&.Mui-disabled": {
+              backgroundColor: "#e0e0e0",
+              color: "#9e9e9e",
+            },
+          }}
+        >
+          <SendIcon />
+        </IconButton>
+      </InputContainer>
+    </ChatContainer>
   );
 };
 
