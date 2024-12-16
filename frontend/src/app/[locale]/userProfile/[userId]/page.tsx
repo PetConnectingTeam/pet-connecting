@@ -464,14 +464,14 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
                       </h2>
                       {roleId === "basic" && (
                         <Chip
-                          label="Upgrade"
+                          label={t("subscription")}
                           onClick={handleOpenUpgradeDialog}
                           sx={{ marginLeft: "10px", cursor: "pointer" }}
                         />
                       )}
                       {roleId === "premium" && (
                         <Chip
-                          label="Downgrade"
+                          label={t("Cancel_subscription")}
                           onClick={handleOpenDowngradeDialog}
                           sx={{ marginLeft: "10px", cursor: "pointer" }}
                         />
@@ -543,21 +543,21 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
         open={openUpgradeDialog}
         onClose={handleCloseUpgradeDialog}
       >
-        <DialogTitle>Upgrade to Premium</DialogTitle>
+        <DialogTitle>{t("Sucribe_to_Premium")}</DialogTitle>
         <DialogContent>
-        <p>The upgrade to Premium costs <strong>15 €</strong>.</p>
-          <p>Please enter your card details to complete the upgrade.</p>
+        <p>{t("Sucribe_to_Premium")} <strong>5 €</strong> / {t("month")}.</p>
+          <p>{t("enter_details")}</p>
           <TextField
             autoFocus
             margin="dense"
-            label="Card Number"
+            label={t("card_number")}
             type="text"
             fullWidth
             variant="outlined"
           />
           <TextField
             margin="dense"
-            label="Expiration Date (MM/YY)"
+            label={t("Expiration_date")}
             type="text"
             fullWidth
             variant="outlined"
@@ -572,7 +572,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseUpgradeDialog} color="secondary">
-            Cancel
+          {t("cancel")}
           </Button>
           <Button
             onClick={() => {
@@ -581,7 +581,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
             }}
             color="primary"
           >
-            Pay Now
+            {t("pay_now")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -589,13 +589,13 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
         open={openDowngradeDialog}
         onClose={handleCloseDowngradeDialog}
       >
-        <DialogTitle>Downgrade from Premium</DialogTitle>
+        <DialogTitle>{t("Cancel_subscription")} </DialogTitle>
         <DialogContent>
-          <p>Are you sure you want to downgrade from Premium?</p>
+          <p>{t("sure_cancel")}</p>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDowngradeDialog} color="secondary">
-            Cancel
+          {t("cancel")}
           </Button>
           <Button
             onClick={() => {
@@ -604,7 +604,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
             }}
             color="primary"
           >
-            Confirm
+            {t("confirm")}
           </Button>
         </DialogActions>
       </Dialog>  

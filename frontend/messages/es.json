@@ -170,8 +170,18 @@
     "unknown_error": "Ocurrió un error desconocido",
     "vet":"veterinario",
     "profile_updated_success": "Perfil actualizado exitosamente",
-    "fialed_update_profile": "No se pudo actualizar el perfil"
-    
+    "fialed_update_profile": "No se pudo actualizar el perfil",
+    "Sucribe_to_Premium":"Sucribete al plan Premium",
+    "enter_details":"Introduce los datos de tu tarjeta para suscribirte ",
+    "card_number":"Número de tarjeta",
+    "Expiration_date":"Fecha de caducidad (MM/YY)",
+    "cancel":"Cancelar",
+    "pay_now":"Pagar ahora",
+    "confirm":"Confirmar",
+    "Cancel_subscription":"Cancel suscripción",
+    "sure_cancel":"¿Estás seguro de que quieres cancelar la suscripción?",
+    "month":"mes",
+    "subscription":"suscripción"
   },
   "petsProfile": {
     "name": "Nombre:",
