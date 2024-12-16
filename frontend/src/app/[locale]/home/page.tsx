@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Rating from "@mui/material/Rating";
 
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -27,6 +28,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import Signature from "../components/signature";
+import AD from "../components/ad";
 import ListSubheader from "@mui/material/ListSubheader";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -53,6 +55,7 @@ interface Service {
 }
 
 interface Application {
+  Signed: any;
   Accepted: boolean;
   ServiceId: number;
   UserId: number;
@@ -77,6 +80,12 @@ interface User {
   rating: number;
 }
 
+interface Pet {
+  ID: number;
+  Name: string;
+  // other pet properties
+}
+
 const HomePage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -93,6 +102,15 @@ const HomePage: React.FC = () => {
     Application[]
   >([]);
   const [open, setOpen] = useState(false);
+  const [petRatings, setPetRatings] = useState<{ [key: number]: number }>({});
+  const [openRatingModal, setOpenRatingModal] = useState<boolean>(false);
+  const [selectedServiceForRating, setSelectedServiceForRating] = useState<
+    number | null
+  >(null);
+  const [serviceRating, setServiceRating] = useState<number>(0);
+  const [ratedPets, setRatedPets] = useState<Set<number>>(new Set());
+  const [showPetRatings, setShowPetRatings] = useState<number | null>(null);
+  const [pets, setPets] = useState<Pet[]>([]);
 
   const UserId = Number(Cookies.get("user_id"));
 
@@ -115,7 +133,12 @@ const HomePage: React.FC = () => {
         });
 
         if (Array.isArray(response.data)) {
-          setServices(response.data);
+          const sortedServices = response.data.sort(
+            (a, b) =>
+              new Date(b.publishDate).getTime() -
+              new Date(a.publishDate).getTime()
+          );
+          setServices(sortedServices);
         }
 
         const usersResponse = await axios.get("http://127.0.0.1:5001/users", {
@@ -169,8 +192,26 @@ const HomePage: React.FC = () => {
       }
     };
 
+    const fetchPets = async () => {
+      try {
+        const token = Cookies.get("accessToken");
+        const response = await axios.get("http://127.0.0.1:5001/pets", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (Array.isArray(response.data)) {
+          setPets(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching pets:", error);
+      }
+    };
+
     fetchServices();
     fetchAplications();
+    fetchPets();
   }, []);
 
   // Filtrar servicios por aceptar y servicios solicitados
@@ -418,6 +459,110 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleRatePet = async (
+    serviceId: number,
+    petId: number,
+    rating: number
+  ) => {
+    // Add confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to rate this pet with ${rating} stars?`
+    );
+    if (!confirmed) return;
+
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.put(
+        `http://127.0.0.1:5001/service/${serviceId}/rate_pet/${petId}`,
+        { rating },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert(`Rating saved for pet ${petId}: ${rating} stars`);
+      } else {
+        console.error("Failed to save rating:", response.data);
+      }
+    } catch (error) {
+      console.error("Error saving rating:", error);
+      alert("Failed to save rating.");
+    }
+  };
+
+  const handleCompleteService = async (serviceId: number) => {
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.put(
+        `http://127.0.0.1:5001/service/${serviceId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Service marked as complete!");
+        // Optionally update the state to reflect the change
+      }
+    } catch (error) {
+      console.error("Error completing service:", error);
+      alert("Failed to complete service.");
+    }
+  };
+
+  const handleOpenRatingModal = (serviceId: number) => {
+    setSelectedServiceForRating(serviceId);
+    setOpenRatingModal(true);
+  };
+
+  const handleCloseRatingModal = () => {
+    setOpenRatingModal(false);
+    setSelectedServiceForRating(null);
+    setServiceRating(0);
+  };
+
+  const handleSaveRating = async () => {
+    if (selectedServiceForRating === null) return;
+
+    // Add confirmation dialog
+    const confirmed = window.confirm(
+      "Are you sure you want to submit this rating?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.put(
+        `http://127.0.0.1:5001/service/${selectedServiceForRating}/rate`,
+        { rating: serviceRating },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Rating saved successfully!");
+        handleCloseRatingModal();
+      } else {
+        console.error("Failed to save rating:", response.data);
+      }
+    } catch (error) {
+      console.error("Error saving rating:", error);
+      alert("Failed to save rating.");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -429,6 +574,7 @@ const HomePage: React.FC = () => {
         paddingTop: 5,
       }}
     >
+      <AD />
       <Box sx={{ width: "100%", color: "#4b887c" }}>
         <Tabs
           value={tabIndex}
@@ -539,15 +685,15 @@ const HomePage: React.FC = () => {
                         <Typography variant="body2" sx={{ color: "#657786" }}>
                           💸 {service.cost} {t("points")}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: "#657786" }}>
-                          🗓{" "}
-                          {new Date(
-                            service.serviceDateIni
-                          ).toLocaleDateString()}{" "}
-                          -{" "}
-                          {new Date(
-                            service.serviceDateEnd
-                          ).toLocaleDateString()}
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: "bold",
+                            color: service.completed ? "#17bf63" : "#e0245e",
+                          }}
+                        >
+                          {service.completed ? t("completed") : t("pending")}
                         </Typography>
                         <Typography variant="body2" sx={{ color: "#657786" }}>
                           {t("pets")}:{" "}
@@ -636,9 +782,8 @@ const HomePage: React.FC = () => {
                         >
                           {t("Delete")}
                         </Button>
-                        
                       )}
-                      
+
                       {service.PublisherId !== UserId && !service.completed && (
                         <Button
                           variant="contained"
@@ -737,33 +882,112 @@ const HomePage: React.FC = () => {
                           ? t("approved")
                           : t("pending_approval")}
                       </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: "bold",
+                          color: service.completed ? "#17bf63" : "#e0245e",
+                        }}
+                      >
+                        {service.completed ? t("completed") : t("pending")}
+                      </Typography>
+
                       <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
-                        <Chip
-                          label={t("Delete")}
-                          color="secondary"
-                          onClick={() => {
-                            const confirmed = window.confirm(
-                              "Are you sure you want to delete this application?"
-                            );
-                            if (
-                              confirmed &&
-                              service.ServiceId &&
-                              application?.ApplicationId
-                            ) {
-                              handleDeleteApplication(
-                                service.ServiceId,
-                                application.ApplicationId
+                        {application?.ApplicationId && (
+                          <Chip
+                            variant="filled"
+                            color="primary"
+                            label={t("Delete")}
+                            sx={{
+                              backgroundColor: "#c74b4b",
+                              color: "#fff",
+                              "&:hover": {
+                                backgroundColor: "#a43e3e",
+                              },
+
+                              boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                              fontWeight: "bold",
+                              padding: "8px 16px",
+                              textTransform: "none",
+                            }}
+                            onClick={() => {
+                              const confirmed = window.confirm(
+                                "Are you sure you want to delete this application?"
                               );
-                            }
-                          }}
-                          sx={{
-                            backgroundColor: "#e74c3c",
-                            "&:hover": {
-                              backgroundColor: "#d32f2f",
-                            },
-                          }}
-                        />
+                              if (confirmed && application.ApplicationId) {
+                                handleDeleteApplication(
+                                  service.ServiceId,
+                                  application.ApplicationId
+                                );
+                              }
+                            }}
+                          ></Chip>
+                        )}
+
+                        {service.completed &&
+                          !ratedPets.has(service.ServiceId) && (
+                            <Chip
+                              label={
+                                showPetRatings === service.ServiceId
+                                  ? t("Close")
+                                  : t("Rate")
+                              }
+                              color="primary"
+                              onClick={() =>
+                                setShowPetRatings((prev) =>
+                                  prev === service.ServiceId
+                                    ? null
+                                    : service.ServiceId
+                                )
+                              }
+                              sx={{
+                                backgroundColor: "#4b887c",
+                                "&:hover": {
+                                  backgroundColor: "#3c6b62",
+                                },
+                              }}
+                            />
+                          )}
                       </Box>
+
+                      {showPetRatings === service.ServiceId && (
+                        <Box sx={{ marginTop: 2 }}>
+                          {service.photos.map((photo) => {
+                            const pet = pets.find((p) => p.ID === photo.PetID);
+                            return (
+                              <Stack key={photo.PetID} spacing={1}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: "bold" }}
+                                >
+                                  {pet ? pet.Name : `Pet ${photo.PetID}`}
+                                </Typography>
+
+                                {!ratedPets.has(photo.PetID) && (
+                                  <Rating
+                                    name={`rate-pet-${photo.PetID}`}
+                                    value={petRatings[photo.PetID] || 0}
+                                    precision={0.5}
+                                    onChange={(event, newValue) => {
+                                      if (newValue !== null) {
+                                        setPetRatings((prev) => ({
+                                          ...prev,
+                                          [photo.PetID]: newValue,
+                                        }));
+                                        handleRatePet(
+                                          service.ServiceId,
+                                          photo.PetID,
+                                          newValue
+                                        );
+                                      }
+                                    }}
+                                  />
+                                )}
+                              </Stack>
+                            );
+                          })}
+                        </Box>
+                      )}
                     </Box>
                   );
                 })
@@ -829,6 +1053,31 @@ const HomePage: React.FC = () => {
                       >
                         {service.completed ? t("completed") : t("pending")}
                       </Typography>
+
+                      {service.completed && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            mt: 1,
+                            backgroundColor: "#4b887c",
+                            color: "#fff",
+                            "&:hover": {
+                              backgroundColor: "#3c6b62",
+                            },
+                            borderRadius: 2,
+                            boxShadow: "0 3px 5px rgba(0, 0, 0, 0.3)",
+                            fontWeight: "bold",
+                            padding: "8px 16px",
+                            textTransform: "none",
+                          }}
+                          onClick={() =>
+                            handleOpenRatingModal(service.ServiceId)
+                          }
+                        >
+                          Rate the Service
+                        </Button>
+                      )}
 
                       {!service.completed && (
                         <Box>
@@ -989,22 +1238,17 @@ const HomePage: React.FC = () => {
                                           marginLeft: "auto",
                                         }}
                                       >
-                                        {!application.Accepted ? (
+                                        {application.Signed ? (
                                           <Chip
-                                            label={t("accept")}
+                                            label={t("complete")}
                                             color="primary"
-                                            onClick={() => {
-                                              const confirmed = window.confirm(
-                                                "Are you sure you want to accept this application?"
-                                              );
-                                              if (confirmed) {
-                                                handleAcceptApplication(
-                                                  application.UserId
-                                                );
-                                              }
-                                            }}
+                                            onClick={() =>
+                                              handleCompleteService(
+                                                service.ServiceId
+                                              )
+                                            }
                                             sx={{
-                                              backgroundColor: "#33524a",
+                                              backgroundColor: "#4b887c",
                                               color: "#fff",
                                               "&:hover": {
                                                 backgroundColor: "#3c6b62",
@@ -1012,53 +1256,98 @@ const HomePage: React.FC = () => {
                                             }}
                                           />
                                         ) : (
-                                          <Chip
-                                            label={t("cancel")}
-                                            color="secondary"
-                                            onClick={() => {
-                                              const confirmed = window.confirm(
-                                                "Are you sure you want to cancel this application?"
-                                              );
-                                              if (confirmed) {
-                                                handleUnAcceptApplication(
-                                                  application.UserId
-                                                );
-                                              }
-                                            }}
-                                            sx={{
-                                              backgroundColor: "#e74c3c",
-                                              "&:hover": {
-                                                backgroundColor: "#d32f2f",
-                                              },
-                                            }}
-                                          />
+                                          <>
+                                            {!application.Accepted ? (
+                                              <>
+                                                <Chip
+                                                  label={t("accept")}
+                                                  color="primary"
+                                                  onClick={() => {
+                                                    const confirmed =
+                                                      window.confirm(
+                                                        "Are you sure you want to accept this application?"
+                                                      );
+                                                    if (confirmed) {
+                                                      handleAcceptApplication(
+                                                        application.UserId
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "#33524a",
+                                                    color: "#fff",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#3c6b62",
+                                                    },
+                                                  }}
+                                                />
+                                                <Chip
+                                                  label={t("Delete")}
+                                                  color="secondary"
+                                                  onClick={() => {
+                                                    const confirmed =
+                                                      window.confirm(
+                                                        "Are you sure you want to delete this application?"
+                                                      );
+                                                    if (
+                                                      confirmed &&
+                                                      service.ServiceId &&
+                                                      application.ApplicationId
+                                                    ) {
+                                                      handleDeleteApplication(
+                                                        service.ServiceId,
+                                                        application.ApplicationId
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "#e74c3c",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#d32f2f",
+                                                    },
+                                                  }}
+                                                />
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Chip
+                                                  label={t("cancel")}
+                                                  color="secondary"
+                                                  onClick={() => {
+                                                    const confirmed =
+                                                      window.confirm(
+                                                        "Are you sure you want to cancel this application?"
+                                                      );
+                                                    if (confirmed) {
+                                                      handleUnAcceptApplication(
+                                                        application.UserId
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "#e74c3c",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#d32f2f",
+                                                    },
+                                                  }}
+                                                />
+                                                {application.ApplicationId && (
+                                                  <Signature
+                                                    applicationId={
+                                                      application.ApplicationId
+                                                    }
+                                                    serviceId={
+                                                      service.ServiceId
+                                                    }
+                                                  />
+                                                )}
+                                              </>
+                                            )}
+                                          </>
                                         )}
-                                        <Signature applicationId={application.ApplicationId} serviceId={service.ServiceId} />
-                                        <Chip
-                                          label={t("Delete")}
-                                          color="secondary"
-                                          onClick={() => {
-                                            const confirmed = window.confirm(
-                                              "Are you sure you want to delete this application?"
-                                            );
-                                            if (
-                                              confirmed &&
-                                              service.ServiceId &&
-                                              application.ApplicationId
-                                            ) {
-                                              handleDeleteApplication(
-                                                service.ServiceId,
-                                                application.ApplicationId
-                                              );
-                                            }
-                                          }}
-                                          sx={{
-                                            backgroundColor: "#e74c3c",
-                                            "&:hover": {
-                                              backgroundColor: "#d32f2f",
-                                            },
-                                          }}
-                                        />
                                       </Box>
                                     </ListItem>
                                   ))
@@ -1188,6 +1477,78 @@ const HomePage: React.FC = () => {
           >
             {t("close")}
           </Button>
+        </Box>
+      </Modal>
+
+      {/* Rating Modal */}
+      <Modal open={openRatingModal} onClose={handleCloseRatingModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "90%", sm: "400px" },
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: { xs: "200px", sm: "250px" }, // Add minimum height
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
+            {t("rate_service")}
+          </Typography>
+          <Rating
+            name="service-rating"
+            value={serviceRating}
+            precision={0.5}
+            onChange={(event, newValue) => {
+              if (newValue !== null) {
+                setServiceRating(newValue);
+              }
+            }}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              justifyContent: "flex-end",
+              mt: "auto", // Push to bottom
+              flexDirection: isMobile ? "column" : "row",
+              width: "100%",
+            }}
+          >
+            <Chip
+              label={t("save_rating")}
+              color="primary"
+              onClick={handleSaveRating}
+              sx={{
+                padding: "18px 16px",
+                backgroundColor: "#4b887c",
+                color: "#fff",
+                "&:hover": {
+                  backgroundColor: "#3c6b62",
+                },
+                width: isMobile ? "100%" : "auto",
+              }}
+            />
+            <Chip
+              label={t("close_rating")}
+              onClick={handleCloseRatingModal}
+              sx={{
+                padding: "18px 16px",
+                backgroundColor: "#4b887c",
+                color: "#fff",
+                "&:hover": {
+                  backgroundColor: "#3c6b62",
+                },
+                width: isMobile ? "100%" : "auto",
+              }}
+            />
+          </Box>
         </Box>
       </Modal>
     </Box>
