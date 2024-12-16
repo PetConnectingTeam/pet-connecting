@@ -6,7 +6,7 @@ import base64
 from flask_cors import CORS
 from sqlalchemy import func
 from weasyprint import HTML
-from flask_mail import Message
+from flask_mail import Message as MailMessage
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 from datetime import datetime
@@ -979,7 +979,7 @@ def sign_application(service_id, application_id):
     
     pdf = HTML(string=html_content).write_pdf()
 
-    msg = Message(
+    msg = MailMessage(
         'Signed Pet Care Agreement',
         sender=app.config['MAIL_DEFAULT_SENDER'],
         recipients=[owner_email, caregiver_email],
