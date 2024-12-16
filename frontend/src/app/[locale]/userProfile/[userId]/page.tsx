@@ -16,12 +16,17 @@ import {
   Radio,
   CssBaseline,
   Snackbar,
+  Chip,
   Alert,
 } from "@mui/material";
 import axios from "axios";
 import MenuAppBar from "../../components/appBar";
 import BottomBar from "../../components/BottomBar";
 import Sidebar from "../../components/chat";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { useTranslations } from "next-intl";
 
 const UserProfile: React.FC<{ params: { userId: string } }> = ({
@@ -30,7 +35,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState<number | null>(null);
-  const [userType, setUserType] = useState("petOwner");
+  const [userType, setUserType] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -39,12 +44,18 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [clientLoaded, setClientLoaded] = useState(false);
   const [isChatVisible, setIsChatVisible] = useState(false);
+  const [openUpgradeDialog, setOpenUpgradeDialog] = useState(false);
+  const [openDowngradeDialog, setOpenDowngradeDialog] = useState(false);
 
   const accessToken = Cookies.get("accessToken");
   const { userId } = params;
   const roleId = Cookies.get("role_id");
   const currentUserId = Cookies.get("user_id");
   const t = useTranslations("userProfile");
+  const handleOpenUpgradeDialog = () => setOpenUpgradeDialog(true);
+  const handleCloseUpgradeDialog = () => setOpenUpgradeDialog(false);
+  const handleOpenDowngradeDialog = () => setOpenDowngradeDialog(true);
+  const handleCloseDowngradeDialog = () => setOpenDowngradeDialog(false);
 
   useEffect(() => {
     setClientLoaded(true);
@@ -78,9 +89,9 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
             headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
-
+        
         const roleData = roleResponse.data[0];
-        console.log("Value of roleData:", roleId);
+        
         if (roleId) {
           switch (roleId) {
             case "admin":
@@ -95,6 +106,7 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
             case "vet":
               setUserType("vet");
               break;
+   
           }
         }
       }
@@ -188,6 +200,45 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
       setErrorMessage(getErrorMessage(error));
     }
   };
+  const handleUpgradePremium = async () => {
+    try {
+      const response = await axios.put(
+        `http://127.0.0.1:5001/upgrade_premium`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+  
+      if (response.status === 200) {
+        setSuccessMessage("Successfully upgraded to Premium");
+        Cookies.set("role_id", "premium");
+      }
+    } catch (error) {
+      console.error("Error upgrading to premium:", error);
+      setErrorMessage("Failed to upgrade to Premium");
+    }
+  };
+  
+  const handleDowngradePremium = async () => {
+    try {
+      const response = await axios.put(
+        `http://127.0.0.1:5001/downgrade_basic`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+  
+      if (response.status === 200) {
+        setSuccessMessage("Successfully upgraded to Premium");
+        Cookies.set("role_id", "basic");
+      }
+    } catch (error) {
+      console.error("Error upgrading to premium:", error);
+      setErrorMessage("Failed to upgrade to Premium");
+    }
+  };
 
   const handleProfilePictureUpload = async () => {
     if (!profilePicture) return;
@@ -230,6 +281,25 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
       setProfilePicture(event.target.files[0]);
     }
   };
+
+  let title: string = '';
+  switch (roleId) {
+    case 'admin':
+      title = "Admin";
+      break;
+    case 'basic':
+      title = t("basic_user");
+      break;
+    case 'premium':
+      title = t("premium_user");
+      break;
+    case 'vet':
+      title = t("vet");
+      break;
+    default:
+      title = "User";
+      break;
+  }
 
   const handleCloseSnackbar = () => {
     setErrorMessage(null);
@@ -388,26 +458,25 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
                 {clientLoaded && currentUserId === userId && (
                   <FormControl component="fieldset" margin="normal">
                     <FormLabel component="legend">{t("user_role")}</FormLabel>
-                    <RadioGroup row value={userType}>
-                      <FormControlLabel
-                        value="vet"
-                        control={<Radio />}
-                        label={t("vet")}
-                        disabled
-                      />
-                      <FormControlLabel
-                        value="basic"
-                        control={<Radio />}
-                        label={t("basic_user")}
-                        disabled
-                      />
-                      <FormControlLabel
-                        value="premium"
-                        control={<Radio />}
-                        label={t("premium_user")}
-                        disabled
-                      />
-                    </RadioGroup>
+                    <Box>
+                      <h2 style={{ color: "gray", marginLeft: "50px", display: "inline-block" }}>
+                        {title}
+                      </h2>
+                      {roleId === "basic" && (
+                        <Chip
+                          label={t("subscription")}
+                          onClick={handleOpenUpgradeDialog}
+                          sx={{ marginLeft: "10px", cursor: "pointer" }}
+                        />
+                      )}
+                      {roleId === "premium" && (
+                        <Chip
+                          label={t("Cancel_subscription")}
+                          onClick={handleOpenDowngradeDialog}
+                          sx={{ marginLeft: "10px", cursor: "pointer" }}
+                        />
+                      )}
+                    </Box>
                   </FormControl>
                 )}
               </div>
@@ -470,8 +539,76 @@ const UserProfile: React.FC<{ params: { userId: string } }> = ({
         )}
         <BottomBar toggleChat={toggleChat} />
       </Box>
+      <Dialog
+        open={openUpgradeDialog}
+        onClose={handleCloseUpgradeDialog}
+      >
+        <DialogTitle>{t("Sucribe_to_Premium")}</DialogTitle>
+        <DialogContent>
+        <p>{t("Sucribe_to_Premium")} <strong>5 €</strong> / {t("month")}.</p>
+          <p>{t("enter_details")}</p>
+          <TextField
+            autoFocus
+            margin="dense"
+            label={t("card_number")}
+            type="text"
+            fullWidth
+            variant="outlined"
+          />
+          <TextField
+            margin="dense"
+            label={t("Expiration_date")}
+            type="text"
+            fullWidth
+            variant="outlined"
+          />
+          <TextField
+            margin="dense"
+            label="CVV"
+            type="password"
+            fullWidth
+            variant="outlined"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseUpgradeDialog} color="secondary">
+          {t("cancel")}
+          </Button>
+          <Button
+            onClick={() => {
+              handleUpgradePremium();
+              handleCloseUpgradeDialog();
+            }}
+            color="primary"
+          >
+            {t("pay_now")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openDowngradeDialog}
+        onClose={handleCloseDowngradeDialog}
+      >
+        <DialogTitle>{t("Cancel_subscription")} </DialogTitle>
+        <DialogContent>
+          <p>{t("sure_cancel")}</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDowngradeDialog} color="secondary">
+          {t("cancel")}
+          </Button>
+          <Button
+            onClick={() => {
+              handleDowngradePremium();
+              handleCloseDowngradeDialog();
+            }}
+            color="primary"
+          >
+            {t("confirm")}
+          </Button>
+        </DialogActions>
+      </Dialog>  
     </>
   );
 };
-
 export default UserProfile;

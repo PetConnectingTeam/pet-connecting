@@ -62,6 +62,11 @@ const SignInSide: React.FC = () => {
       expires: expirationTime,
       path: "/",
     });
+    Cookies.set("role_id", response.data.role, {
+      expires: expirationTime,
+      path: "/",
+    });
+
 
     if (response) {
       router.push("/home");
