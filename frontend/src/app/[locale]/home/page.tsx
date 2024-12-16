@@ -314,21 +314,6 @@ const HomePage: React.FC = () => {
         }
       );
 
-      // Crear un objeto `blob` para el archivo PDF
-      const blob = new Blob([response.data], { type: "application/pdf" });
-
-      // Crear un enlace de descarga temporal
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `application_${userId}.pdf`; // Nombre del archivo
-
-      // Añadir el enlace al documento y simular el clic para descargar
-      document.body.appendChild(link);
-      link.click();
-
-      // Limpiar el enlace después de descargar
-      document.body.removeChild(link);
-
       alert(t("application_accepted"));
 
       // Opcional: actualizar el estado de aplicaciones o recargar la lista
@@ -1312,6 +1297,16 @@ const HomePage: React.FC = () => {
                                               </>
                                             ) : (
                                               <>
+                                              {application.ApplicationId && (
+                                                  <Signature
+                                                    applicationId={
+                                                      application.ApplicationId
+                                                    }
+                                                    serviceId={
+                                                      service.ServiceId
+                                                    }
+                                                  />
+                                                )}
                                                 <Chip
                                                   label={t("cancel")}
                                                   color="secondary"
@@ -1334,16 +1329,6 @@ const HomePage: React.FC = () => {
                                                     },
                                                   }}
                                                 />
-                                                {application.ApplicationId && (
-                                                  <Signature
-                                                    applicationId={
-                                                      application.ApplicationId
-                                                    }
-                                                    serviceId={
-                                                      service.ServiceId
-                                                    }
-                                                  />
-                                                )}
                                               </>
                                             )}
                                           </>

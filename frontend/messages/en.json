@@ -5,7 +5,7 @@
     "completed": "✅ Completed",
     "pending": "⏳ Pending",
     "pets": "🐾 Pets",
-    "application_accepted": "Application accepted and file downloaded successfully!",
+    "application_accepted": "Application accepted!",
     "application_failed": "Failed to accept application.",
     "application_unaccepted": "Application unaccepted successfully!",
     "cancel_failed": "Failed to cancel application.",
