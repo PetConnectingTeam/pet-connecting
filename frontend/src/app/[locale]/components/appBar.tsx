@@ -42,6 +42,7 @@ import axios from "axios";
 import Link from "next/link";
 import { FormControlLabel } from "@mui/material";
 import logo from "../../../../public/Logo2.png";
+import LocalPharmacyIcon from "@mui/icons-material/LocalPharmacy";
 
 const LanguageSwitch = styled(Switch)(({ theme }) => ({
   width: 60,
@@ -140,6 +141,7 @@ export default function NavigationBar() {
   const t = useTranslations("AppBar");
   const router = useRouter();
   const locale = useLocale();
+  const roleId = Cookies.get("role_id");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchOpen, setSearchOpen] = useState(false); // Controls visibility of search input on mobile
@@ -519,6 +521,14 @@ export default function NavigationBar() {
 
             {!isMobile || !searchOpen ? (
               <>
+                <Button
+                  size="small"
+                  sx={{ color: "#4b887c", width: "100%" }}
+                  onClick={() => router.push("/home/chat")}
+                  disabled={roleId != "premium"}
+                >
+                  <LocalPharmacyIcon></LocalPharmacyIcon>
+                </Button>
                 <CircularButton size="small" onClick={handleBoneClick}>
                   <svg
                     width="32"

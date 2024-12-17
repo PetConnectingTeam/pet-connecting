@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { Close as CloseIcon, Send as SendIcon } from "@mui/icons-material";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import FaceIcon from "@mui/icons-material/Face";
 
 const ChatContainer = styled(Card)(({ theme }) => ({
   maxWidth: "800px",
@@ -78,21 +80,29 @@ const MessageContainer = styled(Box)({
 
 const VeterinarianChat = () => {
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! How can I help you today?", isUser: false },
+    {
+      id: 1,
+      text: "Hello! I’m here to help. Can you tell me a bit more about what’s going on with Bella?",
+      isUser: false,
+    },
     {
       id: 2,
-      text: "I'm having issues with my recent order #12345",
+      text: "Sure. She hasn’t eaten much today, and she seems very low on energy. Normally, she’s super playful in the mornings.",
       isUser: true,
     },
     {
       id: 3,
-      text: "I'm sorry to hear that. Could you please provide more details about the issue?",
+      text: "I see. Has she been drinking water? And have you noticed any vomiting, diarrhea, or unusual behavior?",
       isUser: false,
     },
-    { id: 4, text: "The product I received is damaged", isUser: true },
+    {
+      id: 4,
+      text: "She’s drinking, but not as much as usual. No vomiting or diarrhea, but she’s been sleeping a lot more. I also noticed her nose is warm.",
+      isUser: true,
+    },
     {
       id: 5,
-      text: "I apologize for the inconvenience. I'll help you process a replacement right away. Could you please provide some photos of the damaged product?",
+      text: "A warm nose can sometimes indicate a mild fever. Could you check her temperature if you have a pet thermometer?",
       isUser: false,
     },
   ]);
@@ -158,12 +168,12 @@ const VeterinarianChat = () => {
               >
                 {!message.isUser && (
                   <Avatar sx={{ backgroundColor: "#2196f3" }}>
-                    <SendIcon />
+                    <LocalHospitalIcon />
                   </Avatar>
                 )}
                 {message.isUser && (
                   <Avatar sx={{ backgroundColor: "#4caf50" }}>
-                    <SendIcon />
+                    <FaceIcon />
                   </Avatar>
                 )}
               </Box>
