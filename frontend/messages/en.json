@@ -5,7 +5,7 @@
     "completed": "✅ Completed",
     "pending": "⏳ Pending",
     "pets": "🐾 Pets",
-    "application_accepted": "Application accepted and file downloaded successfully!",
+    "application_accepted": "Application accepted!",
     "application_failed": "Failed to accept application.",
     "application_unaccepted": "Application unaccepted successfully!",
     "cancel_failed": "Failed to cancel application.",
@@ -198,7 +198,18 @@
     "unknown_error": "An unknown error occurred",
     "profile_updated_success": "Profile updated successfully",
     "vet":"vet",
-    "fialed_update_profile": "Failed to update profile"
+    "fialed_update_profile": "Failed to update profile",
+    "Sucribe_to_Premium":"Subscribe to Premium",
+    "enter_details":"Please enter your card details to complete the subscription",
+    "card_number":"Card number",
+    "Expiration_date":"Expiration Date (MM/YY)",
+    "cancel":"Cancel",
+    "pay_now":"Pay now",
+    "confirm":"Confirm",
+    "Cancel_subscription":"Cancel subscription",
+    "sure_cancel":"Are you sure you want to cancel suscription?",
+    "month":"month",
+    "subscription":"Subscription"
   },
   "petsProfile": {
     "name": "Name :",

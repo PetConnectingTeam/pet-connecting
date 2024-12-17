@@ -87,6 +87,7 @@ const Signature: React.FC<SignatureProps> = ({ applicationId, serviceId }) => {
 
       if (response.status === 200) {
         handleClose(); // Cerrar diálogo al enviar correctamente
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error al enviar las firmas:", error);
