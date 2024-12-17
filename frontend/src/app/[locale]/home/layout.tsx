@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import NavigationBar from "../components/appBar";
 import SideBar from "../components/bar-sidebar";
 import BottomBar from "../components/BottomBar";
-import Chat from "../components/chat";
+import ChatComp from "../components/chat";
 import { CssBaseline, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -54,7 +54,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </Box>
       {isChatVisible && (
         <Box>
-          <Chat />
+          <ChatComp />
         </Box>
       )}
       {isMobile && (
