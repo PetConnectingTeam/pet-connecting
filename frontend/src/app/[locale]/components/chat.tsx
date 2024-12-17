@@ -20,6 +20,13 @@ interface User {
   image_mimetype?: string;
 }
 
+interface chatContent {
+  content: string;
+  receiver_id: string;
+  sender_id: string;
+  timestamp: string;
+}
+
 const getImageSrc = (user: User): string => {
   return user.profile_image_base64 && user.image_mimetype
     ? `data:${user.image_mimetype};base64,${user.profile_image_base64}`
@@ -75,7 +82,28 @@ const ChatComp = () => {
       <List>
         {users.map((user) => (
           <ListItem key={user.id} disablePadding>
-            <ListItemButton onClick={() => setSelectedUser(user)}>
+            <ListItemButton
+              onClick={async () => {
+                setSelectedUser(user);
+                const response = axios.get(
+                  `http://127.0.0.1:5001/user/${user.id}/chat`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${Cookies.get("accessToken")}`,
+                    },
+                  }
+                );
+                const chatContent: chatContent[] = (await response).data;
+
+                setMessages(
+                  chatContent.map((c) => ({
+                    sender: c.sender_id,
+                    content: c.content,
+                    timestamp: c.timestamp,
+                  }))
+                );
+              }}
+            >
               <ListItemAvatar>
                 <Avatar src={getImageSrc(user)} alt={user.name} />
               </ListItemAvatar>
