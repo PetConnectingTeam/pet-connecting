@@ -8,6 +8,7 @@ from datetime import timedelta
 from flask_socketio import SocketIO
 from time import sleep
 from flask_mail import Mail
+from flask_cors import CORS
 
 sleep(20)
 
@@ -31,6 +32,7 @@ db = SQLAlchemy(app)
 mail = Mail(app)
 
 socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app)
 
 from . import routes, sockets
 
