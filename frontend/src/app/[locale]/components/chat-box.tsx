@@ -15,17 +15,21 @@ import { styled } from "@mui/system";
 import Cookies from "js-cookie";
 
 const ChatContainer = styled(Card)(({ theme }) => ({
+  width: "95%",
   maxWidth: "400px",
   margin: "20px auto",
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
   borderRadius: "16px",
-  height: "600px",
+  height: "500px",
+  marginTop: "20px",
+  marginBottom: "50px",
   display: "flex",
   flexDirection: "column",
-
   position: "fixed",
   bottom: 16,
-  right: 316,
+  left: "50%",
+  transform: "translateX(-50%)",
+  right: "auto",
 }));
 
 const MessageContainer = styled(Box)({

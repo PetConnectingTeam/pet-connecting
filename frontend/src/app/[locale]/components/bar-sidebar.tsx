@@ -543,7 +543,7 @@ export default function Component() {
             "& .MuiDrawer-paper": {
               width: drawerWidth,
               boxSizing: "border-box",
-              backgroundColor: "#f9f7f4",
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
               height: `calc(100% - 60px)`,
               marginTop: 8,
             },
@@ -564,28 +564,7 @@ export default function Component() {
                 </ListItemButton>
               </Link>
             </ListItem>
-            <ListItem>
-              <ListItemButton
-                onClick={() =>
-                  router.push(`/userProfile/${Cookies.get("user_id")}`)
-                }
-              >
-                <ListItemIcon>
-                  <Avatar
-                    src={
-                      profileImageUrl || "/placeholder.svg?height=40&width=40"
-                    }
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      color: "#4b887c",
-                      backgroundColor: "#b3d2cd",
-                    }}
-                  />
-                </ListItemIcon>
-                <ListItemText primary={t("profile")} />
-              </ListItemButton>
-            </ListItem>
+
             <ListItem>
               <ListItemButton onClick={handleClickOpen}>
                 <ListItemIcon>
@@ -860,6 +839,18 @@ export default function Component() {
 
           {/* <Divider /> */}
         </Drawer>
+      )}
+      {isMobile && (
+        <Box
+          sx={{
+            display: "flex",
+            // justifyContent: "space-between",
+            gap: 0.4,
+            padding: "5px",
+          }}
+        >
+          {/* Icons go here */}
+        </Box>
       )}
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
         <DialogTitle style={{ backgroundColor: "#4b887c", color: "white" }}>

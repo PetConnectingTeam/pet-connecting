@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import ChatIcon from "@mui/icons-material/Chat";
+import AddBoxIcon from "@mui/icons-material/AddBoxOutlined";
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -18,6 +19,11 @@ import {
   IconButton,
   Typography,
   Slider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 
@@ -89,6 +95,124 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
   const [success, setSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const router = useRouter();
+
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [cost, setCost] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedPets, setSelectedPets] = useState<string[]>([]);
+  const [petList, setPetList] = useState<any[]>([]);
+
+  const fetchPetList = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    if (!userId || !token) {
+      console.error("User ID or Auth Token is not available in cookies");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:5001/pets?name=&id=&user_id=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPetList(response.data);
+    } catch (error) {
+      console.error("Error fetching pet list", error);
+    }
+  };
+
+  useEffect(() => {
+    if (serviceDialogOpen) fetchPetList();
+  }, [serviceDialogOpen]);
+
+  const handleServiceDialogOpen = () => {
+    setServiceDialogOpen(true);
+  };
+
+  const handleServiceDialogClose = () => {
+    setServiceDialogOpen(false);
+  };
+
+  const handlePetChange = (event: SelectChangeEvent<string[]>) => {
+    setSelectedPets(
+      typeof event.target.value === "string"
+        ? event.target.value.split(",")
+        : event.target.value
+    );
+  };
+
+  const handleSubmitService = async () => {
+    const token = Cookies.get("accessToken");
+    const userId = Cookies.get("user_id");
+
+    if (!userId || !token) {
+      setError("User ID or Auth Token is not available");
+      return;
+    }
+
+    if (
+      !description ||
+      !location ||
+      !cost ||
+      !startDate ||
+      !endDate ||
+      selectedPets.length === 0
+    ) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}/${(
+          date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
+      };
+
+      const serviceData = {
+        description: description,
+        serviceDateIni: formatDate(startDate),
+        serviceDateFin: formatDate(endDate),
+        address: location,
+        cost: cost,
+        pets: selectedPets.map(String),
+      };
+
+      const response = await axios.post(
+        "http://127.0.0.1:5001/service",
+        serviceData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        setDescription("");
+        setLocation("");
+        setCost("");
+        setStartDate("");
+        setEndDate("");
+        setSelectedPets([]);
+        handleServiceDialogClose();
+      }
+    } catch (error) {
+      console.error("Error creating service:", error);
+    }
+  };
 
   useEffect(() => {
     const isValid =
@@ -239,6 +363,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
       size: determineSize(weight, prev.breed), // Set size based on weight and breed
     }));
   };
+
   if (!isMobile) {
     return null;
   }
@@ -287,6 +412,11 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
           icon={<AccountCircleIcon />}
           component="a"
           onClick={() => router.push(`/userProfile/${Cookies.get("user_id")}`)}
+        />
+        <BottomNavigationAction
+          label={t("add")}
+          icon={<AddBoxIcon />}
+          onClick={handleServiceDialogOpen}
         />
         <BottomNavigationAction
           label={t("Home")}
@@ -514,6 +644,122 @@ const BottomBar: React.FC<BottomBarProps> = ({ toggleChat }) => {
             sx={{ backgroundColor: "#4b887c" }}
           >
             {t("upload")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Service Posting Dialog */}
+      <Dialog
+        open={serviceDialogOpen}
+        onClose={handleServiceDialogClose}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{t("Post_a_Service")}</DialogTitle>
+        <DialogContent
+          sx={{
+            padding: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            maxHeight: "50vh",
+            overflowY: "auto",
+          }}
+        >
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel id="pet-select-label">{t("select_pets")}</InputLabel>
+            <Select
+              multiple
+              value={selectedPets}
+              onChange={handlePetChange}
+              label={t("select_pets")}
+            >
+              {petList.map((pet) => (
+                <MenuItem key={pet.ID} value={pet.ID.toString()}>
+                  {pet.Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label={t("description")}
+            fullWidth
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("location")}
+            fullWidth
+            variant="outlined"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("cost")}
+            fullWidth
+            variant="outlined"
+            type="number"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            required
+          />
+          <TextField
+            margin="dense"
+            label={t("start_date_time")}
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            required
+            sx={{
+              "& .MuiInputBase-root": {
+                overflow: "hidden",
+              },
+            }}
+          />
+          <TextField
+            margin="dense"
+            label={t("end_date_time")}
+            fullWidth
+            variant="outlined"
+            type="datetime-local"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            required
+            sx={{
+              "& .MuiInputBase-root": {
+                overflow: "hidden",
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleServiceDialogClose} sx={{ color: "#4b887c" }}>
+            {t("Cancel")}
+          </Button>
+          <Button
+            onClick={handleSubmitService}
+            variant="contained"
+            sx={{ backgroundColor: "#4b887c", color: "white" }}
+            disabled={
+              !description ||
+              !location ||
+              !cost ||
+              !startDate ||
+              !endDate ||
+              selectedPets.length === 0
+            }
+          >
+            {t("Submit")}
           </Button>
         </DialogActions>
       </Dialog>
