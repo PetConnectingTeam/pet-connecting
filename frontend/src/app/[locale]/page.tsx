@@ -74,7 +74,11 @@ function App() {
           item
           xs={12}
           md={6}
-          sx={{ backgroundColor: "#ede2c4", color: "#fff", p: 4 }}
+          sx={{
+            backgroundColor: "#ede2c4",
+            color: "#fff",
+            p: { xs: 2, md: 4 },
+          }}
         >
           <Box
             display="flex"
@@ -85,8 +89,17 @@ function App() {
             textAlign="center"
             color="#4b887c"
           >
-            <Image src={portrait} alt="Illustration" width={512} height={512} />
-            <Typography variant="h4" fontWeight="bold" mb={2}>
+            <Image
+              src={portrait}
+              alt="Illustration"
+              width={isMobile ? 256 : 512}
+              height={isMobile ? 256 : 512}
+            />
+            <Typography
+              variant={isMobile ? "h5" : "h4"}
+              fontWeight="bold"
+              mb={2}
+            >
               PetConnecting: Connect with Pet
             </Typography>
             <Typography variant="body1">
@@ -105,13 +118,14 @@ function App() {
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: "#ffffff",
+          p: { xs: 2, md: 4 },
         }}
       >
         <Box sx={{ maxWidth: "400px", width: "100%", p: 4 }}>
           {isMobile && (
             <Box textAlign="center" mb={3}>
-              <Image src={logo} alt="Logo" width={100} height={100} />
-              <Typography variant="h4" fontWeight="bold" color="#4b887c">
+              <Image src={logo} alt="Logo" width={80} height={80} />
+              <Typography variant="h5" fontWeight="bold" color="#4b887c">
                 PetConnecting
               </Typography>
             </Box>

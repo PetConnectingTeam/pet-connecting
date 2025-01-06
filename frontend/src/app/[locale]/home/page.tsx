@@ -555,7 +555,7 @@ const HomePage: React.FC = () => {
         flexDirection: "column",
         alignItems: "center",
         minHeight: "100vh",
-        bgcolor: "#f5f8fa",
+        bgcolor: "#eef4f1",
         paddingTop: 5,
       }}
     >
@@ -613,7 +613,7 @@ const HomePage: React.FC = () => {
                       key={service.ServiceId}
                       sx={{
                         padding: 2,
-                        bgcolor: "#f9f7f4",
+                        bgcolor: "rgba(255, 255, 255, 0.8)",
                         borderRadius: 2,
                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                         border: "1px solid #e1e8ed",
@@ -1297,7 +1297,7 @@ const HomePage: React.FC = () => {
                                               </>
                                             ) : (
                                               <>
-                                              {application.ApplicationId && (
+                                                {application.ApplicationId && (
                                                   <Signature
                                                     applicationId={
                                                       application.ApplicationId
