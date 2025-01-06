@@ -135,3 +135,12 @@ class Application(db.Model):
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+class FirebaseTokens(db.Model):
+    __tablename__ = 'FirebaseTokens'
+
+    UserId = db.Column(db.BigInteger, db.ForeignKey('User.ID'), nullable=False, primary_key=True)
+    Token = db.Column(db.String(255), nullable=False, primary_key=True)
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
