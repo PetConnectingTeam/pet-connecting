@@ -5,3 +5,4 @@ db/mysql_data
 .history
 node_modules
 .vscode
+api/serviceAccountKey.json

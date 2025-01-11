@@ -32,6 +32,6 @@ export default async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next|favicon.ico|public|manifest.json|logo-192.png|logo-256.png|logo-512.png).*)",
+    "/((?!_next|favicon.ico|public|manifest.json|logo-192.png|logo-256.png|logo-512.png|firebase-messaging-sw.js).*)",
   ],
 };

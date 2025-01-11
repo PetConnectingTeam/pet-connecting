@@ -37,6 +37,8 @@ import Collapse from "@mui/material/Collapse";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
+import { messaging, getToken, onMessage } from "../../../../firebase-config";
+
 interface Service {
   PublisherId: number;
   ServiceId: number;
@@ -117,6 +119,48 @@ const HomePage: React.FC = () => {
   const searchParams = useSearchParams();
   const animal_type = searchParams.get("animal_type");
   const t = useTranslations("Home");
+
+  const requestNotificationPermission = async () => {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        console.log("Notification permission granted.");
+        
+        const token = await getToken(messaging, {
+          vapidKey: "BLdFNZjQKWJ6m24HsjTxGhad1z906jkPWbSZgaZvIA6WbdzNCXRbDgxAUeQbHLdV-6d-f2CvnwzfCDeLl88s7TE",
+        });
+        console.log("FCM Token:", token);
+        // Envía este token al backend para enviar notificaciones
+        try {
+          const accessToken = Cookies.get("accessToken");
+          const response = await axios.post(
+            `http://127.0.0.1:5001/user/set-fcm-token`,
+            { token: token },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+    
+          if (response.status === 200) {
+            console.log("FCM token saved successfully!");
+          } else {
+            console.error("Failed to save FCM token", response.data);
+          }
+        } catch (error) {
+          console.error("Failed to save FCM token", error);
+        }
+
+      } else {
+        console.error("Unable to get permission to notify.");
+      }
+    } catch (error) {
+      console.error("Error requesting notification permission:", error);
+    }
+  };
+
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -208,6 +252,12 @@ const HomePage: React.FC = () => {
         console.error("Error fetching pets:", error);
       }
     };
+
+    requestNotificationPermission();
+
+    onMessage(messaging, (payload) => {
+      console.log("Message received in foreground: ", payload);
+    });
 
     fetchServices();
     fetchAplications();

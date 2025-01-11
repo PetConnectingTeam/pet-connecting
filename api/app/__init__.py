@@ -9,6 +9,8 @@ from flask_socketio import SocketIO
 from time import sleep
 from flask_mail import Mail
 from flask_cors import CORS
+from pyfcm import FCMNotification
+
 
 sleep(20)
 
@@ -30,6 +32,10 @@ bcrypt = Bcrypt(app)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 mail = Mail(app)
+push_service = FCMNotification(
+    service_account_file="./serviceAccountKey.json",
+    project_id="pet-connecting"
+)
 
 socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
