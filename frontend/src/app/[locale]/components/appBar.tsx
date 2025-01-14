@@ -408,7 +408,7 @@ export default function NavigationBar() {
                 <Button
                   size="small"
                   sx={{ color: "#4b887c", width: "100%" }}
-                  onClick={() => router.push("/home/chat")}
+                  onClick={() => router.push("/veterinarianChat")}
                   disabled={roleId != "premium"}
                 >
                   <LocalPharmacyIcon></LocalPharmacyIcon>

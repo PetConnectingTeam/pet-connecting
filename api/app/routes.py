@@ -7,6 +7,7 @@ from flask_cors import CORS
 from sqlalchemy import func
 from weasyprint import HTML
 from flask_mail import Message as MailMessage
+from sqlalchemy import or_
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 from datetime import datetime
@@ -24,7 +25,13 @@ def index():
 def get_users():
     user_id = request.args.get('id', type=int)  
     name_filter = request.args.get('name')  
-    query = User.query.filter(User.RoleID == 'basic')  
+    query = User.query.filter(
+        or_(
+            User.RoleID == 'basic',
+            User.RoleID == 'premium',
+            User.RoleID == 'vet'
+        )
+    )
 
     if user_id is not None:  
         query = query.filter(User.ID == user_id)  
@@ -46,6 +53,7 @@ def get_users():
                 'email': user.Email,
                 'profile_image_base64': profile_image_base64,
                 'image_mimetype': user.MimeType,
+                'role_id': user.RoleID,
                 'rating' : user.TotalRating / user.RatingCount if user.RatingCount > 0 else 0
             })
 
