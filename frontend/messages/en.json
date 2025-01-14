@@ -84,7 +84,18 @@
     "Profile": "Profile",
     "Pet": "Pet",
     "Services": "Services",
-    "upload": "Upload"
+    "upload": "Upload",
+    "add": "Service",
+    "Post_a_Service": "Post a Service",
+    "select_pets": "Select pets",
+    "location": "Location",
+    "cost": "cost",
+    "start_date_time": "Start date & time",
+    "end_date_time": "End date & time",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "post_a_service": "Post a service",
+    "Delete": "Delete"
   },
   "Sidebar": {
     "home": "Home",
@@ -159,7 +170,8 @@
     "Are you sure you want to accept this application?": "Are you sure you want to accept this application?",
     "Are you sure you want to reject this application?": "Are you sure you want to reject this application?",
     "close": "Close",
-    "Post a Service": "Post a Service"
+    "Post_a_Service": "Post a Service",
+    "profile": "Profile"
   },
   "tweetBox": {
     "share": "Share",
@@ -197,19 +209,19 @@
     "change_picture": "CHANGE PICTURE",
     "unknown_error": "An unknown error occurred",
     "profile_updated_success": "Profile updated successfully",
-    "vet":"vet",
+    "vet": "vet",
     "fialed_update_profile": "Failed to update profile",
-    "Sucribe_to_Premium":"Subscribe to Premium",
-    "enter_details":"Please enter your card details to complete the subscription",
-    "card_number":"Card number",
-    "Expiration_date":"Expiration Date (MM/YY)",
-    "cancel":"Cancel",
-    "pay_now":"Pay now",
-    "confirm":"Confirm",
-    "Cancel_subscription":"Cancel subscription",
-    "sure_cancel":"Are you sure you want to cancel suscription?",
-    "month":"month",
-    "subscription":"Subscription"
+    "Sucribe_to_Premium": "Subscribe to Premium",
+    "enter_details": "Please enter your card details to complete the subscription",
+    "card_number": "Card number",
+    "Expiration_date": "Expiration Date (MM/YY)",
+    "cancel": "Cancel",
+    "pay_now": "Pay now",
+    "confirm": "Confirm",
+    "Cancel_subscription": "Cancel subscription",
+    "sure_cancel": "Are you sure you want to cancel suscription?",
+    "month": "month",
+    "subscription": "Subscription"
   },
   "petsProfile": {
     "name": "Name :",

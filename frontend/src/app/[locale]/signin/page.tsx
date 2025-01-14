@@ -67,7 +67,6 @@ const SignInSide: React.FC = () => {
       path: "/",
     });
 
-
     if (response) {
       router.push("/home");
     }
@@ -176,7 +175,7 @@ const SignInSide: React.FC = () => {
         </CardContent>
         <Typography variant="body2" sx={{ mt: 2, paddingLeft: "46px" }}>
           {t("dont_have_account")}{" "}
-          <Link href="/signup" sx={{ color: "#ff3b30" }}>
+          <Link href="../signup" sx={{ color: "#ff3b30" }}>
             {t("create_account")}
           </Link>
         </Typography>

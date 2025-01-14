@@ -1,6 +1,6 @@
 from flask import jsonify, request, send_file, render_template, make_response
-from app import app, db, bcrypt, mail
-from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService, Message
+from app import app, db, bcrypt, mail, push_service
+from app.models import User, Role, Pet, PetPhotos, RequestService, Application, PetsInService, Message, FirebaseTokens
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import base64
 from flask_cors import CORS
@@ -719,6 +719,8 @@ def assign_service(service_id):
     
     db.session.commit()
 
+    send_notification(taker_id, "Service assigned", f"A service has been assigned to you!")
+
     return jsonify({"msg": "Service assigned successfully"}), 200
 
 @app.route('/service/<int:service_id>/unassign', methods=['PUT'])
@@ -750,6 +752,8 @@ def unassign_service(service_id):
     
     db.session.commit()
 
+    send_notification(taker_id, "Service unassigned", f"A service has been unassigned to you!")
+
     return jsonify({"msg": "Service unassigned successfully"}), 200
 
 @app.route('/service/<int:service_id>/complete', methods=['PUT']) 
@@ -774,6 +778,8 @@ def complete_service(service_id):
 
     service.completed = True
     db.session.commit()
+
+    send_notification(application.UserId, "Service completed", f"A service has been completed!")
 
     return jsonify({"msg": "Service completed successfully"}), 200
 
@@ -807,6 +813,8 @@ def rate_service(service_id):
 
     db.session.commit()
 
+    send_notification(application.UserId, "Service rated", f"Your service has been rated as {rating}!")
+
     return jsonify({"msg": "Service rated successfully"}), 200
 
 @app.route('/service/<int:service_id>/rate_pet/<int:pet_id>', methods=['PUT'])
@@ -838,6 +846,8 @@ def rate_pet(service_id, pet_id):
     pet_in_service.Rated = True
 
     db.session.commit()
+
+    send_notification(pet.UserID, "Pet rated", f"Your pet {pet.Name} has been rated as {rating}!")
 
     return jsonify({"msg": "Pet rated successfully"}), 200
     
@@ -871,6 +881,10 @@ def apply_for_service(service_id):
     )
     db.session.add(application)    
     db.session.commit()
+
+    current_user = User.query.get(current_user_id)
+
+    send_notification(service.PublisherId, "New application for your service", f"User {current_user.Name} has applied for your service!")
 
     return jsonify({"msg": "Service taken successfully"}), 200
 
@@ -1051,6 +1065,58 @@ def test_email():
     except Exception as e:
         return f"Error al enviar correo: {e}", 500
 
+# Firebase
+
+@app.route("/user/set-fcm-token", methods=['POST'])
+@jwt_required()
+def set_fcm_token():
+    data = request.json
+    current_user_id = get_jwt_identity()
+    token = data.get("token")
+
+    if not token:
+        return jsonify({"msg": "Missing data"}), 400
+    
+    fcm_token = FirebaseTokens.query.filter_by(UserId=current_user_id, Token=token).first()
+
+    if fcm_token:
+        return jsonify({"msg": "FCM token already set"}), 200
+
+    fcm_token = FirebaseTokens(UserId=current_user_id, Token=token)
+    db.session.add(fcm_token)
+
+    db.session.commit()
+    return jsonify({"msg": "FCM token set successfully"}), 200
+
+def get_fcm_tokens(user_id):
+    user = User.query.get(user_id)
+    tokens = FirebaseTokens.query.filter_by(UserId=user_id).all()
+
+    return [token.Token for token in tokens]
+
+def send_notification(user_id, title, body):
+    tokens = get_fcm_tokens(user_id)
+
+    for token in tokens:
+        result = push_service.notify(fcm_token=token, 
+                                     notification_title=title, 
+                                     notification_body=body)
+    return result
+
+    
+
+@app.route("/send-notification", methods=["POST"])
+def send_notification_endpoint():
+    data = request.json
+    user_id = data.get("user_id")
+    message_title = data.get("title")
+    message_body = data.get("body")
+
+    result = send_notification(user_id, message_title, message_body)
+    
+    if result:
+        return "Notifications sent successfully", 200
+    return "Error sending notifications", 500
 
 
 

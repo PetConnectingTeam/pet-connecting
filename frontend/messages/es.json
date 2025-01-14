@@ -122,7 +122,17 @@
     "Pet": "Mascota",
     "Services": "Servicios",
     "size": "Tamaño",
-    "upload": "Subir"
+    "upload": "Subir",
+    "add": "Servicio",
+    "select_pets": "Seleccionar mascotas",
+    "location": "Ubicación",
+    "cost": "Costo",
+    "start_date_time": "Fecha y hora de inicio",
+    "end_date_time": "Fecha y hora de fin",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "post_a_service": "Publicar un servicio",
+    "Delete": "Borrar"
   },
   "AppBar": {
     "search_for_pet_care_services": "Buscar servicios de cuidado de mascotas",
@@ -146,7 +156,8 @@
     "Are you sure you want to reject this application?": "¿Estás seguro de que quieres rechazar esta solicitud?",
     "no_applications_found": "No hay solicitudes disponibles para este servicio.",
     "close": "Cerrar",
-    "Post a Service": "Publicar un servicio"
+    "Post_a_Service": "Publicar un servicio",
+    "profile": "Perfil"
   },
   "tweetBox": {
     "share": "Compartir",
@@ -183,20 +194,20 @@
     "save_changes": "GUARDAR CAMBIOS",
     "change_picture": "CAMBIAR IMAGEN",
     "unknown_error": "Ocurrió un error desconocido",
-    "vet":"veterinario",
+    "vet": "veterinario",
     "profile_updated_success": "Perfil actualizado exitosamente",
     "fialed_update_profile": "No se pudo actualizar el perfil",
-    "Sucribe_to_Premium":"Sucribete al plan Premium",
-    "enter_details":"Introduce los datos de tu tarjeta para suscribirte ",
-    "card_number":"Número de tarjeta",
-    "Expiration_date":"Fecha de caducidad (MM/YY)",
-    "cancel":"Cancelar",
-    "pay_now":"Pagar ahora",
-    "confirm":"Confirmar",
-    "Cancel_subscription":"Cancel suscripción",
-    "sure_cancel":"¿Estás seguro de que quieres cancelar la suscripción?",
-    "month":"mes",
-    "subscription":"suscripción"
+    "Sucribe_to_Premium": "Sucribete al plan Premium",
+    "enter_details": "Introduce los datos de tu tarjeta para suscribirte ",
+    "card_number": "Número de tarjeta",
+    "Expiration_date": "Fecha de caducidad (MM/YY)",
+    "cancel": "Cancelar",
+    "pay_now": "Pagar ahora",
+    "confirm": "Confirmar",
+    "Cancel_subscription": "Cancel suscripción",
+    "sure_cancel": "¿Estás seguro de que quieres cancelar la suscripción?",
+    "month": "mes",
+    "subscription": "suscripción"
   },
   "petsProfile": {
     "name": "Nombre:",
