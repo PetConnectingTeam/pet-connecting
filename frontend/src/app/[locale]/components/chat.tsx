@@ -18,6 +18,7 @@ interface User {
   name: string;
   profile_image_base64?: string;
   image_mimetype?: string;
+  role_id: string;
 }
 
 interface chatContent {
@@ -48,7 +49,8 @@ const ChatComp = () => {
         });
         setUsers(
           response.data.filter(
-            (u: User) => u.id.toString() !== Cookies.get("user_id")
+            (u: User) =>
+              u.id.toString() !== Cookies.get("user_id") && u.role_id !== "vet"
           )
         );
       } catch (error) {
