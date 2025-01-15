@@ -3,8 +3,9 @@ from flask_jwt_extended import decode_token
 from flask import request
 from . import socketio
 from app import app, socketio
-from app.models import db, Message
+from app.models import db, Message, User
 import logging
+from app.routes import send_notification
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -47,6 +48,8 @@ def handle_send_message(data):
                 'timestamp': message.timestamp.isoformat()
             }, room=receiver_id)
             logger.info("Message sent to room")
+            user = User.query.get(receiver_id)
+            send_notification(receiver_id, "New message", f'New message from {user.Name}')
 
         except Exception as e:
             logger.error(f'Error saving message to the database: {e}')
